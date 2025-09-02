@@ -1,0 +1,42 @@
+from tokenizer import TokenType, Token
+
+
+def assert_integer_token(token: Token, value: int) -> None:
+    assert (
+        token.Type == TokenType.INTEGER
+    ), f"The token must be TokenType.INTEGER, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f"The token value must be {value}, but got {token.Value}"
+
+
+def assert_float_token(token: Token, value: float) -> None:
+    assert (
+        token.Type == TokenType.FLOAT
+    ), f"The token must be TokenType.FLOAT, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f"The token value must be {value}, but got {token.Value}"
+
+
+def assert_delimiter_token(token: Token, value: str) -> None:
+    assert value in [
+        ";",
+        ",",
+    ], f"The delimiter token must be either ';' or ',', but got {value}"
+
+    assert (
+        token.Type == TokenType.DELIMITER
+    ), f"The token must be TokenType.DELIMITER, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f"The token value must be {value}, but got {token.Value}"
+
+
+def assert_string_token(token: Token, value: str) -> None:
+    assert (
+        token.Type == TokenType.STRING
+    ), f"The token must be TokenType.STRING, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f'The token value must be "{value}", but got "{token.Value}"'
