@@ -134,5 +134,8 @@ class Tokenizer:
                     )
                     tempContent = tempContent[nextNewLine + 1 :]
 
+    def Empty(self) -> bool:
+        return len(self._tokens) == 0
+
     def Next(self) -> Token:
         return self._tokens.pop(0)

@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/compiler/venv/Scripts/pytest.exe",
             "args": [
                 "-k",
-                "test_parse_multiple_keywords"
+                "test_parse_simple_program"
             ],
             "console": "integratedTerminal"
         }
