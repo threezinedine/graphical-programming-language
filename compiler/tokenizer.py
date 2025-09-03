@@ -10,6 +10,7 @@ class TokenType(Enum):
     STRING = auto()
     DELIMITER = auto()
     NONE = auto()
+    INVALID = auto()
 
 
 TokenValue: TypeAlias = typing.Union[int, float, str, None, "Token"]
@@ -54,6 +55,14 @@ class Tokenizer:
     def _Parse(self) -> None:
         tempContent = self._content
         while tempContent:
+            if len(tempContent) == 0:
+                break
+
+            while (len(tempContent) > 0 and tempContent[0] == " ") or (
+                len(tempContent) > 0 and tempContent[0] == "\n"
+            ):
+                tempContent = tempContent[1:]
+
             hasMatch = False
             for regex, tokenType in self._regexes.items():
                 match = re.match(regex, tempContent)
@@ -85,10 +94,17 @@ class Tokenizer:
                 nextNewLine = tempContent.find("\n")
 
                 if nextSpace == -1 and nextNewLine == -1:
+                    self._tokens.append(Token(TokenType.INVALID, tempContent))
                     break
                 if nextNewLine == -1 or (nextSpace != -1 and nextSpace < nextNewLine):
+                    self._tokens.append(
+                        Token(TokenType.INVALID, tempContent[:nextSpace])
+                    )
                     tempContent = tempContent[nextSpace + 1 :]
                 else:
+                    self._tokens.append(
+                        Token(TokenType.INVALID, tempContent[:nextNewLine])
+                    )
                     tempContent = tempContent[nextNewLine + 1 :]
 
     def Next(self) -> Token:

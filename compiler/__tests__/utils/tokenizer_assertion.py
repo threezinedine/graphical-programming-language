@@ -40,3 +40,13 @@ def assert_string_token(token: Token, value: str) -> None:
     assert (
         token.Value == value
     ), f'The token value must be "{value}", but got "{token.Value}"'
+
+
+def assert_invalid_token(token: Token, value: str) -> None:
+    assert (
+        token.Type == TokenType.INVALID
+    ), f"The token must be TokenType.INVALID, but got {token.Type}"
+
+    assert (
+        token.Value == value
+    ), f'The token value must be "{value}", but got "{token.Value}"'

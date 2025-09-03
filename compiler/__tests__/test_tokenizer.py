@@ -5,6 +5,7 @@ from utils.tokenizer_assertion import (
     assert_float_token,
     assert_delimiter_token,
     assert_string_token,
+    assert_invalid_token,
 )
 
 
@@ -54,3 +55,15 @@ def test_parse_multiple_strings():
 def test_parse_string_with_internal_quotes():
     tokenizer = Tokenizer('"hello \\"world\\""')
     assert_string_token(tokenizer.Next(), 'hello \\"world\\"')
+
+
+def test_parse_invalid_token():
+    assert_invalid_token(Tokenizer("adn").Next(), "adn")
+
+
+def test_parse_invalid_token_with_other_token_type():
+    tokenizer = Tokenizer("23, adn 42.0")
+    assert_integer_token(tokenizer.Next(), 23)
+    assert_delimiter_token(tokenizer.Next(), ",")
+    assert_invalid_token(tokenizer.Next(), "adn")
+    assert_float_token(tokenizer.Next(), 42.0)
