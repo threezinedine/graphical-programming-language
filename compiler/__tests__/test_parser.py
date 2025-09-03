@@ -4,6 +4,7 @@ from utils.parser_assertion import (
     ParameterAssertion,
     FunctionCallAssertion,
     ProgramAssertion,
+    VariableDefinitionAssertion,
 )
 
 
@@ -25,5 +26,21 @@ print(23.4, "testing");
                 "print",
                 [ParameterAssertion(23.4), ParameterAssertion('"testing"')],
             ),
+        ]
+    ).Assert(ast.Nodes)
+
+
+def test_parse_variable_definition():
+    ast = Parser(
+        """
+int x = 5;
+auto y = 10.5;
+"""
+    )
+
+    ProgramAssertion(
+        [
+            VariableDefinitionAssertion("x", 5),
+            VariableDefinitionAssertion("y", 10.5),
         ]
     ).Assert(ast.Nodes)

@@ -4,6 +4,7 @@ from utils.tokenizer_assertion import (
     assert_integer_token,
     assert_float_token,
     assert_delimiter_token,
+    assert_operator_token,
     assert_string_token,
     assert_invalid_token,
     assert_parentheses_token,
@@ -47,18 +48,30 @@ def test_parse_delimiter():
 
 def test_parse_string():
     tokenizer = Tokenizer('"hello world"')
-    assert_string_token(tokenizer.Next(), "hello world")
+    assert_string_token(tokenizer.Next(), '"hello world"')
+
+
+def test_assign_operator():
+    assert_operator_token(Tokenizer("=").Next(), "=")
+
+
+def test_function_call():
+    tokenizer = Tokenizer('print("hello world")')
+    assert_identifier_token(tokenizer.Next(), "print")
+    assert_parentheses_token(tokenizer.Next(), "(")
+    assert_string_token(tokenizer.Next(), '"hello world"')
+    assert_parentheses_token(tokenizer.Next(), ")")
 
 
 def test_parse_multiple_strings():
     tokenizer = Tokenizer('"hello" "world"')
-    assert_string_token(tokenizer.Next(), "hello")
-    assert_string_token(tokenizer.Next(), "world")
+    assert_string_token(tokenizer.Next(), '"hello"')
+    assert_string_token(tokenizer.Next(), '"world"')
 
 
 def test_parse_string_with_internal_quotes():
     tokenizer = Tokenizer('"hello \\"world\\""')
-    assert_string_token(tokenizer.Next(), 'hello \\"world\\"')
+    assert_string_token(tokenizer.Next(), '"hello \\"world\\""')
 
 
 def test_parse_invalid_token():

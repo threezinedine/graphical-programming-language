@@ -1,6 +1,6 @@
 from abc import ABC
 import typing
-from tokenizer import Tokenizer, Token, TokenType
+from tokenizer import Tokenizer, Token, TokenType, TYPES
 
 
 class Node(ABC):
@@ -11,6 +11,15 @@ class FunctionCall(Node):
     def __init__(self, functionName: str, parameters: list["Parameter"]) -> None:
         self.functionName = functionName
         self.parameters = parameters
+
+
+class VariableDefinition(Node):
+    def __init__(
+        self, identifier: str, varType: str, initialValue: Node | None = None
+    ) -> None:
+        self.identifier = identifier
+        self.varType = varType
+        self.initialValue = initialValue
 
 
 class Parameter(Node):
@@ -47,6 +56,7 @@ class Parser:
             self._ProcessInteger,
             self._ProcessFloat,
             self._ProcessStringLiteral,
+            self._ProcessVariableDefinition,
             self._ProcessFunctionCall,
         ]
 
@@ -101,6 +111,32 @@ class Parser:
 
         assert isinstance(token[0].Value, float)
         return Float(token[0].Value)
+
+    def _ProcessVariableDefinition(self, tokens: list[Token]) -> Node | None:
+        if len(tokens) < 4:
+            return
+
+        if tokens[0].Type != TokenType.KEYWORD or (
+            tokens[0].Value not in TYPES and tokens[0].Value != "auto"
+        ):
+            return
+
+        if tokens[1].Type != TokenType.IDENTIFIER:
+            return
+
+        if tokens[2].Type != TokenType.OPERATOR or tokens[2].Value != "=":
+            return
+
+        node: Node | None = None
+
+        for process in self._processes:
+            node = process(tokens[3:])
+            if node:
+                break
+
+        assert isinstance(tokens[0].Value, str)
+        assert isinstance(tokens[1].Value, str)
+        return VariableDefinition(tokens[1].Value, tokens[0].Value, node)
 
     def _ProcessFunctionCall(self, tokens: list[Token]) -> Node | None:
         if len(tokens) < 3:

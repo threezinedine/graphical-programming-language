@@ -33,6 +33,15 @@ def assert_delimiter_token(token: Token, value: str) -> None:
     ), f"The token value must be {value}, but got {token.Value}"
 
 
+def assert_operator_token(token: Token, value: str) -> None:
+    assert (
+        token.Type == TokenType.OPERATOR
+    ), f"The token must be TokenType.OPERATOR, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f'The token value must be "{value}", but got "{token.Value}"'
+
+
 def assert_string_token(token: Token, value: str) -> None:
     assert (
         token.Type == TokenType.STRING

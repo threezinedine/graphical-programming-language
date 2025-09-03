@@ -9,6 +9,7 @@ class TokenType(Enum):
     FLOAT = auto()
     STRING = auto()
     DELIMITER = auto()
+    OPERATOR = auto()
     PARENTHESES = auto()
     IDENTIFIER = auto()
     KEYWORD = auto()
@@ -18,15 +19,37 @@ class TokenType(Enum):
 
 TokenValue: TypeAlias = typing.Union[int, float, str, None, "Token"]
 
-KEYWORDS = [
-    "func",
-    "return",
-    # type keywords
-    "void",
+TYPES = [
     "int",
     "float",
+    "string",
+    "void",
+]
+
+KEYWORDS = [
+    "func",
+    "auto",
+    "return",
+    # type keywords
+    *TYPES,
 ]
 KEYWORD_REGEX = "|".join(KEYWORDS)
+
+OPERATORS = [
+    "\\+",
+    "\\-",
+    "\\*",
+    "\\/",
+    "\\%",
+    "=",
+    "==",
+    "!=",
+    "<",
+    "<=",
+    ">",
+    ">=",
+]
+OPERATORS_REGEX = "|".join([rf"({op})" for op in OPERATORS])
 
 
 class Token:
@@ -42,6 +65,9 @@ class Token:
     def Value(self) -> TokenValue:
         return self._value
 
+    def __repr__(self) -> str:
+        return f"Token(Type: {self._type}, Value: {self._value})"
+
 
 class Tokenizer:
     REGEXES: dict[TokenType, list[str]] = {
@@ -51,6 +77,7 @@ class Tokenizer:
         TokenType.INVALID: [r"^\d+[a-zA-Z]+"],
         TokenType.FLOAT: [r"^-?\d*\.\d*"],
         TokenType.INTEGER: [r"^-?\d+"],
+        TokenType.OPERATOR: [rf"^({OPERATORS_REGEX})"],
         TokenType.STRING: [r'^"((?:[^"\\]|\\.)*)"'],
         TokenType.IDENTIFIER: [r"^[a-zA-Z_][a-zA-Z0-9_]*"],
     }
@@ -100,9 +127,7 @@ class Tokenizer:
                     elif tokenType == TokenType.DELIMITER:
                         self._tokens.append(Token(TokenType.DELIMITER, match.group(0)))
                     elif tokenType == TokenType.STRING:
-                        self._tokens.append(
-                            Token(TokenType.STRING, match.group(0)[1:-1])
-                        )
+                        self._tokens.append(Token(TokenType.STRING, match.group(0)))
                     elif tokenType == TokenType.PARENTHESES:
                         self._tokens.append(
                             Token(TokenType.PARENTHESES, match.group(0))
@@ -113,6 +138,8 @@ class Tokenizer:
                         self._tokens.append(Token(TokenType.IDENTIFIER, match.group(0)))
                     elif tokenType == TokenType.INVALID:
                         self._tokens.append(Token(TokenType.INVALID, match.group(0)))
+                    elif tokenType == TokenType.OPERATOR:
+                        self._tokens.append(Token(TokenType.OPERATOR, match.group(0)))
 
                     break
 
