@@ -6,6 +6,9 @@ from utils.tokenizer_assertion import (
     assert_delimiter_token,
     assert_string_token,
     assert_invalid_token,
+    assert_parentheses_token,
+    assert_keyword_token,
+    assert_identifier_token,
 )
 
 
@@ -58,12 +61,35 @@ def test_parse_string_with_internal_quotes():
 
 
 def test_parse_invalid_token():
-    assert_invalid_token(Tokenizer("adn").Next(), "adn")
+    assert_invalid_token(Tokenizer("!adn").Next(), "!adn")
 
 
 def test_parse_invalid_token_with_other_token_type():
-    tokenizer = Tokenizer("23, adn 42.0")
+    tokenizer = Tokenizer("23, !adn 42.0")
     assert_integer_token(tokenizer.Next(), 23)
     assert_delimiter_token(tokenizer.Next(), ",")
-    assert_invalid_token(tokenizer.Next(), "adn")
+    assert_invalid_token(tokenizer.Next(), "!adn")
     assert_float_token(tokenizer.Next(), 42.0)
+
+
+def test_parse_parentheses():
+    tokenizer = Tokenizer("(42)")
+    assert_parentheses_token(tokenizer.Next(), "(")
+    assert_integer_token(tokenizer.Next(), 42)
+    assert_parentheses_token(tokenizer.Next(), ")")
+
+
+def test_parse_multiple_keywords():
+    tokenizer = Tokenizer("func testingFunc(a int, b int) void {}")
+    assert_keyword_token(tokenizer.Next(), "func")
+    assert_identifier_token(tokenizer.Next(), "testingFunc")
+    assert_parentheses_token(tokenizer.Next(), "(")
+    assert_identifier_token(tokenizer.Next(), "a")
+    assert_keyword_token(tokenizer.Next(), "int")
+    assert_delimiter_token(tokenizer.Next(), ",")
+    assert_identifier_token(tokenizer.Next(), "b")
+    assert_keyword_token(tokenizer.Next(), "int")
+    assert_parentheses_token(tokenizer.Next(), ")")
+    assert_keyword_token(tokenizer.Next(), "void")
+    assert_parentheses_token(tokenizer.Next(), "{")
+    assert_parentheses_token(tokenizer.Next(), "}")

@@ -50,3 +50,30 @@ def assert_invalid_token(token: Token, value: str) -> None:
     assert (
         token.Value == value
     ), f'The token value must be "{value}", but got "{token.Value}"'
+
+
+def assert_parentheses_token(token: Token, value: str) -> None:
+    assert (
+        token.Type == TokenType.PARENTHESES
+    ), f"The token must be TokenType.PARENTHESES, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f'The token value must be "{value}", but got "{token.Value}"'
+
+
+def assert_keyword_token(token: Token, value: str) -> None:
+    assert (
+        token.Type == TokenType.KEYWORD
+    ), f"The token must be TokenType.KEYWORD, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f'The token value must be "{value}", but got "{token.Value}"'
+
+
+def assert_identifier_token(token: Token, value: str) -> None:
+    assert (
+        token.Type == TokenType.IDENTIFIER
+    ), f"The token must be TokenType.IDENTIFIER, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f'The token value must be "{value}", but got "{token.Value}"'

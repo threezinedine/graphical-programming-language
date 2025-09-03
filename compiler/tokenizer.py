@@ -9,11 +9,22 @@ class TokenType(Enum):
     FLOAT = auto()
     STRING = auto()
     DELIMITER = auto()
+    PARENTHESES = auto()
+    IDENTIFIER = auto()
+    KEYWORD = auto()
     NONE = auto()
     INVALID = auto()
 
 
 TokenValue: TypeAlias = typing.Union[int, float, str, None, "Token"]
+
+KEYWORDS = [
+    "func",
+    # type keywords
+    "void",
+    "int",
+]
+KEYWORD_REGEX = "|".join(KEYWORDS)
 
 
 class Token:
@@ -32,10 +43,13 @@ class Token:
 
 class Tokenizer:
     REGEXES: dict[TokenType, list[str]] = {
+        TokenType.KEYWORD: [rf"^({KEYWORD_REGEX})"],
         TokenType.DELIMITER: [r"^[,;]"],
+        TokenType.PARENTHESES: [r"^[(){}\[\]]"],
         TokenType.FLOAT: [r"^-?\d+f", r"^-?\d+\.\d*f?"],
         TokenType.INTEGER: [r"^-?\d+"],
         TokenType.STRING: [r'^"((?:[^"\\]|\\.)*)"'],
+        TokenType.IDENTIFIER: [r"^[a-zA-Z_][a-zA-Z0-9_]*"],
     }
 
     def __init__(self, content: str) -> None:
@@ -86,6 +100,14 @@ class Tokenizer:
                         self._tokens.append(
                             Token(TokenType.STRING, match.group(0)[1:-1])
                         )
+                    elif tokenType == TokenType.PARENTHESES:
+                        self._tokens.append(
+                            Token(TokenType.PARENTHESES, match.group(0))
+                        )
+                    elif tokenType == TokenType.KEYWORD:
+                        self._tokens.append(Token(TokenType.KEYWORD, match.group(0)))
+                    elif tokenType == TokenType.IDENTIFIER:
+                        self._tokens.append(Token(TokenType.IDENTIFIER, match.group(0)))
 
                     break
 
