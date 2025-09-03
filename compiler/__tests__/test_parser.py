@@ -11,15 +11,19 @@ def test_parse_simple_program():
     ast = Parser(
         """
 print("Hello World");
+print(23.4, "testing");
 """
     )
 
-    assert len(ast.Nodes) == 1
     ProgramAssertion(
         [
             FunctionCallAssertion(
                 "print",
                 [ParameterAssertion('"Hello World"')],
+            ),
+            FunctionCallAssertion(
+                "print",
+                [ParameterAssertion(23.4), ParameterAssertion('"testing"')],
             ),
         ]
     ).Assert(ast.Nodes)

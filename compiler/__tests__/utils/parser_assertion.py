@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from parser import Node, FunctionCall
+from tokenizer import TokenValue
 
 
 class DelayAssertion(ABC):
@@ -9,7 +10,7 @@ class DelayAssertion(ABC):
 
 
 class ParameterAssertion(DelayAssertion):
-    def __init__(self, expectedValue: str) -> None:
+    def __init__(self, expectedValue: TokenValue) -> None:
         self.expectedValue = expectedValue
 
     def Assert(self, node: Node) -> None:
@@ -28,9 +29,15 @@ class FunctionCallAssertion(DelayAssertion):
         self.parameters = parameters
 
     def Assert(self, node: Node) -> None:
-        assert isinstance(node, FunctionCall)
-        assert node.functionName == self.functionName
-        assert len(node.parameters) == len(self.parameters)
+        assert isinstance(
+            node, FunctionCall
+        ), f"Expected FunctionCall, got {type(node)}"
+        assert (
+            node.functionName == self.functionName
+        ), f"Expected function name {self.functionName}, got {node.functionName}"
+        assert len(node.parameters) == len(
+            self.parameters
+        ), f"Expected {len(self.parameters)} parameters, got {len(node.parameters)}"
         for index in range(len(self.parameters)):
             self.parameters[index].Assert(node.parameters[index])
 

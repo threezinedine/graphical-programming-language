@@ -24,6 +24,18 @@ class String(Node):
         self.value = value
 
 
+class Integer(Node):
+    def __init__(self, value: int) -> None:
+        super().__init__()
+        self.value = value
+
+
+class Float(Node):
+    def __init__(self, value: float) -> None:
+        super().__init__()
+        self.value = value
+
+
 class Parser:
     def __init__(self, content: str) -> None:
         self._content = content
@@ -32,6 +44,8 @@ class Parser:
         self._nodes: list[Node] = []
 
         self._processes: list[typing.Callable[[list[Token]], Node | None]] = [
+            self._ProcessInteger,
+            self._ProcessFloat,
             self._ProcessStringLiteral,
             self._ProcessFunctionCall,
         ]
@@ -56,6 +70,8 @@ class Parser:
                     self._nodes.append(result)
                     break
 
+            tempTokens = []
+
     def _ProcessStringLiteral(self, tokens: list[Token]) -> Node | None:
         if len(tokens) != 1:
             return None
@@ -65,6 +81,26 @@ class Parser:
 
         assert isinstance(tokens[0].Value, str)
         return String(tokens[0].Value)
+
+    def _ProcessInteger(self, token: list[Token]) -> Node | None:
+        if len(token) != 1:
+            return None
+
+        if token[0].Type != TokenType.INTEGER:
+            return None
+
+        assert isinstance(token[0].Value, int)
+        return Integer(token[0].Value)
+
+    def _ProcessFloat(self, token: list[Token]) -> Node | None:
+        if len(token) != 1:
+            return None
+
+        if token[0].Type != TokenType.FLOAT:
+            return None
+
+        assert isinstance(token[0].Value, float)
+        return Float(token[0].Value)
 
     def _ProcessFunctionCall(self, tokens: list[Token]) -> Node | None:
         if len(tokens) < 3:
@@ -98,6 +134,8 @@ class Parser:
                 if result:
                     parameters.append(Parameter(result))
                     break
+
+            tempTokens = []
 
         return FunctionCall(functionName, parameters)
 
