@@ -20,9 +20,11 @@ TokenValue: TypeAlias = typing.Union[int, float, str, None, "Token"]
 
 KEYWORDS = [
     "func",
+    "return",
     # type keywords
     "void",
     "int",
+    "float",
 ]
 KEYWORD_REGEX = "|".join(KEYWORDS)
 
@@ -46,7 +48,8 @@ class Tokenizer:
         TokenType.KEYWORD: [rf"^({KEYWORD_REGEX})"],
         TokenType.DELIMITER: [r"^[,;]"],
         TokenType.PARENTHESES: [r"^[(){}\[\]]"],
-        TokenType.FLOAT: [r"^-?\d+f", r"^-?\d+\.\d*f?"],
+        TokenType.INVALID: [r"^\d+[a-zA-Z]+"],
+        TokenType.FLOAT: [r"^-?\d*\.\d*"],
         TokenType.INTEGER: [r"^-?\d+"],
         TokenType.STRING: [r'^"((?:[^"\\]|\\.)*)"'],
         TokenType.IDENTIFIER: [r"^[a-zA-Z_][a-zA-Z0-9_]*"],
@@ -108,6 +111,8 @@ class Tokenizer:
                         self._tokens.append(Token(TokenType.KEYWORD, match.group(0)))
                     elif tokenType == TokenType.IDENTIFIER:
                         self._tokens.append(Token(TokenType.IDENTIFIER, match.group(0)))
+                    elif tokenType == TokenType.INVALID:
+                        self._tokens.append(Token(TokenType.INVALID, match.group(0)))
 
                     break
 

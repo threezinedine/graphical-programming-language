@@ -19,13 +19,14 @@ def test_parse_number_as_number():
 
 
 def test_parse_float_number():
-    assert_float_token(Tokenizer("42f").Next(), 42.0)
-    assert_float_token(Tokenizer("-42f").Next(), -42.0)
+    assert_float_token(Tokenizer("42.").Next(), 42.0)
+    assert_float_token(Tokenizer("-42.").Next(), -42.0)
     assert_float_token(Tokenizer("42.0").Next(), 42.0)
-    assert_float_token(Tokenizer("43.1f").Next(), 43.1)
-    assert_float_token(Tokenizer("42.f0").Next(), 42.0)
+    assert_float_token(Tokenizer("43.1").Next(), 43.1)
+    assert_float_token(Tokenizer("42.0").Next(), 42.0)
     assert_float_token(Tokenizer("0.23").Next(), 0.23)
-    assert_float_token(Tokenizer("12.3f1").Next(), 12.3)
+    assert_float_token(Tokenizer(".23").Next(), 0.23)
+    assert_float_token(Tokenizer("12.3").Next(), 12.3)
 
 
 def test_parse_multiple_numbers():
@@ -62,6 +63,7 @@ def test_parse_string_with_internal_quotes():
 
 def test_parse_invalid_token():
     assert_invalid_token(Tokenizer("!adn").Next(), "!adn")
+    assert_invalid_token(Tokenizer("12adn").Next(), "12adn")
 
 
 def test_parse_invalid_token_with_other_token_type():
@@ -80,7 +82,7 @@ def test_parse_parentheses():
 
 
 def test_parse_multiple_keywords():
-    tokenizer = Tokenizer("func testingFunc(a int, b int) void {}")
+    tokenizer = Tokenizer("func testingFunc(a int, b float) void { return; }")
     assert_keyword_token(tokenizer.Next(), "func")
     assert_identifier_token(tokenizer.Next(), "testingFunc")
     assert_parentheses_token(tokenizer.Next(), "(")
@@ -88,8 +90,10 @@ def test_parse_multiple_keywords():
     assert_keyword_token(tokenizer.Next(), "int")
     assert_delimiter_token(tokenizer.Next(), ",")
     assert_identifier_token(tokenizer.Next(), "b")
-    assert_keyword_token(tokenizer.Next(), "int")
+    assert_keyword_token(tokenizer.Next(), "float")
     assert_parentheses_token(tokenizer.Next(), ")")
     assert_keyword_token(tokenizer.Next(), "void")
     assert_parentheses_token(tokenizer.Next(), "{")
+    assert_keyword_token(tokenizer.Next(), "return")
+    assert_delimiter_token(tokenizer.Next(), ";")
     assert_parentheses_token(tokenizer.Next(), "}")
