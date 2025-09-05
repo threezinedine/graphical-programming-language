@@ -244,7 +244,7 @@ class BlockTypeNode(Node):
 
             if operandRightNode is None and operandLeftNode is None:
                 error = (
-                    f"Both sides of operator '{operatorNode.token.Value}' are invvalid"
+                    f"Both sides of operator '{operatorNode.token.Value}' are invalid"
                 )
             elif operandRightNode is None:
                 error = (
@@ -268,7 +268,8 @@ class BlockTypeNode(Node):
                 error,
             )
             if operandLeftNode is None and operandRightNode is None:
-                nodeIndex += 1
+                nodeIndex += 2
+                tempNodes.append(leftNode)
             elif operandLeftNode is None:
                 nodeIndex += 3
                 tempNodes.append(leftNode)

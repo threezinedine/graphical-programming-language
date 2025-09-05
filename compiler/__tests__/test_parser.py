@@ -367,7 +367,6 @@ def test_label_invalid_expression_with_lack_of_left_operand():
 
     ast.Program.Compress()
     ast.Program.Parse()
-    print(ast.Program)
 
     ProgramAssertion(
         OperationAssertion(
@@ -379,5 +378,58 @@ def test_label_invalid_expression_with_lack_of_left_operand():
                 AtomicAssertion(TokenType.INTEGER, 10),
                 error="Left side of operator '*' is invalid",
             ),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_label_invalid_expression_with_both_operands_missing():
+    ast = Parser(
+        """
+3 + *
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 3),
+            OperationAssertion(
+                "*",
+                InvalidAtomicAssertion(),
+                InvalidAtomicAssertion(),
+                error="Both sides of operator '*' are invalid",
+            ),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_label_invalid_expression_with_multiple_operators_and_multiple_minus_operator():
+    ast = Parser(
+        """
+3 + * - 5
+        """
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+    print(ast.Program)
+
+    ProgramAssertion(
+        OperationAssertion(
+            "-",
+            OperationAssertion(
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                OperationAssertion(
+                    "*",
+                    InvalidAtomicAssertion(),
+                    InvalidAtomicAssertion(),
+                    error="Both sides of operator '*' are invalid",
+                ),
+            ),
+            AtomicAssertion(TokenType.INTEGER, 5),
         ),
     ).Assert(ast.Program)
