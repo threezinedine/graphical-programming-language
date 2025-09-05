@@ -21,6 +21,8 @@ class NodeType(Enum):
     BLOCK = auto()
     INDEX_BLOCK = auto()
 
+    OPERATION_EXPRESSION = auto()
+
     INVALID_EXPRESSION = auto()
     INVALID_BLOCK = auto()
     INVALID_INDEX_BLOCK = auto()
@@ -43,6 +45,10 @@ class Node(ABC):
 
     @abstractmethod
     def Compress(self) -> None:
+        pass
+
+    @abstractmethod
+    def Parse(self) -> None:
         pass
 
     @abstractmethod
@@ -86,6 +92,9 @@ class AtomicNode(Node):
     def Compress(self) -> None:
         pass
 
+    def Parse(self) -> None:
+        pass
+
 
 class BlockTypeNode(Node):
     def __init__(self, nodeType: NodeType, nodes: list[Node]) -> None:
@@ -107,6 +116,47 @@ class BlockTypeNode(Node):
             "type": self.Type.name,
             "nodes": [node.ToJson() for node in self.nodes],
         }
+
+    def Parse(self) -> None:
+        while not self._ParseOperation():
+            pass
+
+    def _ParseOperation(self) -> bool:
+        hasAnyChange = False
+        tempNodes: list[Node] = []
+
+        nodeIndex = 0
+        while nodeIndex < len(self.nodes) - 2:
+            leftNode = self.nodes[nodeIndex]
+            operatorNode = self.nodes[nodeIndex + 1]
+            rightNode = self.nodes[nodeIndex + 2]
+
+            if operatorNode.Type != NodeType.ATOMIC or not isinstance(
+                operatorNode, AtomicNode
+            ):
+                tempNodes.append(deepcopy(leftNode))
+                nodeIndex += 1
+                continue
+
+            if operatorNode.token.Type != TokenType.OPERATOR:
+                tempNodes.append(deepcopy(leftNode))
+                nodeIndex += 1
+                continue
+
+            leftNode.Parse()
+            rightNode.Parse()
+            newOperationNode = OperationNode(
+                operatorNode.token,
+                deepcopy(leftNode),
+                deepcopy(rightNode),
+            )
+            tempNodes.append(newOperationNode)
+            nodeIndex += 3
+            hasAnyChange = True
+
+        if hasAnyChange:
+            self.nodes = deepcopy(tempNodes)
+        return not hasAnyChange
 
     def Compress(self) -> None:
         self.nodes = self._CompressParenthesis(
@@ -216,6 +266,61 @@ class InvalidBlockNode(BlockTypeNode, InvalidNode):
         return f"{self.__class__.__name__}(Error: {self.error})"
 
 
+class OperationNode(Node):
+    def __init__(self, operator: Token, left: Node, right: Node) -> None:
+        self.operator = operator
+        self.left = left
+        self.right = right
+
+    @property
+    def Type(self) -> NodeType:
+        return NodeType.OPERATION_EXPRESSION
+
+    def __len__(self) -> int:
+        return 3
+
+    def __getitem__(self, index: int) -> Node:
+        if index == 0:
+            return self.left
+        elif index == 1:
+            return AtomicNode(self.operator)
+        elif index == 2:
+            return self.right
+        else:
+            raise IndexError("Index out of range")
+
+    @property
+    def Left(self) -> Node:
+        return self.left
+
+    @property
+    def Operator(self) -> Token:
+        return self.operator
+
+    @property
+    def Right(self) -> Node:
+        return self.right
+
+    def ToJson(self) -> Dict[str, Any]:
+        return {
+            "type": self.Type.name,
+            "operator": {
+                "value": self.operator.Value,
+                "tokenType": self.operator.Type.name,
+            },
+            "left": self.left.ToJson(),
+            "right": self.right.ToJson(),
+        }
+
+    def Compress(self) -> None:
+        self.left.Compress()
+        self.right.Compress()
+
+    def Parse(self) -> None:
+        self.left.Parse()
+        self.right.Parse()
+
+
 class Parser:
     def __init__(self, content: str) -> None:
         self._content = content
@@ -225,8 +330,6 @@ class Parser:
             NodeType.PROGRAM,
             [AtomicNode(token=token) for token in self._tokenizer.Tokens],
         )
-
-        self._programNode.Compress()
 
     @property
     def Program(self) -> BlockTypeNode:

@@ -1,4 +1,11 @@
 import pytest  # type: ignore
+from compiler.__tests__.utils.parser_assertion import (
+    AtomicAssertion,
+    OperationAssertion,
+    ProgramAssertion,
+    ExpressBlockionAsserion,
+)
+from compiler.tokenizer import TokenType
 from parser import Parser
 
 # from utils.parser_assertion import (
@@ -19,6 +26,7 @@ def test_compress_expressions_to_nodes():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 3
     assert len(ast.Program[-1]) == 3
 
@@ -30,6 +38,7 @@ def test_compress_nested_parenthesis():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 5
     assert len(ast.Program[2]) == 3
     assert len(ast.Program[2][2]) == 3
@@ -42,6 +51,7 @@ def test_compress_multiple_expressions():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 3
     assert len(ast.Program[0]) == 3
     assert len(ast.Program[2]) == 3
@@ -54,6 +64,7 @@ def test_compress_no_expressions():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 7
 
 
@@ -62,6 +73,8 @@ def test_compress_empty_expressions():
         """
         """
     )
+
+    ast.Program.Compress()
     assert len(ast.Program) == 0
 
 
@@ -72,6 +85,7 @@ def test_compress_single_expression():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 1
     assert len(ast.Program[0]) == 3
 
@@ -83,6 +97,7 @@ def test_compress_unmatched_parenthesis():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 1
     assert len(ast.Program[0]) == 5
     assert len(ast.Program[0][4]) == 3
@@ -95,6 +110,7 @@ def test_compress_unmatched_closing_parenthesis():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 3
     assert len(ast.Program[2]) == 3
     assert len(ast.Program[2][2]) == 3
@@ -107,6 +123,7 @@ def test_compress_redundant_closing_parenthesis():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 6
     assert len(ast.Program[5]) == 3
 
@@ -121,6 +138,7 @@ def test_compress_block_parenthesis():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 1
     assert len(ast.Program[0]) == 10
 
@@ -137,6 +155,7 @@ def test_compress_nested_block_parenthesis():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 1
     assert len(ast.Program[0]) == 5
     assert len(ast.Program[0][4]) == 6
@@ -150,6 +169,7 @@ value = array[2 * 4];
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 10
 
 
@@ -164,6 +184,7 @@ def test_compress_mixed_parenthesis():
 """
     )
 
+    ast.Program.Compress()
     assert len(ast.Program) == 7
     assert len(ast.Program[-1]) == 12
 
@@ -175,7 +196,57 @@ def test_compress_nested_parenthesis_2():
 """
     )
 
-    print(ast.Program[1])
+    ast.Program.Compress()
     assert len(ast.Program) == 3
     assert len(ast.Program[1]) == 3
     assert len(ast.Program[1][0]) == 4
+
+
+def test_label_node_type():
+    ast = Parser(
+        """
+3 + 5
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 3),
+            AtomicAssertion(TokenType.INTEGER, 5),
+        )
+    ).Assert(ast.Program)
+
+
+def test_label_node_with_parenthesis():
+    ast = Parser(
+        """
+(3 + 5) * (10 - 2)
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "*",
+            ExpressBlockionAsserion(
+                OperationAssertion(
+                    "+",
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                    AtomicAssertion(TokenType.INTEGER, 5),
+                ),
+            ),
+            ExpressBlockionAsserion(
+                OperationAssertion(
+                    "-",
+                    AtomicAssertion(TokenType.INTEGER, 10),
+                    AtomicAssertion(TokenType.INTEGER, 2),
+                ),
+            ),
+        ),
+    ).Assert(ast.Program)

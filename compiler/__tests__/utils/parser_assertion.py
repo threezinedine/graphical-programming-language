@@ -1,15 +1,12 @@
 from abc import ABC, abstractmethod
+from tokenizer import TokenType, Token, TokenValue
 from parser import (
-    # Float,
-    # IfStatement,
-    # IfStatementBranch,
-    # Integer,
+    AtomicNode,
+    BlockTypeNode,
     Node,
-    # FunctionCall,
-    # Parameter,
-    # String,
+    NodeType,
+    OperationNode,
 )
-from tokenizer import TokenValue
 
 
 class DelayAssertion(ABC):
@@ -18,115 +15,79 @@ class DelayAssertion(ABC):
         pass
 
 
-# class ParameterAssertion(DelayAssertion):
-#     def __init__(self, expectedValue: TokenValue) -> None:
-#         self.expectedValue = expectedValue
-
-#     def Assert(self, node: Node) -> None:
-#         assert isinstance(node, Parameter), f"Expected Parameter, got {type(node)}"
-#         assert (
-#             isinstance(node.exp, Integer)
-#             or isinstance(node.exp, Float)
-#             or isinstance(node.exp, String)
-#         ), f"Expected String, Float or Integer, got {type(node.exp)}"
-#         assert (
-#             node.exp.value == self.expectedValue
-#         ), f"Expected {self.expectedValue}, got {node.exp.value}"
-
-
-class StatementAssertion(DelayAssertion):
-    def __init__(self) -> None:
-        super().__init__()
-
-
-class VariableDefinitionAssertion(StatementAssertion):
-    def __init__(self, variableName: str, expectedValue: TokenValue) -> None:
-        self.variableName = variableName
-        self.expectedValue = expectedValue
+class AtomicAssertion(DelayAssertion):
+    def __init__(self, tokenType: TokenType, value: TokenValue) -> None:
+        self.value = value
+        self.tokenType = tokenType
 
     def Assert(self, node: Node) -> None:
-        # assert isinstance(node, VariableDefinition)
-        # assert node.variableName == self.variableName
-        # assert node.expectedValue == self.expectedValue
-        pass
+        assert len(node) == 1, f"Atomic should have 1 node, but got {len(node)}"
+        assert isinstance(node, AtomicNode), "Node should be AtomicNode"
+        assert (
+            node.token.Type.value == self.tokenType.value
+        ), f"Atomic type should be {self.tokenType.name}, but got {node.token.Type.name}"
+        assert (
+            node.token.Value == self.value
+        ), f"Atomic value should be {self.value}, but got {node.token.Value}"
 
 
-class ConditionAssertion(DelayAssertion):
-    def __init__(self, leftNode: Node, operator: str, rightNode: Node) -> None:
-        super().__init__()
-        self.leftNode = leftNode
+class OperationAssertion(DelayAssertion):
+    def __init__(
+        self,
+        operator: str,
+        left: DelayAssertion,
+        right: DelayAssertion,
+    ) -> None:
         self.operator = operator
-        self.rightNode = rightNode
+        self.left = left
+        self.right = right
 
     def Assert(self, node: Node) -> None:
-        return super().Assert(node)
+        assert isinstance(
+            node, OperationNode
+        ), f"Node should be OperationNode, but got {type(node)}"
+
+        assert isinstance(
+            node.Operator, Token
+        ), f"Operation operator should be Token, but got {type(node.Operator)}"
+        assert (
+            node.Operator.Value == self.operator
+        ), f"Operator should be {self.operator}, but got {node.Operator.Value}"
+        self.left.Assert(node.Left)
+        self.right.Assert(node.Right)
 
 
-class BlockAssertion:
-    def __init__(self, expressions: list[DelayAssertion]) -> None:
-        self.expressions = expressions
+class ExpressBlockionAsserion(DelayAssertion):
+    def __init__(self, *assertions: DelayAssertion) -> None:
+        self.assertions = assertions
 
-    def Assert(self, nodes: list[Node]) -> None:
-        assert len(nodes) == len(
-            self.expressions
-        ), f"Expected {len(self.expressions)} expressions, got {len(nodes)}"
-        for index in range(len(self.expressions)):
-            self.expressions[index].Assert(nodes[index])
-
-
-# class IfStatementBranchAssertion(DelayAssertion):
-#     def __init__(
-#         self,
-#         condition: ConditionAssertion | None = None,
-#         block: BlockAssertion | None = None,
-#     ) -> None:
-#         super().__init__()
-#         self.condition = condition
-#         self.block = block
-
-#     def Assert(self, node: Node) -> None:
-#         assert isinstance(
-#             node, IfStatementBranch
-#         ), f"Expected IfStatementBranch, got {type(node)}"
-#         if self.condition:
-#             self.condition.Assert(node.condition)
-#         if self.block:
-#             self.block.Assert(node.block)
+    def Assert(self, node: Node) -> None:
+        assert isinstance(
+            node, BlockTypeNode
+        ), f"Node should be BlockTypeNode, but got {type(node)}"
+        assert (
+            node.Type.value == NodeType.EXPRESSION.value
+        ), f"Node should be BlockTypeNode, but got {node.Type.name}"
+        assert len(node.nodes) == len(
+            self.assertions
+        ), f"Block should have {len(self.assertions)} nodes, but got {len(node.nodes)}"
+        for assertionIndex, assertion in enumerate(self.assertions):
+            assertion.Assert(node.nodes[assertionIndex])
 
 
-# class IfStatementAssertion(DelayAssertion):
-#     def __init__(self, branches: list[IfStatementBranchAssertion]) -> None:
-#         super().__init__()
-#         self.branches = branches
+class ProgramAssertion(DelayAssertion):
+    def __init__(self, *assertions: DelayAssertion) -> None:
+        self.assertions = assertions
 
-#     def Assert(self, node: Node) -> None:
-#         assert isinstance(node, IfStatement), f"Expected IfStatement, got {type(node)}"
-#         assert len(node.branches) == len(
-#             self.branches
-#         ), f"Expected {len(self.branches)} branches, got {len(node.branches)}"
-#         for branchIndex in range(len(self.branches)):
-#             self.branches[branchIndex].Assert(node.branches[branchIndex])
-#         return super().Assert(node)
-
-
-# class FunctionCallAssertion(DelayAssertion):
-#     def __init__(
-#         self,
-#         functionName: str,
-#         parameters: list[ParameterAssertion],
-#     ) -> None:
-#         self.functionName = functionName
-#         self.parameters = parameters
-
-#     def Assert(self, node: Node) -> None:
-#         assert isinstance(
-#             node, FunctionCall
-#         ), f"Expected FunctionCall, got {type(node)}"
-#         assert (
-#             node.functionName == self.functionName
-#         ), f"Expected function name {self.functionName}, got {node.functionName}"
-#         assert len(node.parameters) == len(
-#             self.parameters
-#         ), f"Expected {len(self.parameters)} parameters, got {len(node.parameters)}"
-#         for index in range(len(self.parameters)):
-#             self.parameters[index].Assert(node.parameters[index])
+    def Assert(self, node: Node) -> None:
+        assert isinstance(
+            node, BlockTypeNode
+        ), f"Node should be BlockTypeNode, but got {type(node)}"
+        assert (
+            node.Type == NodeType.PROGRAM
+        ), f"Node should be ProgramNode, but got {node.Type.name}"
+        assert len(node.nodes) == len(
+            self.assertions
+        ), f"Program should have {len(self.assertions)} nodes, but got {len(node.nodes)}"
+        for assertionIndex, assertion in enumerate(self.assertions):
+            assertion.Assert(node.nodes[assertionIndex])
