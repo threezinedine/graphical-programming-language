@@ -20,12 +20,8 @@ class NodeType(Enum):
     EXPRESSION = auto()
     BLOCK = auto()
     INDEX_BLOCK = auto()
-
     OPERATION_EXPRESSION = auto()
 
-    INVALID_EXPRESSION = auto()
-    INVALID_BLOCK = auto()
-    INVALID_INDEX_BLOCK = auto()
     INVALID = auto()
 
 
@@ -58,12 +54,49 @@ class Node(ABC):
     def __repr__(self) -> str:
         return json.dumps(self.ToJson(), indent=4)
 
-
-class InvalidNode(ABC):
     @property
     @abstractmethod
-    def Error(self) -> str:
+    def IsError(self) -> bool:
         pass
+
+    @property
+    def Error(self) -> str:
+        if self.IsError:
+            assert isinstance(self, InvalidNode)
+            return self.Error
+        return ""
+
+
+class InvalidNode(Node):
+    @property
+    def Type(self) -> NodeType:
+        return NodeType.INVALID
+
+    def __len__(self) -> int:
+        return 0
+
+    def __getitem__(self, index: int) -> "Node":
+        raise IndexError("Invalid node has no children")
+
+    def ToJson(self) -> Dict[str, Any]:
+        return {
+            "type": self.Type.name,
+            "error": "Invalid node",
+        }
+
+    def Compress(self) -> None:
+        pass
+
+    def Parse(self) -> None:
+        pass
+
+    @property
+    def IsError(self) -> bool:
+        return True
+
+    @property
+    def Error(self) -> str:
+        return "Invalid node"
 
 
 class AtomicNode(Node):
@@ -95,11 +128,24 @@ class AtomicNode(Node):
     def Parse(self) -> None:
         pass
 
+    @property
+    def IsError(self) -> bool:
+        return self.token.Type == TokenType.INVALID
+
+    @property
+    def Error(self) -> str:
+        if self.IsError:
+            return f"Invalid token: {self.token.Value}"
+        return ""
+
 
 class BlockTypeNode(Node):
-    def __init__(self, nodeType: NodeType, nodes: list[Node]) -> None:
+    def __init__(
+        self, nodeType: NodeType, nodes: list[Node], error: str | None = None
+    ) -> None:
         self.nodes = nodes
         self.type = nodeType
+        self.error = error
 
     def __len__(self) -> int:
         return len(self.nodes)
@@ -117,6 +163,17 @@ class BlockTypeNode(Node):
             "nodes": [node.ToJson() for node in self.nodes],
         }
 
+    @property
+    def IsError(self) -> bool:
+        return self.error is not None
+
+    @property
+    def Error(self) -> str:
+        if self.IsError:
+            assert self.error is not None
+            return self.error
+        return ""
+
     def Parse(self) -> None:
         while not self._ParseOperation("*", "/"):
             pass
@@ -129,37 +186,97 @@ class BlockTypeNode(Node):
         tempNodes: list[Node] = []
 
         nodeIndex = 0
-        while nodeIndex < len(self.nodes) - 2:
+        while nodeIndex < len(self.nodes) - 1:
             leftNode = self.nodes[nodeIndex]
             operatorNode = self.nodes[nodeIndex + 1]
-            rightNode = self.nodes[nodeIndex + 2]
 
-            if operatorNode.Type != NodeType.ATOMIC or not isinstance(
-                operatorNode, AtomicNode
+            if not (
+                operatorNode.Type == NodeType.ATOMIC
+                and isinstance(operatorNode, AtomicNode)
+                and operatorNode.token.Type == TokenType.OPERATOR
+                and operatorNode.token.Value in operations
             ):
                 tempNodes.append(deepcopy(leftNode))
                 nodeIndex += 1
                 continue
 
-            if operatorNode.token.Type != TokenType.OPERATOR:
-                tempNodes.append(deepcopy(leftNode))
-                nodeIndex += 1
-                continue
-
-            if operatorNode.token.Value not in operations:
-                tempNodes.append(deepcopy(leftNode))
-                nodeIndex += 1
-                continue
-
             leftNode.Parse()
-            rightNode.Parse()
+
+            def checkOperandNodeValid(node: Node) -> bool:
+                return (
+                    (
+                        isinstance(node, AtomicNode)
+                        and node.token.Type
+                        in [
+                            TokenType.INTEGER,
+                            TokenType.FLOAT,
+                            TokenType.IDENTIFIER,
+                            TokenType.STRING,
+                        ]
+                    )
+                    or (
+                        isinstance(node, BlockTypeNode)
+                        and node.Type == NodeType.EXPRESSION
+                    )
+                    or isinstance(node, OperationNode)
+                )
+
+            operandLeftNode: Node | None = None
+            operandRightNode: Node | None = None
+
+            if nodeIndex + 2 >= len(self.nodes):
+                operandRightNode = None
+            else:
+                operandRightNode = self.nodes[nodeIndex + 2]
+                operandRightNode.Parse()
+
+            if not checkOperandNodeValid(leftNode):
+                operandLeftNode = None
+            else:
+                operandLeftNode = leftNode
+
+            if operandRightNode is not None and not checkOperandNodeValid(
+                operandRightNode
+            ):
+                operandRightNode = None
+
+            error: str | None = None
+
+            if operandRightNode is None and operandLeftNode is None:
+                error = (
+                    f"Both sides of operator '{operatorNode.token.Value}' are invvalid"
+                )
+            elif operandRightNode is None:
+                error = (
+                    f"Right side of operator '{operatorNode.token.Value}' is invalid"
+                )
+            elif operandLeftNode is None:
+                error = f"Left side of operator '{operatorNode.token.Value}' is invalid"
+
             newOperationNode = OperationNode(
                 operatorNode.token,
-                deepcopy(leftNode),
-                deepcopy(rightNode),
+                (
+                    deepcopy(operandLeftNode)
+                    if operandLeftNode is not None
+                    else InvalidNode()
+                ),
+                (
+                    deepcopy(operandRightNode)
+                    if operandRightNode is not None
+                    else InvalidNode()
+                ),
+                error,
             )
+            if operandLeftNode is None and operandRightNode is None:
+                nodeIndex += 1
+            elif operandLeftNode is None:
+                nodeIndex += 3
+                tempNodes.append(leftNode)
+            elif operandRightNode is None:
+                nodeIndex += 2
+            else:
+                nodeIndex += 3
             tempNodes.append(newOperationNode)
-            nodeIndex += 3
             hasAnyChange = True
 
         if hasAnyChange:
@@ -174,19 +291,16 @@ class BlockTypeNode(Node):
             self.nodes,
             "(",
             NodeType.EXPRESSION,
-            NodeType.INVALID_EXPRESSION,
         )
         self.nodes = self._CompressParenthesis(
             self.nodes,
             "{",
             NodeType.BLOCK,
-            NodeType.INVALID_BLOCK,
         )
         self.nodes = self._CompressParenthesis(
             self.nodes,
             "[",
             NodeType.INDEX_BLOCK,
-            NodeType.INVALID_INDEX_BLOCK,
         )
 
     def _CompressParenthesis(
@@ -194,7 +308,6 @@ class BlockTypeNode(Node):
         nodes: list[Node],
         parenthesis: str,
         validGroup: NodeType,
-        invalidGroup: NodeType,
     ) -> list[Node]:
         result: list[Node] = []
 
@@ -234,7 +347,6 @@ class BlockTypeNode(Node):
                             deepcopy(currentTempsBlock),
                             parenthesis,
                             validGroup,
-                            invalidGroup,
                         ),
                     )
                     newNode.Compress()
@@ -248,13 +360,12 @@ class BlockTypeNode(Node):
                     result.append(deepcopy(node))
 
         if parenthesisStackCount != 0:
-            newNode = InvalidBlockNode(
-                invalidGroup,
+            newNode = BlockTypeNode(
+                validGroup,
                 self._CompressParenthesis(
                     deepcopy(currentTempsBlock),
                     parenthesis,
                     validGroup,
-                    invalidGroup,
                 ),
                 f'Lack of closing parenthesis "{parenthesis}"',
             )
@@ -264,24 +375,14 @@ class BlockTypeNode(Node):
         return result
 
 
-class InvalidBlockNode(BlockTypeNode, InvalidNode):
-    def __init__(self, blockType: NodeType, nodes: list["Node"], error: str) -> None:
-        super().__init__(blockType, nodes)
-        self.error = error
-
-    @property
-    def Error(self) -> str:
-        return self.error
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(Error: {self.error})"
-
-
 class OperationNode(Node):
-    def __init__(self, operator: Token, left: Node, right: Node) -> None:
+    def __init__(
+        self, operator: Token, left: Node, right: Node, error: str | None = None
+    ) -> None:
         self.operator = operator
         self.left = left
         self.right = right
+        self.error = error
 
     @property
     def Type(self) -> NodeType:
@@ -311,6 +412,17 @@ class OperationNode(Node):
     @property
     def Right(self) -> Node:
         return self.right
+
+    @property
+    def IsError(self) -> bool:
+        return self.error is not None
+
+    @property
+    def Error(self) -> str:
+        if self.IsError:
+            assert self.error is not None
+            return self.error
+        return ""
 
     def ToJson(self) -> Dict[str, Any]:
         return {

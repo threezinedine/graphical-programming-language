@@ -1,22 +1,13 @@
 import pytest  # type: ignore
-from compiler.__tests__.utils.parser_assertion import (
+from utils.parser_assertion import (
     AtomicAssertion,
+    InvalidAtomicAssertion,
     OperationAssertion,
     ProgramAssertion,
     ExpressBlockionAsserion,
 )
 from compiler.tokenizer import TokenType
 from parser import Parser
-
-# from utils.parser_assertion import (
-# ConditionAssertion,
-# IfStatementBranchAssertion,
-# ParameterAssertion,
-# FunctionCallAssertion,
-# BlockAssertion,
-# VariableDefinitionAssertion,
-# IfStatementAssertion,
-# )
 
 
 def test_compress_expressions_to_nodes():
@@ -339,5 +330,54 @@ def test_label_complex_expression():
                 ),
             ),
             AtomicAssertion(TokenType.INTEGER, 7),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_label_invalid_expression_with_lack_of_right_operand():
+    ast = Parser(
+        """ 
+3 + 5 *
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 3),
+            OperationAssertion(
+                "*",
+                AtomicAssertion(TokenType.INTEGER, 5),
+                InvalidAtomicAssertion(),
+                error="Right side of operator '*' is invalid",
+            ),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_label_invalid_expression_with_lack_of_left_operand():
+    ast = Parser(
+        """
+3 + * 10
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+    print(ast.Program)
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 3),
+            OperationAssertion(
+                "*",
+                InvalidAtomicAssertion(),
+                AtomicAssertion(TokenType.INTEGER, 10),
+                error="Left side of operator '*' is invalid",
+            ),
         ),
     ).Assert(ast.Program)

@@ -3,6 +3,7 @@ from tokenizer import TokenType, Token, TokenValue
 from parser import (
     AtomicNode,
     BlockTypeNode,
+    InvalidNode,
     Node,
     NodeType,
     OperationNode,
@@ -31,16 +32,24 @@ class AtomicAssertion(DelayAssertion):
         ), f"Atomic value should be {self.value}, but got {node.token.Value}"
 
 
+class InvalidAtomicAssertion(DelayAssertion):
+    def Assert(self, node: Node) -> None:
+        assert len(node) == 0, f"Atomic should have 0 node, but got {len(node)}"
+        assert isinstance(node, InvalidNode), "Node should be AtomicNode"
+
+
 class OperationAssertion(DelayAssertion):
     def __init__(
         self,
         operator: str,
         left: DelayAssertion,
         right: DelayAssertion,
+        error: str | None = None,
     ) -> None:
         self.operator = operator
         self.left = left
         self.right = right
+        self.error = error
 
     def Assert(self, node: Node) -> None:
         assert isinstance(
@@ -53,6 +62,12 @@ class OperationAssertion(DelayAssertion):
         assert (
             node.Operator.Value == self.operator
         ), f"Operator should be {self.operator}, but got {node.Operator.Value}"
+
+        if self.error is not None:
+            assert (
+                node.Error == self.error
+            ), f"Error should be {self.error}, but got {node.Error}"
+
         self.left.Assert(node.Left)
         self.right.Assert(node.Right)
 

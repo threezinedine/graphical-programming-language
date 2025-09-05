@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/compiler/venv/Scripts/pytest.exe",
             "args": [
                 "-k",
-                "test_label_multiple_and_divide"
+                "test_label_invalid_expression_with_lack_of_left_operand"
             ],
             "console": "integratedTerminal"
         }
