@@ -10,9 +10,16 @@ class Parser:
         test = subparsers.add_parser("test", help="Run tests")
         test.add_argument(
             "project",
-            choices=["compiler"],
+            choices=["compiler", "spec"],
             default="compiler",
             type=str,
+        )
+        test.add_argument(
+            "-s",
+            "--spec",
+            type=str,
+            help="Run specific spec test",
+            default="",
         )
 
         add = subparsers = subparsers.add_parser(

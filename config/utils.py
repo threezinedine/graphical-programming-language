@@ -185,3 +185,22 @@ def RunTest(folder: str) -> None:
     except Exception as e:
         logger.error(f"Failed to run tests in '{folder}': {e}")
         exit(Config.BUILD_EXIT_ERROR_CODE)
+
+
+def RunSpecTest(folder: str, spec: str) -> None:
+    try:
+        logger.info(f"Running tests in '{folder}' with spec '{spec}'...")
+        subprocess.run(
+            [
+                GetPytestExePath(folder),
+                "-k",
+                spec,
+            ],
+            check=True,
+            shell=True,
+            cwd=folder,
+        )
+        logger.info(f"Tests in '{folder}' completed successfully.")
+    except Exception as e:
+        logger.error(f"Failed to run tests in '{folder}': {e}")
+        exit(Config.BUILD_EXIT_ERROR_CODE)

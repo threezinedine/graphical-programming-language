@@ -69,6 +69,14 @@ def test_parse_multiple_strings():
     assert_string_token(tokenizer.Next(), '"world"')
 
 
+def test_parse_index_token():
+    tokenizer = Tokenizer("array[0]")
+    assert_identifier_token(tokenizer.Next(), "array")
+    assert_parentheses_token(tokenizer.Next(), "[")
+    assert_integer_token(tokenizer.Next(), 0)
+    assert_parentheses_token(tokenizer.Next(), "]")
+
+
 def test_parse_string_with_internal_quotes():
     tokenizer = Tokenizer('"hello \\"world\\""')
     assert_string_token(tokenizer.Next(), '"hello \\"world\\""')

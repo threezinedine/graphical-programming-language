@@ -1,46 +1,181 @@
 import pytest  # type: ignore
 from parser import Parser
-from utils.parser_assertion import (
-    ParameterAssertion,
-    FunctionCallAssertion,
-    ProgramAssertion,
-    VariableDefinitionAssertion,
-)
+
+# from utils.parser_assertion import (
+# ConditionAssertion,
+# IfStatementBranchAssertion,
+# ParameterAssertion,
+# FunctionCallAssertion,
+# BlockAssertion,
+# VariableDefinitionAssertion,
+# IfStatementAssertion,
+# )
 
 
-def test_parse_simple_program():
+def test_compress_expressions_to_nodes():
     ast = Parser(
         """
-print("Hello World");
-print(23.4, "testing");
+3 + (23 - 5)
 """
     )
 
-    ProgramAssertion(
-        [
-            FunctionCallAssertion(
-                "print",
-                [ParameterAssertion('"Hello World"')],
-            ),
-            FunctionCallAssertion(
-                "print",
-                [ParameterAssertion(23.4), ParameterAssertion('"testing"')],
-            ),
-        ]
-    ).Assert(ast.Nodes)
+    assert len(ast.Program) == 3
+    assert len(ast.Program[-1]) == 3
 
 
-def test_parse_variable_definition():
+def test_compress_nested_parenthesis():
     ast = Parser(
         """
-int x = 5;
-auto y = 10.5;
+3 - (3 + (23 - 5)) * 2
 """
     )
 
-    ProgramAssertion(
-        [
-            VariableDefinitionAssertion("x", 5),
-            VariableDefinitionAssertion("y", 10.5),
-        ]
-    ).Assert(ast.Nodes)
+    assert len(ast.Program) == 5
+    assert len(ast.Program[2]) == 3
+    assert len(ast.Program[2][2]) == 3
+
+
+def test_compress_multiple_expressions():
+    ast = Parser(
+        """
+(3 + 5) * (10 - 2)
+"""
+    )
+
+    assert len(ast.Program) == 3
+    assert len(ast.Program[0]) == 3
+    assert len(ast.Program[2]) == 3
+
+
+def test_compress_no_expressions():
+    ast = Parser(
+        """ 
+3 + 5 * 10 - 2
+"""
+    )
+
+    assert len(ast.Program) == 7
+
+
+def test_compress_empty_expressions():
+    ast = Parser(
+        """
+        """
+    )
+    assert len(ast.Program) == 0
+
+
+def test_compress_single_expression():
+    ast = Parser(
+        """
+(3 + 5)
+"""
+    )
+
+    assert len(ast.Program) == 1
+    assert len(ast.Program[0]) == 3
+
+
+def test_compress_unmatched_parenthesis():
+    ast = Parser(
+        """
+(3 + 5 * (10 - 2)
+"""
+    )
+
+    assert len(ast.Program) == 1
+    assert len(ast.Program[0]) == 5
+    assert len(ast.Program[0][4]) == 3
+
+
+def test_compress_unmatched_closing_parenthesis():
+    ast = Parser(
+        """
+3 + (5 * (10 - 2)
+"""
+    )
+
+    assert len(ast.Program) == 3
+    assert len(ast.Program[2]) == 3
+    assert len(ast.Program[2][2]) == 3
+
+
+def test_compress_redundant_closing_parenthesis():
+    ast = Parser(
+        """ 
+3 + 5) * (10 - 2)
+"""
+    )
+
+    assert len(ast.Program) == 6
+    assert len(ast.Program[5]) == 3
+
+
+def test_compress_block_parenthesis():
+    ast = Parser(
+        """
+{
+    x = 5;
+    y = x + 3;
+}
+"""
+    )
+
+    assert len(ast.Program) == 1
+    assert len(ast.Program[0]) == 10
+
+
+def test_compress_nested_block_parenthesis():
+    ast = Parser(
+        """
+{
+    x = 5;
+    {
+        y = x + 3;
+    }
+}
+"""
+    )
+
+    assert len(ast.Program) == 1
+    assert len(ast.Program[0]) == 5
+    assert len(ast.Program[0][4]) == 6
+
+
+def test_indexing_parenthesis():
+    ast = Parser(
+        """
+array[5 + 3] = 10;
+value = array[2 * 4];
+"""
+    )
+
+    assert len(ast.Program) == 10
+
+
+def test_compress_mixed_parenthesis():
+    ast = Parser(
+        """
+    t = (3 + 5) * (10 - 2);
+{
+    x = (5 + 3) * 2;
+    y = x - (4 / 2);
+}
+"""
+    )
+
+    assert len(ast.Program) == 7
+    assert len(ast.Program[-1]) == 12
+
+
+def test_compress_nested_parenthesis_2():
+    ast = Parser(
+        """
+        print((test[2 + 3.10] + (4.3 - 1)) * 5);
+"""
+    )
+
+    print(ast.Program[1])
+    assert len(ast.Program) == 3
+    assert len(ast.Program[1]) == 3
+    assert len(ast.Program[1][0]) == 4

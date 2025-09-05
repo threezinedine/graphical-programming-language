@@ -17,6 +17,15 @@ class TokenType(Enum):
     INVALID = auto()
 
 
+MATCH_CLOSE_PARENTHESIS = {
+    "(": ")",
+    "{": "}",
+    "[": "]",
+}
+
+OpenParenthesis: TypeAlias = typing.Union[
+    typing.Literal["("], typing.Literal["{"], typing.Literal["["]
+]
 TokenValue: TypeAlias = typing.Union[int, float, str, None, "Token"]
 
 TYPES = [
@@ -107,6 +116,9 @@ class Tokenizer:
             ):
                 tempContent = tempContent[1:]
 
+            if len(tempContent) == 0:
+                break
+
             hasMatch = False
             for regex, tokenType in self._regexes.items():
                 match = re.match(regex, tempContent)
@@ -166,3 +178,7 @@ class Tokenizer:
 
     def Next(self) -> Token:
         return self._tokens.pop(0)
+
+    @property
+    def Tokens(self) -> list[Token]:
+        return self._tokens

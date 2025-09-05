@@ -1,48 +1,219 @@
-from abc import ABC
-import typing
-from tokenizer import Tokenizer, Token, TokenType, TYPES
+from abc import ABC, abstractmethod
+from copy import deepcopy
+from enum import Enum, auto
+import json
+from typing import Any, Dict, TypeAlias, Union
+
+from tokenizer import (
+    MATCH_CLOSE_PARENTHESIS,
+    Tokenizer,
+    Token,
+    TokenType,
+)
+
+HierarchyToken: TypeAlias = Union[Token, list["HierarchyToken"]]
+
+
+class NodeType(Enum):
+    ATOMIC = auto()
+    PROGRAM = auto()
+    EXPRESSION = auto()
+    BLOCK = auto()
+    INDEX_BLOCK = auto()
+
+    INVALID_EXPRESSION = auto()
+    INVALID_BLOCK = auto()
+    INVALID_INDEX_BLOCK = auto()
+    INVALID = auto()
 
 
 class Node(ABC):
-    pass
+    @property
+    @abstractmethod
+    def Type(self) -> NodeType:
+        pass
+
+    @abstractmethod
+    def __len__(self) -> int:
+        pass
+
+    @abstractmethod
+    def __getitem__(self, index: int) -> "Node":
+        pass
+
+    @abstractmethod
+    def Compress(self) -> None:
+        pass
+
+    @abstractmethod
+    def ToJson(self) -> Dict[str, Any]:
+        pass
+
+    def __repr__(self) -> str:
+        return json.dumps(self.ToJson(), indent=4)
 
 
-class FunctionCall(Node):
-    def __init__(self, functionName: str, parameters: list["Parameter"]) -> None:
-        self.functionName = functionName
-        self.parameters = parameters
+class InvalidNode(ABC):
+    @property
+    @abstractmethod
+    def Error(self) -> str:
+        pass
 
 
-class VariableDefinition(Node):
-    def __init__(
-        self, identifier: str, varType: str, initialValue: Node | None = None
-    ) -> None:
-        self.identifier = identifier
-        self.varType = varType
-        self.initialValue = initialValue
-
-
-class Parameter(Node):
-    def __init__(self, exp: Node) -> None:
-        self.exp = exp
-
-
-class String(Node):
-    def __init__(self, value: str) -> None:
+class AtomicNode(Node):
+    def __init__(self, token: Token) -> None:
         super().__init__()
-        self.value = value
+        self.token = token
+
+    @property
+    def Type(self) -> NodeType:
+        return NodeType.ATOMIC
+
+    def __len__(self) -> int:
+        return 1
+
+    def __getitem__(self, index: int) -> "Node":
+        assert index == 0, "Index out of range"
+        return self
+
+    def ToJson(self) -> Dict[str, Any]:
+        return {
+            "type": self.Type.name,
+            "value": self.token.Value,
+            "tokenType": self.token.Type.name,
+        }
+
+    def Compress(self) -> None:
+        pass
 
 
-class Integer(Node):
-    def __init__(self, value: int) -> None:
-        super().__init__()
-        self.value = value
+class BlockTypeNode(Node):
+    def __init__(self, nodeType: NodeType, nodes: list[Node]) -> None:
+        self.nodes = nodes
+        self.type = nodeType
+
+    def __len__(self) -> int:
+        return len(self.nodes)
+
+    @property
+    def Type(self) -> NodeType:
+        return self.type
+
+    def __getitem__(self, index: int) -> Node:
+        return self.nodes[index]
+
+    def ToJson(self) -> Dict[str, Any]:
+        return {
+            "type": self.Type.name,
+            "nodes": [node.ToJson() for node in self.nodes],
+        }
+
+    def Compress(self) -> None:
+        self.nodes = self._CompressParenthesis(
+            self.nodes,
+            "(",
+            NodeType.EXPRESSION,
+            NodeType.INVALID_EXPRESSION,
+        )
+        self.nodes = self._CompressParenthesis(
+            self.nodes,
+            "{",
+            NodeType.BLOCK,
+            NodeType.INVALID_BLOCK,
+        )
+        self.nodes = self._CompressParenthesis(
+            self.nodes,
+            "[",
+            NodeType.INDEX_BLOCK,
+            NodeType.INVALID_INDEX_BLOCK,
+        )
+
+    def _CompressParenthesis(
+        self,
+        nodes: list[Node],
+        parenthesis: str,
+        validGroup: NodeType,
+        invalidGroup: NodeType,
+    ) -> list[Node]:
+        result: list[Node] = []
+
+        parenthesisStackCount = 0
+        currentTempsBlock: list[Node] = []
+        inBlock = False
+
+        for node in nodes:
+            if not isinstance(node, AtomicNode):
+                if inBlock:
+                    currentTempsBlock.append(deepcopy(node))
+                else:
+                    result.append(deepcopy(node))
+                continue
+
+            token = node.token
+
+            if token.Type == TokenType.PARENTHESES and token.Value == parenthesis:
+                if parenthesisStackCount == 0:
+                    inBlock = True
+                    currentTempsBlock = []
+                else:
+                    currentTempsBlock.append(deepcopy(node))
+                parenthesisStackCount += 1
+            elif (
+                token.Type == TokenType.PARENTHESES
+                and token.Value == MATCH_CLOSE_PARENTHESIS[parenthesis]
+                and inBlock
+            ):
+                if parenthesisStackCount > 1:
+                    currentTempsBlock.append(deepcopy(node))
+                else:
+                    inBlock = False
+                    newNode = BlockTypeNode(
+                        validGroup,
+                        self._CompressParenthesis(
+                            deepcopy(currentTempsBlock),
+                            parenthesis,
+                            validGroup,
+                            invalidGroup,
+                        ),
+                    )
+                    newNode.Compress()
+                    result.append(newNode)
+                    currentTempsBlock = []
+                parenthesisStackCount -= 1
+            else:
+                if inBlock:
+                    currentTempsBlock.append(deepcopy(node))
+                else:
+                    result.append(deepcopy(node))
+
+        if parenthesisStackCount != 0:
+            newNode = InvalidBlockNode(
+                invalidGroup,
+                self._CompressParenthesis(
+                    deepcopy(currentTempsBlock),
+                    parenthesis,
+                    validGroup,
+                    invalidGroup,
+                ),
+                f'Lack of closing parenthesis "{parenthesis}"',
+            )
+            newNode.Compress()
+            result.append(newNode)
+
+        return result
 
 
-class Float(Node):
-    def __init__(self, value: float) -> None:
-        super().__init__()
-        self.value = value
+class InvalidBlockNode(BlockTypeNode, InvalidNode):
+    def __init__(self, blockType: NodeType, nodes: list["Node"], error: str) -> None:
+        super().__init__(blockType, nodes)
+        self.error = error
+
+    @property
+    def Error(self) -> str:
+        return self.error
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(Error: {self.error})"
 
 
 class Parser:
@@ -50,131 +221,13 @@ class Parser:
         self._content = content
         self._tokenizer = Tokenizer(content)
 
-        self._nodes: list[Node] = []
+        self._programNode: BlockTypeNode = BlockTypeNode(
+            NodeType.PROGRAM,
+            [AtomicNode(token=token) for token in self._tokenizer.Tokens],
+        )
 
-        self._processes: list[typing.Callable[[list[Token]], Node | None]] = [
-            self._ProcessInteger,
-            self._ProcessFloat,
-            self._ProcessStringLiteral,
-            self._ProcessVariableDefinition,
-            self._ProcessFunctionCall,
-        ]
-
-        self._Parse()
-
-    def _Parse(self) -> None:
-        tempTokens: list[Token] = []
-        while not self._tokenizer.Empty():
-            token = self._tokenizer.Next()
-            if token.Type != TokenType.DELIMITER or token.Value != ";":
-                tempTokens.append(token)
-                continue
-
-            if len(tempTokens) == 0:
-                tempTokens = []
-                continue
-
-            for process in self._processes:
-                result = process(tempTokens)
-                if result:
-                    self._nodes.append(result)
-                    break
-
-            tempTokens = []
-
-    def _ProcessStringLiteral(self, tokens: list[Token]) -> Node | None:
-        if len(tokens) != 1:
-            return None
-
-        if tokens[0].Type != TokenType.STRING:
-            return None
-
-        assert isinstance(tokens[0].Value, str)
-        return String(tokens[0].Value)
-
-    def _ProcessInteger(self, token: list[Token]) -> Node | None:
-        if len(token) != 1:
-            return None
-
-        if token[0].Type != TokenType.INTEGER:
-            return None
-
-        assert isinstance(token[0].Value, int)
-        return Integer(token[0].Value)
-
-    def _ProcessFloat(self, token: list[Token]) -> Node | None:
-        if len(token) != 1:
-            return None
-
-        if token[0].Type != TokenType.FLOAT:
-            return None
-
-        assert isinstance(token[0].Value, float)
-        return Float(token[0].Value)
-
-    def _ProcessVariableDefinition(self, tokens: list[Token]) -> Node | None:
-        if len(tokens) < 4:
-            return
-
-        if tokens[0].Type != TokenType.KEYWORD or (
-            tokens[0].Value not in TYPES and tokens[0].Value != "auto"
-        ):
-            return
-
-        if tokens[1].Type != TokenType.IDENTIFIER:
-            return
-
-        if tokens[2].Type != TokenType.OPERATOR or tokens[2].Value != "=":
-            return
-
-        node: Node | None = None
-
-        for process in self._processes:
-            node = process(tokens[3:])
-            if node:
-                break
-
-        assert isinstance(tokens[0].Value, str)
-        assert isinstance(tokens[1].Value, str)
-        return VariableDefinition(tokens[1].Value, tokens[0].Value, node)
-
-    def _ProcessFunctionCall(self, tokens: list[Token]) -> Node | None:
-        if len(tokens) < 3:
-            return None
-
-        if tokens[0].Type != TokenType.IDENTIFIER:
-            return None
-
-        if tokens[1].Type != TokenType.PARENTHESES or tokens[1].Value != "(":
-            return None
-
-        if tokens[-1].Type != TokenType.PARENTHESES or tokens[-1].Value != ")":
-            return None
-
-        functionName: str = tokens[0].Value  # type: ignore
-        parameters: list[Parameter] = []
-
-        tempTokens: list[Token] = []
-        for i in range(2, len(tokens) - 1):
-            if tokens[i].Type != TokenType.DELIMITER or tokens[i].Value != ",":
-                tempTokens.append(tokens[i])
-
-                if i != len(tokens) - 2:
-                    continue
-
-            if len(tempTokens) == 0:
-                continue
-
-            for process in self._processes:
-                result = process(tempTokens)
-                if result:
-                    parameters.append(Parameter(result))
-                    break
-
-            tempTokens = []
-
-        return FunctionCall(functionName, parameters)
+        self._programNode.Compress()
 
     @property
-    def Nodes(self) -> list[Node]:
-        return self._nodes
+    def Program(self) -> BlockTypeNode:
+        return self._programNode

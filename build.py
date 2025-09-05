@@ -1,6 +1,6 @@
 from config.args import Parser
 from config.config import Config
-from config.utils import AddPackage, CreateEnv, RunTest
+from config.utils import AddPackage, CreateEnv, RunSpecTest, RunTest
 
 
 def main() -> None:
@@ -11,6 +11,9 @@ def main() -> None:
         if args.project == "compiler":
             CreateEnv(Config.RELATIVE_COMPILER_DIR)
             RunTest(Config.RELATIVE_COMPILER_DIR)
+        elif args.project == "spec":
+            CreateEnv(Config.RELATIVE_COMPILER_DIR)
+            RunSpecTest(Config.RELATIVE_COMPILER_DIR, args.spec)
     elif args.command == "add":
         if args.project == "compiler":
             CreateEnv(Config.RELATIVE_COMPILER_DIR)
