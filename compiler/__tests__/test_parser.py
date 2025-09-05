@@ -250,3 +250,94 @@ def test_label_node_with_parenthesis():
             ),
         ),
     ).Assert(ast.Program)
+
+
+def test_label_multiple_and_divide_before_add_and_subtract():
+    ast = Parser(
+        """
+3 + 5 * 10
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 3),
+            OperationAssertion(
+                "*",
+                AtomicAssertion(TokenType.INTEGER, 5),
+                AtomicAssertion(TokenType.INTEGER, 10),
+            ),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_label_multiple_and_divide():
+    ast = Parser(
+        """ 
+3 * 5 / 10
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "/",
+            OperationAssertion(
+                "*",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                AtomicAssertion(TokenType.INTEGER, 5),
+            ),
+            AtomicAssertion(TokenType.INTEGER, 10),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_label_complex_expression():
+    ast = Parser(
+        """ 
+(3 + 5) * (10 - 2) / (4 + 6) - 7
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "-",
+            OperationAssertion(
+                "/",
+                OperationAssertion(
+                    "*",
+                    ExpressBlockionAsserion(
+                        OperationAssertion(
+                            "+",
+                            AtomicAssertion(TokenType.INTEGER, 3),
+                            AtomicAssertion(TokenType.INTEGER, 5),
+                        ),
+                    ),
+                    ExpressBlockionAsserion(
+                        OperationAssertion(
+                            "-",
+                            AtomicAssertion(TokenType.INTEGER, 10),
+                            AtomicAssertion(TokenType.INTEGER, 2),
+                        ),
+                    ),
+                ),
+                ExpressBlockionAsserion(
+                    OperationAssertion(
+                        "+",
+                        AtomicAssertion(TokenType.INTEGER, 4),
+                        AtomicAssertion(TokenType.INTEGER, 6),
+                    ),
+                ),
+            ),
+            AtomicAssertion(TokenType.INTEGER, 7),
+        ),
+    ).Assert(ast.Program)

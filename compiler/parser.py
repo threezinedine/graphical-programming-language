@@ -118,10 +118,13 @@ class BlockTypeNode(Node):
         }
 
     def Parse(self) -> None:
-        while not self._ParseOperation():
+        while not self._ParseOperation("*", "/"):
             pass
 
-    def _ParseOperation(self) -> bool:
+        while not self._ParseOperation("+", "-"):
+            pass
+
+    def _ParseOperation(self, *operations: str) -> bool:
         hasAnyChange = False
         tempNodes: list[Node] = []
 
@@ -143,6 +146,11 @@ class BlockTypeNode(Node):
                 nodeIndex += 1
                 continue
 
+            if operatorNode.token.Value not in operations:
+                tempNodes.append(deepcopy(leftNode))
+                nodeIndex += 1
+                continue
+
             leftNode.Parse()
             rightNode.Parse()
             newOperationNode = OperationNode(
@@ -155,6 +163,9 @@ class BlockTypeNode(Node):
             hasAnyChange = True
 
         if hasAnyChange:
+            while nodeIndex < len(self.nodes):
+                tempNodes.append(deepcopy(self.nodes[nodeIndex]))
+                nodeIndex += 1
             self.nodes = deepcopy(tempNodes)
         return not hasAnyChange
 

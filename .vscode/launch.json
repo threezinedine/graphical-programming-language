@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/compiler/venv/Scripts/pytest.exe",
             "args": [
                 "-k",
-                "test_label_node_with_parenthesis"
+                "test_label_multiple_and_divide"
             ],
             "console": "integratedTerminal"
         }
