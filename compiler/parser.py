@@ -21,6 +21,7 @@ class NodeType(Enum):
     BLOCK = auto()
     INDEX_BLOCK = auto()
     OPERATION_EXPRESSION = auto()
+    UNARY_OPERATION_EXPRESSION = auto()
 
     INVALID = auto()
 
@@ -175,6 +176,9 @@ class BlockTypeNode(Node):
         return ""
 
     def Parse(self) -> None:
+        while not self._ParseUnaryOperation("|"):
+            pass
+
         while not self._ParseOperation("^"):
             pass
 
@@ -183,6 +187,76 @@ class BlockTypeNode(Node):
 
         while not self._ParseOperation("+", "-"):
             pass
+
+    def _ParseUnaryOperation(self, *operations: str) -> bool:
+        hasAnyChange = False
+        tempNodes: list[Node] = []
+
+        nodeIndex = 0
+        while nodeIndex < len(self.nodes):
+            operatorNode = self.nodes[nodeIndex]
+
+            if not (
+                operatorNode.Type == NodeType.ATOMIC
+                and isinstance(operatorNode, AtomicNode)
+                and operatorNode.token.Type == TokenType.OPERATOR
+                and operatorNode.token.Value in operations
+            ):
+                tempNodes.append(deepcopy(operatorNode))
+                nodeIndex += 1
+                continue
+
+            def checkOperandNodeValid(node: Node) -> bool:
+                return (
+                    (
+                        isinstance(node, AtomicNode)
+                        and node.token.Type
+                        in [
+                            TokenType.INTEGER,
+                            TokenType.FLOAT,
+                            TokenType.IDENTIFIER,
+                            TokenType.STRING,
+                        ]
+                    )
+                    or (
+                        isinstance(node, BlockTypeNode)
+                        and node.Type == NodeType.EXPRESSION
+                    )
+                    or isinstance(node, OperationNode)
+                    or isinstance(node, UnaryOperationNode)
+                )
+
+            operandNode: Node | None = None
+
+            if nodeIndex + 1 >= len(self.nodes):
+                operandNode = None
+            else:
+                operandNode = self.nodes[nodeIndex + 1]
+                operandNode.Parse()
+
+            if operandNode and not checkOperandNodeValid(operandNode):
+                operandNode = None
+
+            error: str | None = None
+
+            if operandNode is None and operandNode is None:
+                error = f"Operand of operator '{operatorNode.token.Value}' are invalid"
+
+            newOperationNode = UnaryOperationNode(
+                operatorNode.token,
+                (deepcopy(operandNode) if operandNode is not None else InvalidNode()),
+                error,
+            )
+            if operandNode is None:
+                nodeIndex += 1
+            else:
+                nodeIndex += 2
+            tempNodes.append(newOperationNode)
+            hasAnyChange = True
+
+        if hasAnyChange:
+            self.nodes = deepcopy(tempNodes)
+        return not hasAnyChange
 
     def _ParseOperation(self, *operations: str) -> bool:
         hasAnyChange = False
@@ -219,6 +293,7 @@ class BlockTypeNode(Node):
                         and node.Type == NodeType.EXPRESSION
                     )
                     or isinstance(node, OperationNode)
+                    or isinstance(node, UnaryOperationNode)
                 )
 
             operandLeftNode: Node | None = None
@@ -285,9 +360,6 @@ class BlockTypeNode(Node):
             hasAnyChange = True
 
         if hasAnyChange:
-            # while nodeIndex < len(self.nodes):
-            #     tempNodes.append(deepcopy(self.nodes[nodeIndex]))
-            #     nodeIndex += 1
             self.nodes = deepcopy(tempNodes)
         return not hasAnyChange
 
@@ -378,6 +450,65 @@ class BlockTypeNode(Node):
             result.append(newNode)
 
         return result
+
+
+class UnaryOperationNode(Node):
+    def __init__(
+        self, operator: Token, operand: Node, error: str | None = None
+    ) -> None:
+        self.operator = operator
+        self.operand = operand
+        self.error = error
+
+    @property
+    def Type(self) -> NodeType:
+        return NodeType.UNARY_OPERATION_EXPRESSION
+
+    def __len__(self) -> int:
+        return 2
+
+    def __getitem__(self, index: int) -> Node:
+        if index == 0:
+            return AtomicNode(self.operator)
+        elif index == 1:
+            return self.operand
+        else:
+            raise IndexError("Index out of range")
+
+    @property
+    def IsError(self) -> bool:
+        return self.error is not None
+
+    @property
+    def Error(self) -> str:
+        if self.IsError:
+            assert self.error is not None
+            return self.error
+        return ""
+
+    @property
+    def Operator(self) -> Token:
+        return self.operator
+
+    @property
+    def Operand(self) -> Node:
+        return self.operand
+
+    def ToJson(self) -> Dict[str, Any]:
+        return {
+            "type": self.Type.name,
+            "operator": {
+                "value": self.operator.Value,
+                "tokenType": self.operator.Type.name,
+            },
+            "operand": self.operand.ToJson(),
+        }
+
+    def Compress(self) -> None:
+        self.operand.Compress()
+
+    def Parse(self) -> None:
+        self.operand.Parse()
 
 
 class OperationNode(Node):

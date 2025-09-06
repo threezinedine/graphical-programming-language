@@ -1,8 +1,9 @@
 import os
 import sys
-from typing import Any
-import pytest
-from parser import Parser
+
+# from typing import Any
+# import pytest
+# from parser import Parser
 
 
 def pytest_configure():
@@ -12,17 +13,17 @@ def pytest_configure():
     )
 
 
-class ASTBuilder:
-    def __init__(self, content: str) -> None:
-        self._content = content
+# class ASTBuilder:
+#     def __init__(self, content: str) -> None:
+#         self._content = content
 
-    def Build(self) -> Parser:
-        parser = Parser(self._content)
-        parser.Program.Compress()
-        parser.Program.Parse()
-        return parser
+#     def Build(self) -> Parser:
+#         parser = Parser(self._content)
+#         parser.Program.Compress()
+#         parser.Program.Parse()
+#         return parser
 
 
-@pytest.fixture
-def astBuilder() -> Any:
-    return ASTBuilder
+# @pytest.fixture
+# def astBuilder() -> Any:
+#     return ASTBuilder

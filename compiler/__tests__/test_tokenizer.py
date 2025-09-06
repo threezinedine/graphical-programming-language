@@ -15,13 +15,11 @@ from utils.tokenizer_assertion import (
 
 def test_parse_number_as_number():
     assert_integer_token(Tokenizer("42").Next(), 42)
-    assert_integer_token(Tokenizer("-42").Next(), -42)
     assert_integer_token(Tokenizer("0").Next(), 0)
 
 
 def test_parse_float_number():
     assert_float_token(Tokenizer("42.").Next(), 42.0)
-    assert_float_token(Tokenizer("-42.").Next(), -42.0)
     assert_float_token(Tokenizer("42.0").Next(), 42.0)
     assert_float_token(Tokenizer("43.1").Next(), 43.1)
     assert_float_token(Tokenizer("42.0").Next(), 42.0)
@@ -127,3 +125,12 @@ def test_parse_expression_with_multiple_operators():
     assert_integer_token(tokenizer.Next(), 5)
     assert_operator_token(tokenizer.Next(), "/")
     assert_integer_token(tokenizer.Next(), 10)
+
+
+def test_unary_operator():
+    tokenizer = Tokenizer("-5 + |3")
+    assert_operator_token(tokenizer.Next(), "-")
+    assert_integer_token(tokenizer.Next(), 5)
+    assert_operator_token(tokenizer.Next(), "+")
+    assert_operator_token(tokenizer.Next(), "|")
+    assert_integer_token(tokenizer.Next(), 3)

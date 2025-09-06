@@ -5,6 +5,7 @@ from utils.parser_assertion import (
     OperationAssertion,
     ProgramAssertion,
     ExpressBlockionAsserion,
+    UnaryOperationAssertion,
 )
 from compiler.tokenizer import TokenType
 from parser import Parser
@@ -502,4 +503,29 @@ def test_power_operator_with_parenthesis():
                 )
             ),
         ),
+    ).Assert(ast.Program)
+
+
+def test_ternary_operator():
+    ast = Parser(
+        """
+2 + |3
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    print(ast.Program)
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 2),
+            UnaryOperationAssertion(
+                "|",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                error=None,
+            ),
+        )
     ).Assert(ast.Program)

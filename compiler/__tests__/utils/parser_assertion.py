@@ -7,6 +7,7 @@ from parser import (
     Node,
     NodeType,
     OperationNode,
+    UnaryOperationNode,
 )
 
 
@@ -70,6 +71,37 @@ class OperationAssertion(DelayAssertion):
 
         self.left.Assert(node.Left)
         self.right.Assert(node.Right)
+
+
+class UnaryOperationAssertion(DelayAssertion):
+    def __init__(
+        self,
+        operator: str,
+        exp: DelayAssertion,
+        error: str | None = None,
+    ) -> None:
+        self.operator = operator
+        self.exp = exp
+        self.error = error
+
+    def Assert(self, node: Node) -> None:
+        assert isinstance(
+            node, UnaryOperationNode
+        ), f"Node should be UnaryOperationNode, but got {type(node)}"
+
+        assert isinstance(
+            node.Operator, Token
+        ), f"Operation operator should be Token, but got {type(node.Operator)}"
+        assert (
+            node.Operator.Value == self.operator
+        ), f"Operator should be {self.operator}, but got {node.Operator.Value}"
+
+        if self.error is not None:
+            assert (
+                node.Error == self.error
+            ), f"Error should be {self.error}, but got {node.Error}"
+
+        self.exp.Assert(node.Operand)
 
 
 class ExpressBlockionAsserion(DelayAssertion):
