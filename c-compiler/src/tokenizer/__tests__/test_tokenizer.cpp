@@ -51,6 +51,12 @@ void AssertDelimiterToken(const Token &token, const std::string &value)
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
+void AssertOperatorToken(const Token &token, const std::string &value)
+{
+    ASSERT_EQ(token.GetType(), TokenType::OPERATOR);
+    EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
+}
+
 #define INTEGER_TOKEN_TESTING(input, value)                  \
     {                                                        \
         Tokenizer tokenizer(input);                          \
@@ -97,6 +103,12 @@ void AssertDelimiterToken(const Token &token, const std::string &value)
     {                                                           \
         Tokenizer tokenizer(input);                             \
         AssertIdentifierToken(tokenizer.GetTokens()[0], value); \
+    }
+
+#define OPERATOR_TOKEN_TESTING(input, value)                  \
+    {                                                         \
+        Tokenizer tokenizer(input);                           \
+        AssertOperatorToken(tokenizer.GetTokens()[0], value); \
     }
 
 TEST(TokenizerTest, IntegerToken)
@@ -221,6 +233,45 @@ TEST(TokenizerTest, InvalidIndentifier)
 {
     INVALID_TOKEN_TESTING("123abc", "123abc");
     INVALID_TOKEN_TESTING("123abc423", "123abc423");
+}
+
+TEST(TokenizerTest, TokenizeOperators)
+{
+    OPERATOR_TOKEN_TESTING("+", "+");
+    OPERATOR_TOKEN_TESTING("-", "-");
+    OPERATOR_TOKEN_TESTING("*", "*");
+    OPERATOR_TOKEN_TESTING("/", "/");
+    OPERATOR_TOKEN_TESTING("%", "%");
+    OPERATOR_TOKEN_TESTING("^", "^");
+    OPERATOR_TOKEN_TESTING("@", "@");
+    OPERATOR_TOKEN_TESTING("!", "!");
+    OPERATOR_TOKEN_TESTING("|", "|");
+    OPERATOR_TOKEN_TESTING("&", "&");
+
+    OPERATOR_TOKEN_TESTING("=", "=");
+
+    OPERATOR_TOKEN_TESTING("++", "++");
+    OPERATOR_TOKEN_TESTING("--", "--");
+
+    OPERATOR_TOKEN_TESTING("+=", "+=");
+    OPERATOR_TOKEN_TESTING("-=", "-=");
+    OPERATOR_TOKEN_TESTING("*=", "*=");
+    OPERATOR_TOKEN_TESTING("/=", "/=");
+    OPERATOR_TOKEN_TESTING("%=", "%=");
+    OPERATOR_TOKEN_TESTING("&=", "&=");
+    OPERATOR_TOKEN_TESTING("|=", "|=");
+    OPERATOR_TOKEN_TESTING("^=", "^=");
+    OPERATOR_TOKEN_TESTING("@=", "@=");
+
+    OPERATOR_TOKEN_TESTING(">", ">");
+    OPERATOR_TOKEN_TESTING("<", "<");
+    OPERATOR_TOKEN_TESTING("==", "==");
+    OPERATOR_TOKEN_TESTING("!=", "!=");
+    OPERATOR_TOKEN_TESTING(">=", ">=");
+    OPERATOR_TOKEN_TESTING("<=", "<=");
+
+    OPERATOR_TOKEN_TESTING("&&", "&&");
+    OPERATOR_TOKEN_TESTING("||", "||");
 }
 
 TEST(TokenizerTest, DISABLED_FinalMix)

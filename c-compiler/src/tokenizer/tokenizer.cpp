@@ -31,6 +31,46 @@ namespace ntt
 
         std::vector<TokenRegexPair> regexes = {
             {
+                TokenType::OPERATOR,
+                {
+                    "^\\+=",
+                    "^\\-=",
+                    "^\\*=",
+                    "^\\/=",
+                    "^\\%=",
+                    "^\\&=",
+                    "^\\|=",
+                    "^\\^=",
+                    "^\\@=",
+
+                    "^==",
+                    "^!=",
+                    "^>=",
+                    "^<=",
+                    "^>",
+                    "^<",
+
+                    "^&&",
+                    "^\\|\\|",
+
+                    "^\\++",
+                    "^\\--",
+
+                    "^\\+",
+                    "^\\-",
+                    "^\\*",
+                    "^\\/",
+                    "^\\%",
+                    "^\\^",
+                    "^@",
+                    "^!",
+                    "^\\|",
+                    "^&",
+
+                    "^=",
+                },
+            },
+            {
                 TokenType::INVALID,
                 {
                     "^[0-9]+[a-zA-Z][0-9a-zA-Z]*",
@@ -176,6 +216,7 @@ namespace ntt
                         case TokenType::DELIMITER:
                         case TokenType::BRACKET:
                         case TokenType::INVALID:
+                        case TokenType::OPERATOR:
                         {
                             token.SetValue<std::string>(matchedStr);
                             break;

@@ -11,6 +11,7 @@ namespace ntt
         IDENTIFIER,
         BRACKET,
         DELIMITER,
+        OPERATOR,
 
         INVALID,
         COUNT,

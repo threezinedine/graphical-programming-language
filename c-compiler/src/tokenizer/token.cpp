@@ -52,5 +52,6 @@ namespace ntt
                        TokenType::INVALID, TokenType::KEYWORD,
                        TokenType::BRACKET,
                        TokenType::DELIMITER,
-                       TokenType::IDENTIFIER);
+                       TokenType::IDENTIFIER,
+                       TokenType::OPERATOR);
 } // namespace ntt
