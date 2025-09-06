@@ -51,5 +51,6 @@ namespace ntt
     GETTER_SETTER_IMPL(std::string, stringValue, TokenType::STRING,
                        TokenType::INVALID, TokenType::KEYWORD,
                        TokenType::BRACKET,
-                       TokenType::DELIMITER);
+                       TokenType::DELIMITER,
+                       TokenType::IDENTIFIER);
 } // namespace ntt

@@ -33,6 +33,12 @@ void AssertKeywordToken(const Token &token, const std::string &value)
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
+void AssertIdentifierToken(const Token &token, const std::string &value)
+{
+    ASSERT_EQ(token.GetType(), TokenType::IDENTIFIER);
+    EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
+}
+
 void AssertBracketToken(const Token &token, const std::string &value)
 {
     ASSERT_EQ(token.GetType(), TokenType::BRACKET);
@@ -85,6 +91,12 @@ void AssertDelimiterToken(const Token &token, const std::string &value)
     {                                                          \
         Tokenizer tokenizer(input);                            \
         AssertDelimiterToken(tokenizer.GetTokens()[0], value); \
+    }
+
+#define IDENTIFIER_TOKEN_TESTING(input, value)                  \
+    {                                                           \
+        Tokenizer tokenizer(input);                             \
+        AssertIdentifierToken(tokenizer.GetTokens()[0], value); \
     }
 
 TEST(TokenizerTest, IntegerToken)
@@ -196,4 +208,32 @@ TEST(TokenizerTest, TokenizeDelimiter)
 {
     DELIMITER_TOKEN_TESTING(",", ",");
     DELIMITER_TOKEN_TESTING(";", ";");
+}
+
+TEST(TokenizerTest, TokenizeIdentifier)
+{
+    IDENTIFIER_TOKEN_TESTING("myVar", "myVar");
+    IDENTIFIER_TOKEN_TESTING("_hidden", "_hidden");
+    IDENTIFIER_TOKEN_TESTING("abc123", "abc123");
+}
+
+TEST(TokenizerTest, DISABLED_FinalMix)
+{
+    Tokenizer tokenizer(R"(
+
+TEST(TokenizerTest, DISABLED_FinalMix)
+{
+    Tokenizer tokenizer(R"(
+const pi = 3.14;
+let radius = 10;
+let area = pi * (radius * radius);
+)");
+
+    const auto &tokens = tokenizer.GetTokens();
+    u32 index = 0;
+
+    AssertKeywordToken(tokens[index++], "const");
+    AssertIdentifierToken(tokens[index++], "pi");
+    AssertDelimiterToken(tokens[index++], "=");
+    AssertFloatToken(tokens[index++], 3.14f);
 }

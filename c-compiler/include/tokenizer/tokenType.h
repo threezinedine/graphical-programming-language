@@ -8,6 +8,7 @@ namespace ntt
         INTEGER,
         STRING,
         KEYWORD,
+        IDENTIFIER,
         BRACKET,
         DELIMITER,
 

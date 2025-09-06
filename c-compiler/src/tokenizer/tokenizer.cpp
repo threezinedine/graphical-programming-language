@@ -1,14 +1,41 @@
 #include "tokenizer/tokenizer.h"
 #include <utility>
 #include <regex>
+#include <set>
 
 namespace ntt
 {
     namespace
     {
+        std::set<std::string> keywords = {
+            // types
+            "number",
+            "string",
+            "boolean",
+            "null",
+
+            // control flow
+            "if",
+            "else",
+            "while",
+            "for",
+
+            // declaration
+            "const",
+            "let",
+            "function",
+            "class",
+        };
+
         typedef std::pair<TokenType, std::vector<std::string>> TokenRegexPair;
 
         std::vector<TokenRegexPair> regexes = {
+            {
+                TokenType::IDENTIFIER,
+                {
+                    "^[a-zA-Z_][a-zA-Z0-9_]*",
+                },
+            },
             {
                 TokenType::DELIMITER,
                 {
@@ -25,28 +52,6 @@ namespace ntt
                     "^\\)",
                     "^\\}",
                     "^\\]",
-                },
-            },
-            {
-                TokenType::KEYWORD,
-                {
-                    // types
-                    "^number",
-                    "^string",
-                    "^boolean",
-                    "^null",
-
-                    // control flow
-                    "^if",
-                    "^else",
-                    "^while",
-                    "^for",
-
-                    // declaration
-                    "^const",
-                    "^let",
-                    "^function",
-                    "^class",
                 },
             },
             {
@@ -148,10 +153,22 @@ namespace ntt
                             token.SetValue<f32>(floatValue);
                             break;
                         }
+                        case TokenType::IDENTIFIER:
+                        {
+                            if (keywords.find(matchedStr) != keywords.end())
+                            {
+                                token = Token(TokenType::KEYWORD);
+                            }
+                            else
+                            {
+                                token = Token(TokenType::IDENTIFIER);
+                            }
+                            token.SetValue<std::string>(matchedStr);
+                            break;
+                        }
                         case TokenType::STRING:
-                        case TokenType::KEYWORD:
-                        case TokenType::BRACKET:
                         case TokenType::DELIMITER:
+                        case TokenType::BRACKET:
                         {
                             token.SetValue<std::string>(matchedStr);
                             break;
