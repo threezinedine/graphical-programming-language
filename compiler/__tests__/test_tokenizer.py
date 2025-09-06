@@ -52,6 +52,7 @@ def test_parse_string():
 
 def test_assign_operator():
     assert_operator_token(Tokenizer("=").Next(), "=")
+    assert_operator_token(Tokenizer("==").Next(), "==")
 
 
 def test_function_call():

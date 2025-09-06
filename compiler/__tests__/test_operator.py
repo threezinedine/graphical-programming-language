@@ -550,3 +550,74 @@ def test_invalid_ternary_operator():
             ),
         )
     ).Assert(ast.Program)
+
+
+def test_comparison_operators():
+    ast = Parser(
+        """ 
+3 + 5 != 10
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "!=",
+            OperationAssertion(
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                AtomicAssertion(TokenType.INTEGER, 5),
+            ),
+            AtomicAssertion(TokenType.INTEGER, 10),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_comparison_operators_with_parenthesis():
+    ast = Parser(
+        """ 
+(5 == 3) + 2
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            ExpressBlockionAsserion(
+                OperationAssertion(
+                    "==",
+                    AtomicAssertion(TokenType.INTEGER, 5),
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                )
+            ),
+            AtomicAssertion(TokenType.INTEGER, 2),
+        )
+    ).Assert(ast.Program)
+
+
+def test_invalid_comparison_operators():
+    ast = Parser(
+        """ 
+3 + 5 !=
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "!=",
+            OperationAssertion(
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                AtomicAssertion(TokenType.INTEGER, 5),
+            ),
+            InvalidAtomicAssertion(),
+        )
+    ).Assert(ast.Program)

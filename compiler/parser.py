@@ -188,6 +188,9 @@ class BlockTypeNode(Node):
         while not self._ParseOperation("+", "-"):
             pass
 
+        while not self._ParseOperation("<", "<=", ">", ">=", "==", "!="):
+            pass
+
     def _ParseUnaryOperation(self, *operations: str) -> bool:
         hasAnyChange = False
         tempNodes: list[Node] = []
