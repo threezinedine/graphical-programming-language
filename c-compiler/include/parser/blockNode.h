@@ -24,6 +24,9 @@ namespace ntt
         inline const Vector<Ref<Node>> &GetChildren() const { return m_children; }
 
     private:
+        void TokenizeContent();
+
+    private:
         NodeType m_type = NodeType::INVALID;
         String m_content;
         Vector<Ref<Node>> m_children;
