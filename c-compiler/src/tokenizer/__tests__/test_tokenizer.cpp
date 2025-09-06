@@ -73,3 +73,15 @@ TEST(TokenizerTest, TokenizeInvalidToken)
 {
     INVALID_TOKEN_TESTING("`", "`");
 }
+
+TEST(TokenizerTest, MultipleMixedIntegersAndInvalidToken)
+{
+    Tokenizer tokenizer("12 0 \n ` 3.12 ");
+    const auto &tokens = tokenizer.GetTokens();
+    ASSERT_EQ(tokens.size(), 4);
+
+    AssertIntegerToken(tokens[0], 12);
+    AssertIntegerToken(tokens[1], 0);
+    AssertInvalidToken(tokens[2], "`");
+    AssertFloatToken(tokens[3], 3.12f);
+}
