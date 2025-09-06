@@ -7,6 +7,7 @@ namespace ntt
         FLOAT,
         INTEGER,
         STRING,
+        KEYWORD,
 
         INVALID,
         COUNT,

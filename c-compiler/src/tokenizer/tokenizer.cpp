@@ -10,6 +10,28 @@ namespace ntt
 
         std::vector<TokenRegexPair> regexes = {
             {
+                TokenType::KEYWORD,
+                {
+                    // types
+                    "^number",
+                    "^string",
+                    "^boolean",
+                    "^null",
+
+                    // control flow
+                    "^if",
+                    "^else",
+                    "^while",
+                    "^for",
+
+                    // declaration
+                    "^const",
+                    "^let",
+                    "^function",
+                    "^class",
+                },
+            },
+            {
                 TokenType::FLOAT,
                 {
                     "^[0-9]*\\.[0-9]+",
@@ -109,6 +131,7 @@ namespace ntt
                             break;
                         }
                         case TokenType::STRING:
+                        case TokenType::KEYWORD:
                         {
                             token.SetValue<std::string>(matchedStr);
                             break;

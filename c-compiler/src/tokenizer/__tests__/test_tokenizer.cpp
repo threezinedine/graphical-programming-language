@@ -27,6 +27,12 @@ void AssertStringToken(const Token &token, std::string value)
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
+void AssertKeywordToken(const Token &token, std::string value)
+{
+    ASSERT_EQ(token.GetType(), TokenType::KEYWORD);
+    EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
+}
+
 #define INTEGER_TOKEN_TESTING(input, value)                  \
     {                                                        \
         Tokenizer tokenizer(input);                          \
@@ -49,6 +55,12 @@ void AssertStringToken(const Token &token, std::string value)
     {                                                       \
         Tokenizer tokenizer(input);                         \
         AssertStringToken(tokenizer.GetTokens()[0], value); \
+    }
+
+#define KEYWORD_TOKEN_TESTING(input, value)                  \
+    {                                                        \
+        Tokenizer tokenizer(input);                          \
+        AssertKeywordToken(tokenizer.GetTokens()[0], value); \
     }
 
 TEST(TokenizerTest, IntegerToken)
@@ -117,4 +129,31 @@ TEST(TokenizerTest, MutipleMixedIntegersFloatsStringsAndInvalids)
     AssertStringToken(tokens[2], R"("Translate")");
     AssertInvalidToken(tokens[3], "`");
     AssertFloatToken(tokens[4], 3.12f);
+}
+
+TEST(TokenizerTest, TokenizeKeywords)
+{
+    // types
+    {
+        KEYWORD_TOKEN_TESTING("number", "number");
+        KEYWORD_TOKEN_TESTING("string", "string");
+        KEYWORD_TOKEN_TESTING("boolean", "boolean");
+        KEYWORD_TOKEN_TESTING("null", "null");
+    }
+
+    // control flow
+    {
+        KEYWORD_TOKEN_TESTING("if", "if");
+        KEYWORD_TOKEN_TESTING("else", "else");
+        KEYWORD_TOKEN_TESTING("while", "while");
+        KEYWORD_TOKEN_TESTING("for", "for");
+    }
+
+    // declaration
+    {
+        KEYWORD_TOKEN_TESTING("const", "const");
+        KEYWORD_TOKEN_TESTING("let", "let");
+        KEYWORD_TOKEN_TESTING("function", "function");
+        KEYWORD_TOKEN_TESTING("class", "class");
+    }
 }

@@ -18,7 +18,7 @@ namespace ntt
 
 #define ASSERT_TYPE_IN_ARRAY(...)                                 \
     {                                                             \
-        std::vector<TokenType> types{__VA_ARGS__};              \
+        std::vector<TokenType> types{__VA_ARGS__};                \
         b8 hasMatched = NTT_FALSE;                                \
         for (const auto &tokenType : types)                       \
         {                                                         \
@@ -48,5 +48,6 @@ namespace ntt
 
     GETTER_SETTER_IMPL(u32, numberValue.intValue, TokenType::INTEGER);
     GETTER_SETTER_IMPL(f32, numberValue.floatValue, TokenType::FLOAT);
-    GETTER_SETTER_IMPL(std::string, stringValue, TokenType::STRING, TokenType::INVALID);
+    GETTER_SETTER_IMPL(std::string, stringValue, TokenType::STRING,
+                       TokenType::INVALID, TokenType::KEYWORD);
 } // namespace ntt
