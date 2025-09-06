@@ -232,17 +232,26 @@ class BlockTypeNode(Node):
                 nodeIndex += 1
                 continue
 
+            bodyNode: BlockTypeNode
+            error: str | None = None
+
+            if (
+                nodeIndex + 2 >= len(self.nodes)
+                or self.nodes[nodeIndex + 2].Type != NodeType.BLOCK
+            ):
+                bodyNode = BlockTypeNode(NodeType.BLOCK, [])
+                error = "Missing body block"
+            else:
+                bodyNode = self.nodes[nodeIndex + 2]  # type: ignore
+
             newIfStatementNode = IfStatementNode(
                 (
                     self.nodes[nodeIndex + 1]
                     if nodeIndex + 1 < len(self.nodes)
                     else InvalidNode()
                 ),
-                (
-                    self.nodes[nodeIndex + 2]
-                    if nodeIndex + 2 < len(self.nodes)
-                    else InvalidNode()
-                ),
+                bodyNode,
+                error=error,
             )
 
             tempNodes.append(newIfStatementNode)

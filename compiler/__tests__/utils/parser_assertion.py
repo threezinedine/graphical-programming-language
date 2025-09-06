@@ -184,6 +184,11 @@ class IfStatementAsserion(DelayAssertion):
         self.condition.Assert(node.Condition)
         self.body.Assert(node.BodyBlock)
 
+        if self.error is not None:
+            assert (
+                node.Error == self.error
+            ), f"Error should be {self.error}, but got {node.Error}"
+
 
 class ProgramAssertion(DelayAssertion):
     def __init__(self, *assertions: DelayAssertion) -> None:

@@ -46,3 +46,30 @@ if (x > 10) {
             ),
         ),
     ).Assert(ast.Program)
+
+
+def test_if_without_body():
+    ast = Parser(
+        """
+if (x > 10)
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    print(ast.Program)
+
+    ProgramAssertion(
+        IfStatementAsserion(
+            condition=ExpressBlockionAsserion(
+                OperationAssertion(
+                    ">",
+                    left=AtomicAssertion(TokenType.IDENTIFIER, "x"),
+                    right=AtomicAssertion(TokenType.INTEGER, 10),
+                ),
+            ),
+            body=CodeBlockionAsserion(),
+            error="Missing body block",
+        ),
+    ).Assert(ast.Program)
