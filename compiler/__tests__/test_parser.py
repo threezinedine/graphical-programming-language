@@ -455,3 +455,51 @@ def test_label_express_with_first_operator():
             AtomicAssertion(TokenType.INTEGER, 5),
         ),
     ).Assert(ast.Program)
+
+
+def test_power_operator():
+    ast = Parser(
+        """
+2 + 3 ^ 2
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 2),
+            OperationAssertion(
+                "^",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                AtomicAssertion(TokenType.INTEGER, 2),
+            ),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_power_operator_with_parenthesis():
+    ast = Parser(
+        """
+2 ^ (1 + 3)
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "^",
+            AtomicAssertion(TokenType.INTEGER, 2),
+            ExpressBlockionAsserion(
+                OperationAssertion(
+                    "+",
+                    AtomicAssertion(TokenType.INTEGER, 1),
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                )
+            ),
+        ),
+    ).Assert(ast.Program)

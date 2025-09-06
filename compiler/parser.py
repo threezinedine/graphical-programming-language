@@ -175,6 +175,9 @@ class BlockTypeNode(Node):
         return ""
 
     def Parse(self) -> None:
+        while not self._ParseOperation("^"):
+            pass
+
         while not self._ParseOperation("*", "/"):
             pass
 
