@@ -49,5 +49,6 @@ namespace ntt
     GETTER_SETTER_IMPL(u32, numberValue.intValue, TokenType::INTEGER);
     GETTER_SETTER_IMPL(f32, numberValue.floatValue, TokenType::FLOAT);
     GETTER_SETTER_IMPL(std::string, stringValue, TokenType::STRING,
-                       TokenType::INVALID, TokenType::KEYWORD);
+                       TokenType::INVALID, TokenType::KEYWORD,
+                       TokenType::OPEN_BRACKET, TokenType::CLOSE_BRACKET);
 } // namespace ntt

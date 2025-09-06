@@ -8,6 +8,8 @@ namespace ntt
         INTEGER,
         STRING,
         KEYWORD,
+        OPEN_BRACKET,
+        CLOSE_BRACKET,
 
         INVALID,
         COUNT,
