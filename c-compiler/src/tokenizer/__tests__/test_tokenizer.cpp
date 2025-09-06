@@ -33,15 +33,9 @@ void AssertKeywordToken(const Token &token, const std::string &value)
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
-void AssertOpenBracketToken(const Token &token, const std::string &value)
+void AssertBracketToken(const Token &token, const std::string &value)
 {
-    ASSERT_EQ(token.GetType(), TokenType::OPEN_BRACKET);
-    EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
-}
-
-void AssertCloseBracketToken(const Token &token, const std::string &value)
-{
-    ASSERT_EQ(token.GetType(), TokenType::CLOSE_BRACKET);
+    ASSERT_EQ(token.GetType(), TokenType::BRACKET);
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
@@ -81,16 +75,10 @@ void AssertDelimiterToken(const Token &token, const std::string &value)
         AssertKeywordToken(tokenizer.GetTokens()[0], value); \
     }
 
-#define OPEN_BRACKET_TOKEN_TESTING(input, value)                 \
-    {                                                            \
-        Tokenizer tokenizer(input);                              \
-        AssertOpenBracketToken(tokenizer.GetTokens()[0], value); \
-    }
-
-#define CLOSE_BRACKET_TOKEN_TESTING(input, value)                 \
-    {                                                             \
-        Tokenizer tokenizer(input);                               \
-        AssertCloseBracketToken(tokenizer.GetTokens()[0], value); \
+#define BRACKET_TOKEN_TESTING(input, value)                  \
+    {                                                        \
+        Tokenizer tokenizer(input);                          \
+        AssertBracketToken(tokenizer.GetTokens()[0], value); \
     }
 
 #define DELIMITER_TOKEN_TESTING(input, value)                  \
@@ -196,12 +184,12 @@ TEST(TokenizerTest, TokenizeKeywords)
 
 TEST(TokenizerTest, TokenizeBrackets)
 {
-    OPEN_BRACKET_TOKEN_TESTING("(", "(");
-    CLOSE_BRACKET_TOKEN_TESTING(")", ")");
-    OPEN_BRACKET_TOKEN_TESTING("{", "{");
-    CLOSE_BRACKET_TOKEN_TESTING("}", "}");
-    OPEN_BRACKET_TOKEN_TESTING("[", "[");
-    CLOSE_BRACKET_TOKEN_TESTING("]", "]");
+    BRACKET_TOKEN_TESTING("(", "(");
+    BRACKET_TOKEN_TESTING(")", ")");
+    BRACKET_TOKEN_TESTING("{", "{");
+    BRACKET_TOKEN_TESTING("}", "}");
+    BRACKET_TOKEN_TESTING("[", "[");
+    BRACKET_TOKEN_TESTING("]", "]");
 }
 
 TEST(TokenizerTest, TokenizeDelimiter)

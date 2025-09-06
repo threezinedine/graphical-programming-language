@@ -17,16 +17,11 @@ namespace ntt
                 },
             },
             {
-                TokenType::OPEN_BRACKET,
+                TokenType::BRACKET,
                 {
                     "^\\(",
                     "^\\{",
                     "^\\[",
-                },
-            },
-            {
-                TokenType::CLOSE_BRACKET,
-                {
                     "^\\)",
                     "^\\}",
                     "^\\]",
@@ -155,8 +150,7 @@ namespace ntt
                         }
                         case TokenType::STRING:
                         case TokenType::KEYWORD:
-                        case TokenType::OPEN_BRACKET:
-                        case TokenType::CLOSE_BRACKET:
+                        case TokenType::BRACKET:
                         case TokenType::DELIMITER:
                         {
                             token.SetValue<std::string>(matchedStr);
