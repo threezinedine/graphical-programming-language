@@ -36,4 +36,23 @@ TEST(TokenizerTest, IntegerToken)
 TEST(TokenizerTest, FloatToken)
 {
     FLOAT_TOKEN_TESTING("12.", 12.0f);
+    FLOAT_TOKEN_TESTING(".12", 0.12f);
+    FLOAT_TOKEN_TESTING("3.12", 3.12f);
+    FLOAT_TOKEN_TESTING("23.12", 23.12f);
+    FLOAT_TOKEN_TESTING("0.", 0.0f);
+}
+
+TEST(TokenizerTest, MultipleMixedIntegersAndFloats)
+{
+    Tokenizer tokenizer("12 0 12. .12 3.12 23.12 0.");
+    const auto &tokens = tokenizer.GetTokens();
+    ASSERT_EQ(tokens.size(), 7);
+
+    AssertIntegerToken(tokens[0], 12);
+    AssertIntegerToken(tokens[1], 0);
+    AssertFloatToken(tokens[2], 12.0f);
+    AssertFloatToken(tokens[3], 0.12f);
+    AssertFloatToken(tokens[4], 3.12f);
+    AssertFloatToken(tokens[5], 23.12f);
+    AssertFloatToken(tokens[6], 0.0f);
 }

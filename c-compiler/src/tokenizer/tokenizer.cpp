@@ -9,8 +9,20 @@ namespace ntt
         typedef std::pair<TokenType, std::vector<std::string>> TokenRegexPair;
 
         std::vector<TokenRegexPair> regexes = {
-            {TokenType::FLOAT, {"^[0-9]+\\."}},
-            {TokenType::INTEGER, {"^[0-9]+"}},
+            {
+                TokenType::FLOAT,
+                {
+                    "^[0-9]*\\.[0-9]+",
+                    "^[0-9]+\\.",
+                    "^\\.[0-9]+",
+                },
+            },
+            {
+                TokenType::INTEGER,
+                {
+                    "^[0-9]+",
+                },
+            },
         };
     } // namespace anonymous
 
@@ -30,10 +42,39 @@ namespace ntt
 
     void Tokenizer::TokenizeInput()
     {
-        std::string tempContent = m_input;
+        std::string temporaryContent = m_input;
 
-        while (tempContent.length() > 0)
+        while (temporaryContent.length() > 0)
         {
+            // remove spaces and new line characters
+            {
+                while (true)
+                {
+                    bool isTemporaryContentEmpty = temporaryContent.length() == 0;
+
+                    if (isTemporaryContentEmpty)
+                    {
+                        break;
+                    }
+
+                    char firstTemporaryCharacter = temporaryContent[0];
+
+                    if (firstTemporaryCharacter == ' ' || firstTemporaryCharacter == '\n')
+                    {
+                        temporaryContent = temporaryContent.substr(1);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (temporaryContent.length() == 0)
+                {
+                    break;
+                }
+            }
+
             for (const auto &[tokenType, regexList] : regexes)
             {
                 b8 hasMatched = NTT_FALSE;
@@ -41,10 +82,10 @@ namespace ntt
                 {
                     std::smatch match;
                     std::regex rgx(regex);
-                    if (std::regex_search(tempContent, match, rgx))
+                    if (std::regex_search(temporaryContent, match, rgx))
                     {
                         std::string matchedStr = match.str(0);
-                        tempContent = tempContent.substr(matchedStr.length());
+                        temporaryContent = temporaryContent.substr(matchedStr.length());
                         Token token(tokenType);
 
                         switch (tokenType)
