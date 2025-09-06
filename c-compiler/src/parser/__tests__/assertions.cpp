@@ -1,9 +1,9 @@
 #include "test_common.h"
 #include "assertions.h"
 
-void ProgramAssertion::Assert(Ref<Node> node)
+void BlockAssertion::Assert(Ref<Node> node)
 {
-    EXPECT_THAT(node->GetType(), NodeType::PROGRAM);
+    EXPECT_THAT(node->GetType(), m_blockType);
 
     BlockNode *blockNode = dynamic_cast<BlockNode *>(node.get());
 

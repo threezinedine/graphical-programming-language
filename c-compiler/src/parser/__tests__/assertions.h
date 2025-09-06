@@ -9,19 +9,20 @@ public:
     virtual void Assert(Ref<Node> node) = 0;
 };
 
-class ProgramAssertion : public DelayAssertion
+class BlockAssertion : public DelayAssertion
 {
 public:
-    ProgramAssertion(const Vector<Ref<DelayAssertion>> &assertions)
-        : m_assertions(assertions)
+    BlockAssertion(NodeType blockType, const Vector<Ref<DelayAssertion>> &assertions)
+        : m_blockType(blockType), m_assertions(assertions)
     {
     }
 
-    ~ProgramAssertion() = default;
+    ~BlockAssertion() = default;
 
     void Assert(Ref<Node> node) override;
 
 private:
+    NodeType m_blockType;
     Vector<Ref<DelayAssertion>> m_assertions;
 };
 

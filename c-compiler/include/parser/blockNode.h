@@ -26,6 +26,11 @@ namespace ntt
     private:
         void TokenizeContent();
 
+        Vector<Ref<Node>> CompressWithBrackets(const Vector<Ref<Node>> &nodes,
+                                               NodeType blockType,
+                                               const String &bracketOpen,
+                                               const String &bracketClose);
+
     private:
         NodeType m_type = NodeType::INVALID;
         String m_content;

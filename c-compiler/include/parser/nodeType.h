@@ -6,6 +6,7 @@ namespace ntt
     enum class NodeType
     {
         PROGRAM,
+        EXPRESSION,
 
         ATOMIC,
 
