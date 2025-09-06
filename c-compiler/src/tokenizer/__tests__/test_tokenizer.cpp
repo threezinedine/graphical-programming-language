@@ -217,6 +217,12 @@ TEST(TokenizerTest, TokenizeIdentifier)
     IDENTIFIER_TOKEN_TESTING("abc123", "abc123");
 }
 
+TEST(TokenizerTest, InvalidIndentifier)
+{
+    INVALID_TOKEN_TESTING("123abc", "123abc");
+    INVALID_TOKEN_TESTING("123abc423", "123abc423");
+}
+
 TEST(TokenizerTest, DISABLED_FinalMix)
 {
     Tokenizer tokenizer(R"(

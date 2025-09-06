@@ -31,6 +31,12 @@ namespace ntt
 
         std::vector<TokenRegexPair> regexes = {
             {
+                TokenType::INVALID,
+                {
+                    "^[0-9]+[a-zA-Z][0-9a-zA-Z]*",
+                },
+            },
+            {
                 TokenType::IDENTIFIER,
                 {
                     "^[a-zA-Z_][a-zA-Z0-9_]*",
@@ -169,6 +175,7 @@ namespace ntt
                         case TokenType::STRING:
                         case TokenType::DELIMITER:
                         case TokenType::BRACKET:
+                        case TokenType::INVALID:
                         {
                             token.SetValue<std::string>(matchedStr);
                             break;
