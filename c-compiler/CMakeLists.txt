@@ -21,13 +21,17 @@ file(
 file(
     GLOB_RECURSE
     TEST_FILES
-    "src/__tests__/test_*.cpp"
-    "src/**/__tests__/test_*.cpp"
+    "src/__tests__/*.cpp"
+    "src/**/__tests__/*.cpp"
 )
 
 foreach(TEST_FILE ${TEST_FILES})
     list(REMOVE_ITEM SOURCE_FILES ${TEST_FILE})
 endforeach()
+
+set(CMAKE_FOLDER "Dependencies")
+find_package(ntt-json REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+unset(CMAKE_FOLDER)
 
 set(CMAKE_FOLDER "Libraries")
 
@@ -43,6 +47,12 @@ target_include_directories(
     include
 )
 
+target_link_libraries(
+    ${PROJECT_NAME} 
+    PUBLIC 
+    ntt-json
+)
+
 target_precompile_headers(
     ${PROJECT_NAME} 
     PUBLIC 
@@ -51,7 +61,7 @@ target_precompile_headers(
 
 unset(CMAKE_FOLDER)
 
-set(CMAKE_FOLDER "Dependencies")
+set(CMAKE_FOLDER "TestDependencies")
 find_package(ntt-gtest REQUIRED PATHS ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 unset(CMAKE_FOLDER)
 

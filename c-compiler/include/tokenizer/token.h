@@ -38,6 +38,8 @@ namespace ntt
         template <typename T>
         T GetValue() const;
 
+        JSON ToJSON() const;
+
     private:
         TokenType m_type;
         TokenValue m_value;

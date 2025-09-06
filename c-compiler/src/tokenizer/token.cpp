@@ -54,4 +54,31 @@ namespace ntt
                        TokenType::DELIMITER,
                        TokenType::IDENTIFIER,
                        TokenType::OPERATOR);
+
+    JSON Token::ToJSON() const
+    {
+        JSON json;
+        json["type"] = TokenTypeToString(m_type);
+        switch (m_type)
+        {
+        case TokenType::INTEGER:
+            json["value"] = m_value.numberValue.intValue;
+            break;
+        case TokenType::FLOAT:
+            json["value"] = m_value.numberValue.floatValue;
+            break;
+        case TokenType::STRING:
+        case TokenType::INVALID:
+        case TokenType::KEYWORD:
+        case TokenType::BRACKET:
+        case TokenType::DELIMITER:
+        case TokenType::IDENTIFIER:
+        case TokenType::OPERATOR:
+            json["value"] = m_value.stringValue;
+            break;
+        default:
+            break;
+        }
+        return json;
+    }
 } // namespace ntt

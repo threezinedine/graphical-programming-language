@@ -1,4 +1,5 @@
 #pragma once
+#include "pch.h"
 
 namespace ntt
 {
@@ -16,4 +17,6 @@ namespace ntt
         INVALID,
         COUNT,
     };
+
+    String TokenTypeToString(TokenType type);
 } // namespace ntt
