@@ -621,3 +621,36 @@ def test_invalid_comparison_operators():
             InvalidAtomicAssertion(),
         )
     ).Assert(ast.Program)
+
+
+def test_multiple_comparison_operators():
+    ast = Parser(
+        """
+!(3 + 5 == 10) != 2
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "!=",
+            UnaryOperationAssertion(
+                "!",
+                ExpressBlockionAsserion(
+                    OperationAssertion(
+                        "==",
+                        OperationAssertion(
+                            "+",
+                            AtomicAssertion(TokenType.INTEGER, 3),
+                            AtomicAssertion(TokenType.INTEGER, 5),
+                        ),
+                        AtomicAssertion(TokenType.INTEGER, 10),
+                    )
+                ),
+                error=None,
+            ),
+            AtomicAssertion(TokenType.INTEGER, 2),
+        )
+    ).Assert(ast.Program)
