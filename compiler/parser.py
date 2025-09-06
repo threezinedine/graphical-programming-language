@@ -23,6 +23,7 @@ class NodeType(Enum):
     OPERATION_EXPRESSION = auto()
     UNARY_OPERATION_EXPRESSION = auto()
 
+    IF_STATEMENT = auto()
     STATEMENT = auto()
 
     INVALID = auto()
@@ -178,11 +179,12 @@ class BlockTypeNode(Node):
         return ""
 
     def Parse(self) -> None:
-        if self.Type in [
-            NodeType.PROGRAM,
-        ]:
-            while not self._ParseStatement():
-                pass
+        for node in self.nodes:
+            if node.Type in [
+                NodeType.BLOCK,
+                NodeType.EXPRESSION,
+            ]:
+                node.Parse()
 
         while not self._ParseUnaryOperation("|", "!"):
             pass
@@ -202,6 +204,54 @@ class BlockTypeNode(Node):
         while not self._ParseOperation("="):
             pass
 
+        if self.Type in [
+            NodeType.PROGRAM,
+            NodeType.BLOCK,
+        ]:
+            while not self._ParseIfStatement():
+                pass
+
+            while not self._ParseStatement():
+                pass
+
+    def _ParseIfStatement(self) -> bool:
+        tempNodes: list[Node] = []
+
+        nodeIndex = 0
+
+        while nodeIndex < len(self.nodes):
+            keywordNode = self.nodes[nodeIndex]
+
+            if not (
+                keywordNode.Type == NodeType.ATOMIC
+                and isinstance(keywordNode, AtomicNode)
+                and keywordNode.token.Type == TokenType.KEYWORD
+                and keywordNode.token.Value == "if"
+            ):
+                tempNodes.append(deepcopy(keywordNode))
+                nodeIndex += 1
+                continue
+
+            newIfStatementNode = IfStatementNode(
+                (
+                    self.nodes[nodeIndex + 1]
+                    if nodeIndex + 1 < len(self.nodes)
+                    else InvalidNode()
+                ),
+                (
+                    self.nodes[nodeIndex + 2]
+                    if nodeIndex + 2 < len(self.nodes)
+                    else InvalidNode()
+                ),
+            )
+
+            tempNodes.append(newIfStatementNode)
+            nodeIndex += 3
+
+        self.nodes = deepcopy(tempNodes)
+
+        return True
+
     def _ParseStatement(self) -> bool:
         tempNodes: list[Node] = []
 
@@ -209,6 +259,28 @@ class BlockTypeNode(Node):
         nodeIndex = 0
         while nodeIndex < len(self.nodes):
             currentNode = self.nodes[nodeIndex]
+
+            if currentNode.Type in [
+                NodeType.BLOCK,
+                NodeType.IF_STATEMENT,
+                NodeType.STATEMENT,
+            ]:
+                if len(tempStatmentNodes) > 0:
+                    newStatementNode = BlockTypeNode(
+                        NodeType.STATEMENT,
+                        deepcopy(tempStatmentNodes),
+                        error=(
+                            "Missing semicolon at the end"
+                            if len(tempStatmentNodes) > 0
+                            else None
+                        ),
+                    )
+                    tempNodes.append(newStatementNode)
+
+                tempNodes.append(deepcopy(currentNode))
+                tempStatmentNodes = []
+                nodeIndex += 1
+                continue
 
             if not (
                 currentNode.Type == NodeType.ATOMIC
@@ -224,8 +296,6 @@ class BlockTypeNode(Node):
                 NodeType.STATEMENT,
                 deepcopy(tempStatmentNodes),
             )
-            newStatementNode.Compress()
-            newStatementNode.Parse()
             tempNodes.append(newStatementNode)
             tempStatmentNodes = []
 
@@ -239,8 +309,6 @@ class BlockTypeNode(Node):
                 deepcopy(tempStatmentNodes),
                 error="Missing semicolon at the end",
             )
-            newStatementNode.Compress()
-            newStatementNode.Parse()
             self.nodes.append(newStatementNode)
 
         return True
@@ -635,6 +703,68 @@ class OperationNode(Node):
     def Parse(self) -> None:
         self.left.Parse()
         self.right.Parse()
+
+
+class IfStatementNode(Node):
+    def __init__(
+        self,
+        condition: Node,
+        body: Node,
+        error: str | None = None,
+    ) -> None:
+        super().__init__()
+        self.condition = condition
+        self.body = body
+        self.error = error
+
+    @property
+    def Type(self) -> NodeType:
+        return NodeType.IF_STATEMENT
+
+    @property
+    def IsError(self) -> bool:
+        return self.error is not None
+
+    @property
+    def Error(self) -> str:
+        if self.IsError:
+            assert self.error is not None
+            return self.error
+        return ""
+
+    def ToJson(self) -> Dict[str, Any]:
+        return {
+            "type": self.Type.name,
+            "condition": self.condition.ToJson(),
+            "body": self.body.ToJson(),
+        }
+
+    def __len__(self) -> int:
+        return 2
+
+    def __getitem__(self, index: int) -> Node:
+        if index == 0:
+            return self.condition
+        elif index == 1:
+            return self.body
+        else:
+            raise IndexError("Index out of range")
+
+    @property
+    def Condition(self) -> Node:
+        return self.condition
+
+    @property
+    def BodyBlock(self) -> Node:
+        return self.body
+
+    def Compress(self) -> None:
+        self.condition.Compress()
+        self.body.Compress()
+
+    def Parse(self) -> None:
+        self.condition.Parse()
+        self.body.Parse()
 
 
 class Parser:

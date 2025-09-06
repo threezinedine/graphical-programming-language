@@ -40,6 +40,7 @@ KEYWORDS = [
     "func",
     "auto",
     "return",
+    "if",
     # type keywords
     *TYPES,
 ]

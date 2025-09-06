@@ -3,6 +3,7 @@ from tokenizer import TokenType, Token, TokenValue
 from parser import (
     AtomicNode,
     BlockTypeNode,
+    IfStatementNode,
     InvalidNode,
     Node,
     NodeType,
@@ -122,6 +123,24 @@ class ExpressBlockionAsserion(DelayAssertion):
             assertion.Assert(node.nodes[assertionIndex])
 
 
+class CodeBlockionAsserion(DelayAssertion):
+    def __init__(self, *assertions: DelayAssertion) -> None:
+        self.assertions = assertions
+
+    def Assert(self, node: Node) -> None:
+        assert isinstance(
+            node, BlockTypeNode
+        ), f"Node should be BlockTypeNode, but got {type(node)}"
+        assert (
+            node.Type == NodeType.BLOCK
+        ), f"Node should be BlockNode, but got {node.Type.name}"
+        assert len(node.nodes) == len(
+            self.assertions
+        ), f"Code block should have {len(self.assertions)} nodes, but got {len(node.nodes)}"
+        for assertionIndex, assertion in enumerate(self.assertions):
+            assertion.Assert(node.nodes[assertionIndex])
+
+
 class StatementAsserion(DelayAssertion):
     def __init__(self, *assertions: DelayAssertion, error: str | None = None) -> None:
         self.assertions = assertions
@@ -144,6 +163,26 @@ class StatementAsserion(DelayAssertion):
             assert (
                 node.Error == self.error
             ), f"Error should be {self.error}, but got {node.Error}"
+
+
+class IfStatementAsserion(DelayAssertion):
+    def __init__(
+        self, condition: DelayAssertion, body: DelayAssertion, error: str | None = None
+    ) -> None:
+        self.condition = condition
+        self.body = body
+        self.error = error
+
+    def Assert(self, node: Node) -> None:
+        assert isinstance(
+            node, IfStatementNode
+        ), f"Node should be IfStatementNode, but got {type(node)}"
+        assert (
+            node.Type == NodeType.IF_STATEMENT
+        ), f"Node should be IfStatementNode, but got {node.Type.name}"
+
+        self.condition.Assert(node.Condition)
+        self.body.Assert(node.BodyBlock)
 
 
 class ProgramAssertion(DelayAssertion):
