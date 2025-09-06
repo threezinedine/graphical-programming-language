@@ -53,3 +53,17 @@ private:
     TokenType m_expectType;
     TokenValue m_expectValue;
 };
+
+#define COMPRESS_ONLY_DEFINE(content)                \
+    BlockNode blockNode(NodeType::PROGRAM, content); \
+    blockNode.Compress();
+
+#define PROGRAM_ASSERTION(...)                                                             \
+    CreateRef<BlockAssertion>(NodeType::PROGRAM, Vector<Ref<DelayAssertion>>{__VA_ARGS__}) \
+        ->Assert(CreateRef<BlockNode>(blockNode));
+
+#define EXPRESSION_ASSERTION(...) \
+    CreateRef<BlockAssertion>(NodeType::EXPRESSION, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
+
+#define ATOMIC_ASSERTION(type, value) \
+    CreateRef<AtomicAssertion>(type, value)

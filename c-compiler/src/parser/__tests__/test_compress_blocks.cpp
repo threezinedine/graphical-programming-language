@@ -6,65 +6,37 @@ using namespace ntt;
 
 TEST(BlockNodeCompressTest, CreateWithContent)
 {
-    BlockNode blockNode(NodeType::PROGRAM, "23");
-    blockNode.Compress();
+    COMPRESS_ONLY_DEFINE("23");
 
-    CreateRef<BlockAssertion>(
-        NodeType::PROGRAM,
-        Vector<Ref<DelayAssertion>>{
-            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(23)),
-        })
-        ->Assert(CreateRef<BlockNode>(blockNode));
+    PROGRAM_ASSERTION(
+        ATOMIC_ASSERTION(TokenType::INTEGER, u32(23)));
 }
 
 TEST(BlockNodeCompressTest, HasBlockCode)
 {
-    BlockNode blockNode(
-        NodeType::PROGRAM,
-        "3 + (2 + 4)");
-    blockNode.Compress();
+    COMPRESS_ONLY_DEFINE("3 + (2 + 4)");
 
-    CreateRef<BlockAssertion>(
-        NodeType::PROGRAM,
-        Vector<Ref<DelayAssertion>>{
-            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(3)),
-            CreateRef<AtomicAssertion>(TokenType::OPERATOR, "+"),
-            CreateRef<BlockAssertion>(
-                NodeType::EXPRESSION,
-                Vector<Ref<DelayAssertion>>{
-                    CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(2)),
-                    CreateRef<AtomicAssertion>(TokenType::OPERATOR, "+"),
-                    CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(4)),
-                }),
-        })
-        ->Assert(CreateRef<BlockNode>(blockNode));
+    PROGRAM_ASSERTION(
+        ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+        ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+        EXPRESSION_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
 }
 
 TEST(BlockNodeCompressTest, NestedBlockCode)
 {
-    BlockNode blockNode(
-        NodeType::PROGRAM,
-        "3 + (2 + (5 - 3))");
-    blockNode.Compress();
+    COMPRESS_ONLY_DEFINE("3 + (2 + (5 - 3))");
 
-    CreateRef<BlockAssertion>(
-        NodeType::PROGRAM,
-        Vector<Ref<DelayAssertion>>{
-            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(3)),
-            CreateRef<AtomicAssertion>(TokenType::OPERATOR, "+"),
-            CreateRef<BlockAssertion>(
-                NodeType::EXPRESSION,
-                Vector<Ref<DelayAssertion>>{
-                    CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(2)),
-                    CreateRef<AtomicAssertion>(TokenType::OPERATOR, "+"),
-                    CreateRef<BlockAssertion>(
-                        NodeType::EXPRESSION,
-                        Vector<Ref<DelayAssertion>>{
-                            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(5)),
-                            CreateRef<AtomicAssertion>(TokenType::OPERATOR, "-"),
-                            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(3)),
-                        }),
-                }),
-        })
-        ->Assert(CreateRef<BlockNode>(blockNode));
+    PROGRAM_ASSERTION(
+        ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+        ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+        EXPRESSION_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)),
+                ATOMIC_ASSERTION(TokenType::OPERATOR, "-"),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)))));
 }
