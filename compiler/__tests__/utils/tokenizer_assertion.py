@@ -51,6 +51,20 @@ def assert_string_token(token: Token, value: str) -> None:
     ), f'The token value must be "{value}", but got "{token.Value}"'
 
 
+def assert_boolean_token(token: Token, value: str) -> None:
+    assert value in [
+        "true",
+        "false",
+    ], f'The boolean token must be either "true" or "false", but got {value}'
+
+    assert (
+        token.Type == TokenType.BOOLEAN
+    ), f"The token must be TokenType.BOOLEAN, but got {token.Type}"
+    assert (
+        token.Value == value
+    ), f'The token value must be "{value}", but got "{token.Value}"'
+
+
 def assert_invalid_token(token: Token, value: str) -> None:
     assert (
         token.Type == TokenType.INVALID

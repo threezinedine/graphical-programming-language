@@ -176,7 +176,7 @@ class BlockTypeNode(Node):
         return ""
 
     def Parse(self) -> None:
-        while not self._ParseUnaryOperation("|"):
+        while not self._ParseUnaryOperation("|", "!"):
             pass
 
         while not self._ParseOperation("^"):
@@ -240,7 +240,7 @@ class BlockTypeNode(Node):
             error: str | None = None
 
             if operandNode is None and operandNode is None:
-                error = f"Operand of operator '{operatorNode.token.Value}' are invalid"
+                error = f"Operand of operator '{operatorNode.token.Value}' is invalid"
 
             newOperationNode = UnaryOperationNode(
                 operatorNode.token,

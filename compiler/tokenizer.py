@@ -5,6 +5,7 @@ import re
 
 
 class TokenType(Enum):
+    BOOLEAN = auto()
     INTEGER = auto()
     FLOAT = auto()
     STRING = auto()
@@ -86,7 +87,8 @@ class Tokenizer:
         TokenType.DELIMITER: [r"^[,;]"],
         TokenType.PARENTHESES: [r"^[(){}\[\]]"],
         TokenType.INVALID: [r"^\d+[a-zA-Z]+"],
-        TokenType.OPERATOR: [rf"^({OPERATORS_REGEX})"],
+        TokenType.OPERATOR: [rf"^({OPERATORS_REGEX})", r"^!"],
+        TokenType.BOOLEAN: [r"^(true|false)"],
         TokenType.FLOAT: [r"^\d*\.\d*"],
         TokenType.INTEGER: [r"^\d+"],
         TokenType.STRING: [r'^"((?:[^"\\]|\\.)*)"'],
@@ -154,6 +156,8 @@ class Tokenizer:
                         self._tokens.append(Token(TokenType.INVALID, match.group(0)))
                     elif tokenType == TokenType.OPERATOR:
                         self._tokens.append(Token(TokenType.OPERATOR, match.group(0)))
+                    elif tokenType == TokenType.BOOLEAN:
+                        self._tokens.append(Token(TokenType.BOOLEAN, match.group(0)))
 
                     break
 

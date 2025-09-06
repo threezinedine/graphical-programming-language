@@ -516,8 +516,6 @@ def test_ternary_operator():
     ast.Program.Compress()
     ast.Program.Parse()
 
-    print(ast.Program)
-
     ProgramAssertion(
         OperationAssertion(
             "+",
@@ -526,6 +524,29 @@ def test_ternary_operator():
                 "|",
                 AtomicAssertion(TokenType.INTEGER, 3),
                 error=None,
+            ),
+        )
+    ).Assert(ast.Program)
+
+
+def test_invalid_ternary_operator():
+    ast = Parser(
+        """
+2 + !
+"""
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            AtomicAssertion(TokenType.INTEGER, 2),
+            UnaryOperationAssertion(
+                "!",
+                InvalidAtomicAssertion(),
+                error="Operand of operator '!' is invalid",
             ),
         )
     ).Assert(ast.Program)

@@ -6,6 +6,7 @@ from utils.tokenizer_assertion import (
     assert_delimiter_token,
     assert_operator_token,
     assert_string_token,
+    assert_boolean_token,
     assert_invalid_token,
     assert_parentheses_token,
     assert_keyword_token,
@@ -81,15 +82,15 @@ def test_parse_string_with_internal_quotes():
 
 
 def test_parse_invalid_token():
-    assert_invalid_token(Tokenizer("!adn").Next(), "!adn")
+    assert_invalid_token(Tokenizer("~adn").Next(), "~adn")
     assert_invalid_token(Tokenizer("12adn").Next(), "12adn")
 
 
 def test_parse_invalid_token_with_other_token_type():
-    tokenizer = Tokenizer("23, !adn 42.0")
+    tokenizer = Tokenizer("23, ~adn 42.0")
     assert_integer_token(tokenizer.Next(), 23)
     assert_delimiter_token(tokenizer.Next(), ",")
-    assert_invalid_token(tokenizer.Next(), "!adn")
+    assert_invalid_token(tokenizer.Next(), "~adn")
     assert_float_token(tokenizer.Next(), 42.0)
 
 
@@ -133,4 +134,13 @@ def test_unary_operator():
     assert_integer_token(tokenizer.Next(), 5)
     assert_operator_token(tokenizer.Next(), "+")
     assert_operator_token(tokenizer.Next(), "|")
+    assert_integer_token(tokenizer.Next(), 3)
+
+
+def test_boolean_token():
+    tokenizer = Tokenizer("true !false != 3")
+    assert_boolean_token(tokenizer.Next(), "true")
+    assert_operator_token(tokenizer.Next(), "!")
+    assert_boolean_token(tokenizer.Next(), "false")
+    assert_operator_token(tokenizer.Next(), "!=")
     assert_integer_token(tokenizer.Next(), 3)
