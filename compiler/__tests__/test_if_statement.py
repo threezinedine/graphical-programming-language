@@ -78,6 +78,7 @@ def test_if_without_expression():
 if 
 {
     x += 1;
+    y ^= 2 * (3 + a);
 }
 """
     )
@@ -94,6 +95,23 @@ if
                         "+=",
                         left=AtomicAssertion(TokenType.IDENTIFIER, "x"),
                         right=AtomicAssertion(TokenType.INTEGER, 1),
+                    ),
+                ),
+                StatementAsserion(
+                    OperationAssertion(
+                        "^=",
+                        left=AtomicAssertion(TokenType.IDENTIFIER, "y"),
+                        right=OperationAssertion(
+                            "*",
+                            left=AtomicAssertion(TokenType.INTEGER, 2),
+                            right=ExpressBlockionAsserion(
+                                OperationAssertion(
+                                    "+",
+                                    left=AtomicAssertion(TokenType.INTEGER, 3),
+                                    right=AtomicAssertion(TokenType.IDENTIFIER, "a"),
+                                ),
+                            ),
+                        ),
                     ),
                 ),
             ),

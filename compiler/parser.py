@@ -202,7 +202,7 @@ class BlockTypeNode(Node):
         while not self._ParseOperation("<", "<=", ">", ">=", "==", "!="):
             pass
 
-        while not self._ParseOperation("+=", "-=", "*=", "/=", "%="):
+        while not self._ParseOperation("+=", "-=", "*=", "/=", "%=", "^="):
             pass
 
         while not self._ParseOperation("="):
@@ -440,7 +440,10 @@ class BlockTypeNode(Node):
                     )
                     or (
                         isinstance(node, BlockTypeNode)
-                        and node.Type == NodeType.EXPRESSION
+                        and (
+                            node.Type == NodeType.EXPRESSION
+                            or node.Type == NodeType.OPERATION_EXPRESSION
+                        )
                     )
                     or isinstance(node, OperationNode)
                     or isinstance(node, UnaryOperationNode)
