@@ -186,9 +186,8 @@ class BlockTypeNode(Node):
         tempNodes: list[Node] = []
 
         nodeIndex = 0
-        while nodeIndex < len(self.nodes) - 1:
-            leftNode = self.nodes[nodeIndex]
-            operatorNode = self.nodes[nodeIndex + 1]
+        while nodeIndex < len(self.nodes):
+            operatorNode = self.nodes[nodeIndex]
 
             if not (
                 operatorNode.Type == NodeType.ATOMIC
@@ -196,11 +195,9 @@ class BlockTypeNode(Node):
                 and operatorNode.token.Type == TokenType.OPERATOR
                 and operatorNode.token.Value in operations
             ):
-                tempNodes.append(deepcopy(leftNode))
+                tempNodes.append(deepcopy(operatorNode))
                 nodeIndex += 1
                 continue
-
-            leftNode.Parse()
 
             def checkOperandNodeValid(node: Node) -> bool:
                 return (
@@ -224,16 +221,20 @@ class BlockTypeNode(Node):
             operandLeftNode: Node | None = None
             operandRightNode: Node | None = None
 
-            if nodeIndex + 2 >= len(self.nodes):
-                operandRightNode = None
-            else:
-                operandRightNode = self.nodes[nodeIndex + 2]
-                operandRightNode.Parse()
-
-            if not checkOperandNodeValid(leftNode):
+            if len(tempNodes) == 0:
                 operandLeftNode = None
             else:
-                operandLeftNode = leftNode
+                operandLeftNode = tempNodes[-1]
+                operandLeftNode.Parse()
+
+            if nodeIndex + 1 >= len(self.nodes):
+                operandRightNode = None
+            else:
+                operandRightNode = self.nodes[nodeIndex + 1]
+                operandRightNode.Parse()
+
+            if operandLeftNode and not checkOperandNodeValid(operandLeftNode):
+                operandLeftNode = None
 
             if operandRightNode is not None and not checkOperandNodeValid(
                 operandRightNode
@@ -268,22 +269,22 @@ class BlockTypeNode(Node):
                 error,
             )
             if operandLeftNode is None and operandRightNode is None:
-                nodeIndex += 2
-                tempNodes.append(leftNode)
+                nodeIndex += 1
             elif operandLeftNode is None:
-                nodeIndex += 3
-                tempNodes.append(leftNode)
-            elif operandRightNode is None:
                 nodeIndex += 2
+            elif operandRightNode is None:
+                nodeIndex += 1
+                tempNodes.pop()  # Remove the left operand
             else:
-                nodeIndex += 3
+                nodeIndex += 2
+                tempNodes.pop()  # Remove the left operand
             tempNodes.append(newOperationNode)
             hasAnyChange = True
 
         if hasAnyChange:
-            while nodeIndex < len(self.nodes):
-                tempNodes.append(deepcopy(self.nodes[nodeIndex]))
-                nodeIndex += 1
+            # while nodeIndex < len(self.nodes):
+            #     tempNodes.append(deepcopy(self.nodes[nodeIndex]))
+            #     nodeIndex += 1
             self.nodes = deepcopy(tempNodes)
         return not hasAnyChange
 

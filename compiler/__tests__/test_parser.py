@@ -415,7 +415,6 @@ def test_label_invalid_expression_with_multiple_operators_and_multiple_minus_ope
 
     ast.Program.Compress()
     ast.Program.Parse()
-    print(ast.Program)
 
     ProgramAssertion(
         OperationAssertion(
@@ -429,6 +428,29 @@ def test_label_invalid_expression_with_multiple_operators_and_multiple_minus_ope
                     InvalidAtomicAssertion(),
                     error="Both sides of operator '*' are invalid",
                 ),
+            ),
+            AtomicAssertion(TokenType.INTEGER, 5),
+        ),
+    ).Assert(ast.Program)
+
+
+def test_label_express_with_first_operator():
+    ast = Parser(
+        """
+/ 4 + 5
+        """
+    )
+
+    ast.Program.Compress()
+    ast.Program.Parse()
+
+    ProgramAssertion(
+        OperationAssertion(
+            "+",
+            OperationAssertion(
+                "/",
+                InvalidAtomicAssertion(),
+                AtomicAssertion(TokenType.INTEGER, 4),
             ),
             AtomicAssertion(TokenType.INTEGER, 5),
         ),

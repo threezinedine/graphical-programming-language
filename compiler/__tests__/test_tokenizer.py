@@ -118,3 +118,12 @@ def test_parse_multiple_keywords():
     assert_keyword_token(tokenizer.Next(), "return")
     assert_delimiter_token(tokenizer.Next(), ";")
     assert_parentheses_token(tokenizer.Next(), "}")
+
+
+def test_parse_expression_with_multiple_operators():
+    tokenizer = Tokenizer("3 * 5 / 10")
+    assert_integer_token(tokenizer.Next(), 3)
+    assert_operator_token(tokenizer.Next(), "*")
+    assert_integer_token(tokenizer.Next(), 5)
+    assert_operator_token(tokenizer.Next(), "/")
+    assert_integer_token(tokenizer.Next(), 10)
