@@ -23,6 +23,12 @@ namespace ntt
                     "^[0-9]+",
                 },
             },
+            {
+                TokenType::STRING,
+                {
+                    "^\"((?:[^\"\\\\]|\\\\.)*)\"",
+                },
+            },
         };
     } // namespace anonymous
 
@@ -100,6 +106,11 @@ namespace ntt
                         {
                             f32 floatValue = std::stof(matchedStr);
                             token.SetValue<f32>(floatValue);
+                            break;
+                        }
+                        case TokenType::STRING:
+                        {
+                            token.SetValue<std::string>(matchedStr);
                             break;
                         }
                         default:

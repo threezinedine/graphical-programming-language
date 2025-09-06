@@ -21,6 +21,12 @@ void AssertInvalidToken(const Token &token, std::string value)
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
+void AssertStringToken(const Token &token, std::string value)
+{
+    ASSERT_EQ(token.GetType(), TokenType::STRING);
+    EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
+}
+
 #define INTEGER_TOKEN_TESTING(input, value)                  \
     {                                                        \
         Tokenizer tokenizer(input);                          \
@@ -37,6 +43,12 @@ void AssertInvalidToken(const Token &token, std::string value)
     {                                                        \
         Tokenizer tokenizer(input);                          \
         AssertInvalidToken(tokenizer.GetTokens()[0], value); \
+    }
+
+#define STRING_TOKEN_TESTING(input, value)                  \
+    {                                                       \
+        Tokenizer tokenizer(input);                         \
+        AssertStringToken(tokenizer.GetTokens()[0], value); \
     }
 
 TEST(TokenizerTest, IntegerToken)
@@ -84,4 +96,25 @@ TEST(TokenizerTest, MultipleMixedIntegersAndInvalidToken)
     AssertIntegerToken(tokens[1], 0);
     AssertInvalidToken(tokens[2], "`");
     AssertFloatToken(tokens[3], 3.12f);
+}
+
+TEST(TokenizerTest, TokenizeString)
+{
+    STRING_TOKEN_TESTING(R"("Hello World")", R"("Hello World")");
+    STRING_TOKEN_TESTING(R"("Hello \" World")", R"("Hello \" World")");
+}
+
+TEST(TokenizerTest, MutipleMixedIntegersFloatsStringsAndInvalids)
+{
+    Tokenizer tokenizer(R"(
+ 0 "Testing \" World""Translate" 
+` 3.12 )");
+    const auto &tokens = tokenizer.GetTokens();
+    ASSERT_EQ(tokens.size(), 5);
+
+    AssertIntegerToken(tokens[0], 0);
+    AssertStringToken(tokens[1], R"("Testing \" World")");
+    AssertStringToken(tokens[2], R"("Translate")");
+    AssertInvalidToken(tokens[3], "`");
+    AssertFloatToken(tokens[4], 3.12f);
 }
