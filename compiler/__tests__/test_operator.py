@@ -226,6 +226,8 @@ def test_label_node_with_parenthesis():
     ast.Program.Compress()
     ast.Program.Parse()
 
+    print(ast.Program)
+
     ProgramAssertion(
         StatementAsserion(
             OperationAssertion(

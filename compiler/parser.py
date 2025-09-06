@@ -165,6 +165,7 @@ class BlockTypeNode(Node):
         return {
             "type": self.Type.name,
             "nodes": [node.ToJson() for node in self.nodes],
+            "error": self.error,
         }
 
     @property
@@ -201,6 +202,9 @@ class BlockTypeNode(Node):
         while not self._ParseOperation("<", "<=", ">", ">=", "==", "!="):
             pass
 
+        while not self._ParseOperation("+=", "-=", "*=", "/=", "%="):
+            pass
+
         while not self._ParseOperation("="):
             pass
 
@@ -232,30 +236,46 @@ class BlockTypeNode(Node):
                 nodeIndex += 1
                 continue
 
+            indexAddition = 1
+
+            conditionNode: BlockTypeNode | InvalidNode = InvalidNode()
             bodyNode: BlockTypeNode
             error: str | None = None
+            conditionNodeIndex = 1
+            blockNodeIndex = 2
 
             if (
-                nodeIndex + 2 >= len(self.nodes)
-                or self.nodes[nodeIndex + 2].Type != NodeType.BLOCK
+                nodeIndex + conditionNodeIndex >= len(self.nodes)
+                or self.nodes[nodeIndex + conditionNodeIndex].Type
+                != NodeType.EXPRESSION
+            ):
+                conditionNode = InvalidNode()
+                error = "Missing condition expression"
+
+                if nodeIndex + conditionNodeIndex < len(self.nodes):
+                    blockNodeIndex = conditionNodeIndex
+            else:
+                conditionNode = self.nodes[nodeIndex + conditionNodeIndex]  # type: ignore
+                indexAddition += 1
+
+            if (
+                nodeIndex + blockNodeIndex >= len(self.nodes)
+                or self.nodes[nodeIndex + blockNodeIndex].Type != NodeType.BLOCK
             ):
                 bodyNode = BlockTypeNode(NodeType.BLOCK, [])
                 error = "Missing body block"
             else:
-                bodyNode = self.nodes[nodeIndex + 2]  # type: ignore
+                bodyNode = self.nodes[nodeIndex + blockNodeIndex]  # type: ignore
+                indexAddition += 1
 
             newIfStatementNode = IfStatementNode(
-                (
-                    self.nodes[nodeIndex + 1]
-                    if nodeIndex + 1 < len(self.nodes)
-                    else InvalidNode()
-                ),
-                bodyNode,
+                condition=conditionNode,
+                body=bodyNode,
                 error=error,
             )
 
             tempNodes.append(newIfStatementNode)
-            nodeIndex += 3
+            nodeIndex += indexAddition
 
         self.nodes = deepcopy(tempNodes)
 
@@ -278,11 +298,7 @@ class BlockTypeNode(Node):
                     newStatementNode = BlockTypeNode(
                         NodeType.STATEMENT,
                         deepcopy(tempStatmentNodes),
-                        error=(
-                            "Missing semicolon at the end"
-                            if len(tempStatmentNodes) > 0
-                            else None
-                        ),
+                        error="Missing semicolon at the end",
                     )
                     tempNodes.append(newStatementNode)
 
@@ -636,6 +652,7 @@ class UnaryOperationNode(Node):
                 "tokenType": self.operator.Type.name,
             },
             "operand": self.operand.ToJson(),
+            "error": self.error,
         }
 
     def Compress(self) -> None:
@@ -703,6 +720,7 @@ class OperationNode(Node):
             },
             "left": self.left.ToJson(),
             "right": self.right.ToJson(),
+            "error": self.error,
         }
 
     def Compress(self) -> None:
@@ -746,6 +764,7 @@ class IfStatementNode(Node):
             "type": self.Type.name,
             "condition": self.condition.ToJson(),
             "body": self.body.ToJson(),
+            "error": self.error,
         }
 
     def __len__(self) -> int:

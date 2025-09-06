@@ -47,12 +47,11 @@ KEYWORDS = [
 KEYWORD_REGEX = "|".join(KEYWORDS)
 
 OPERATORS = [
-    "\\+",
-    "\\-",
-    "\\*",
-    "\\^",
-    "\\/",
-    "\\%",
+    "\\+=",
+    "\\-=",
+    "\\*=",
+    "\\/=",
+    "\\%=",
     "==",
     "!=",
     "\\|",
@@ -87,7 +86,13 @@ class Tokenizer:
         TokenType.DELIMITER: [r"^[,;]"],
         TokenType.PARENTHESES: [r"^[(){}\[\]]"],
         TokenType.INVALID: [r"^\d+[a-zA-Z]+"],
-        TokenType.OPERATOR: [rf"^({OPERATORS_REGEX})", r"^!", r"^="],
+        TokenType.OPERATOR: [
+            rf"^({OPERATORS_REGEX})",
+            r"^!",
+            r"^=",
+            r"^[\\+\\*\\/\\%\\^]",
+            r"^-",
+        ],
         TokenType.BOOLEAN: [r"^(true|false)"],
         TokenType.FLOAT: [r"^\d*\.\d*"],
         TokenType.INTEGER: [r"^\d+"],
