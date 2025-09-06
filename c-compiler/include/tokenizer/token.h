@@ -11,6 +11,7 @@ namespace ntt
     union TokenValue
     {
         u32 intValue;
+        f32 floatValue;
     };
 
     class Token

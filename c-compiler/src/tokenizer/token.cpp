@@ -32,4 +32,5 @@ namespace ntt
     }
 
     GETTER_SETTER_IMPL(u32, intValue, INTEGER);
+    GETTER_SETTER_IMPL(f32, floatValue, FLOAT);
 } // namespace ntt
