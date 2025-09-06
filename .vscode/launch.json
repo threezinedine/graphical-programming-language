@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/compiler/venv/Scripts/pytest.exe",
             "args": [
                 "-k",
-                "test_label_express_with_first_operator"
+                "test_parse_simple_statement"
             ],
             "console": "integratedTerminal"
         }

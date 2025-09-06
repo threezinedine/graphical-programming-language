@@ -5,6 +5,7 @@ from utils.parser_assertion import (
     OperationAssertion,
     ProgramAssertion,
     ExpressBlockionAsserion,
+    StatementAsserion,
     UnaryOperationAssertion,
 )
 from compiler.tokenizer import TokenType
@@ -205,11 +206,13 @@ def test_label_node_type():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 3),
-            AtomicAssertion(TokenType.INTEGER, 5),
-        )
+        StatementAsserion(
+            OperationAssertion(
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                AtomicAssertion(TokenType.INTEGER, 5),
+            ),
+        ),
     ).Assert(ast.Program)
 
 
@@ -224,20 +227,22 @@ def test_label_node_with_parenthesis():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "*",
-            ExpressBlockionAsserion(
-                OperationAssertion(
-                    "+",
-                    AtomicAssertion(TokenType.INTEGER, 3),
-                    AtomicAssertion(TokenType.INTEGER, 5),
+        StatementAsserion(
+            OperationAssertion(
+                "*",
+                ExpressBlockionAsserion(
+                    OperationAssertion(
+                        "+",
+                        AtomicAssertion(TokenType.INTEGER, 3),
+                        AtomicAssertion(TokenType.INTEGER, 5),
+                    ),
                 ),
-            ),
-            ExpressBlockionAsserion(
-                OperationAssertion(
-                    "-",
-                    AtomicAssertion(TokenType.INTEGER, 10),
-                    AtomicAssertion(TokenType.INTEGER, 2),
+                ExpressBlockionAsserion(
+                    OperationAssertion(
+                        "-",
+                        AtomicAssertion(TokenType.INTEGER, 10),
+                        AtomicAssertion(TokenType.INTEGER, 2),
+                    ),
                 ),
             ),
         ),
@@ -255,13 +260,15 @@ def test_label_multiple_and_divide_before_add_and_subtract():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 3),
+        StatementAsserion(
             OperationAssertion(
-                "*",
-                AtomicAssertion(TokenType.INTEGER, 5),
-                AtomicAssertion(TokenType.INTEGER, 10),
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                OperationAssertion(
+                    "*",
+                    AtomicAssertion(TokenType.INTEGER, 5),
+                    AtomicAssertion(TokenType.INTEGER, 10),
+                ),
             ),
         ),
     ).Assert(ast.Program)
@@ -278,14 +285,16 @@ def test_label_multiple_and_divide():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "/",
+        StatementAsserion(
             OperationAssertion(
-                "*",
-                AtomicAssertion(TokenType.INTEGER, 3),
-                AtomicAssertion(TokenType.INTEGER, 5),
+                "/",
+                OperationAssertion(
+                    "*",
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                    AtomicAssertion(TokenType.INTEGER, 5),
+                ),
+                AtomicAssertion(TokenType.INTEGER, 10),
             ),
-            AtomicAssertion(TokenType.INTEGER, 10),
         ),
     ).Assert(ast.Program)
 
@@ -301,36 +310,38 @@ def test_label_complex_expression():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "-",
+        StatementAsserion(
             OperationAssertion(
-                "/",
+                "-",
                 OperationAssertion(
-                    "*",
+                    "/",
+                    OperationAssertion(
+                        "*",
+                        ExpressBlockionAsserion(
+                            OperationAssertion(
+                                "+",
+                                AtomicAssertion(TokenType.INTEGER, 3),
+                                AtomicAssertion(TokenType.INTEGER, 5),
+                            ),
+                        ),
+                        ExpressBlockionAsserion(
+                            OperationAssertion(
+                                "-",
+                                AtomicAssertion(TokenType.INTEGER, 10),
+                                AtomicAssertion(TokenType.INTEGER, 2),
+                            ),
+                        ),
+                    ),
                     ExpressBlockionAsserion(
                         OperationAssertion(
                             "+",
-                            AtomicAssertion(TokenType.INTEGER, 3),
-                            AtomicAssertion(TokenType.INTEGER, 5),
-                        ),
-                    ),
-                    ExpressBlockionAsserion(
-                        OperationAssertion(
-                            "-",
-                            AtomicAssertion(TokenType.INTEGER, 10),
-                            AtomicAssertion(TokenType.INTEGER, 2),
+                            AtomicAssertion(TokenType.INTEGER, 4),
+                            AtomicAssertion(TokenType.INTEGER, 6),
                         ),
                     ),
                 ),
-                ExpressBlockionAsserion(
-                    OperationAssertion(
-                        "+",
-                        AtomicAssertion(TokenType.INTEGER, 4),
-                        AtomicAssertion(TokenType.INTEGER, 6),
-                    ),
-                ),
+                AtomicAssertion(TokenType.INTEGER, 7),
             ),
-            AtomicAssertion(TokenType.INTEGER, 7),
         ),
     ).Assert(ast.Program)
 
@@ -346,14 +357,16 @@ def test_label_invalid_expression_with_lack_of_right_operand():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 3),
+        StatementAsserion(
             OperationAssertion(
-                "*",
-                AtomicAssertion(TokenType.INTEGER, 5),
-                InvalidAtomicAssertion(),
-                error="Right side of operator '*' is invalid",
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                OperationAssertion(
+                    "*",
+                    AtomicAssertion(TokenType.INTEGER, 5),
+                    InvalidAtomicAssertion(),
+                    error="Right side of operator '*' is invalid",
+                ),
             ),
         ),
     ).Assert(ast.Program)
@@ -370,14 +383,16 @@ def test_label_invalid_expression_with_lack_of_left_operand():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 3),
+        StatementAsserion(
             OperationAssertion(
-                "*",
-                InvalidAtomicAssertion(),
-                AtomicAssertion(TokenType.INTEGER, 10),
-                error="Left side of operator '*' is invalid",
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                OperationAssertion(
+                    "*",
+                    InvalidAtomicAssertion(),
+                    AtomicAssertion(TokenType.INTEGER, 10),
+                    error="Left side of operator '*' is invalid",
+                ),
             ),
         ),
     ).Assert(ast.Program)
@@ -394,14 +409,16 @@ def test_label_invalid_expression_with_both_operands_missing():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 3),
+        StatementAsserion(
             OperationAssertion(
-                "*",
-                InvalidAtomicAssertion(),
-                InvalidAtomicAssertion(),
-                error="Both sides of operator '*' are invalid",
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 3),
+                OperationAssertion(
+                    "*",
+                    InvalidAtomicAssertion(),
+                    InvalidAtomicAssertion(),
+                    error="Both sides of operator '*' are invalid",
+                ),
             ),
         ),
     ).Assert(ast.Program)
@@ -418,19 +435,21 @@ def test_label_invalid_expression_with_multiple_operators_and_multiple_minus_ope
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "-",
+        StatementAsserion(
             OperationAssertion(
-                "+",
-                AtomicAssertion(TokenType.INTEGER, 3),
+                "-",
                 OperationAssertion(
-                    "*",
-                    InvalidAtomicAssertion(),
-                    InvalidAtomicAssertion(),
-                    error="Both sides of operator '*' are invalid",
+                    "+",
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                    OperationAssertion(
+                        "*",
+                        InvalidAtomicAssertion(),
+                        InvalidAtomicAssertion(),
+                        error="Both sides of operator '*' are invalid",
+                    ),
                 ),
+                AtomicAssertion(TokenType.INTEGER, 5),
             ),
-            AtomicAssertion(TokenType.INTEGER, 5),
         ),
     ).Assert(ast.Program)
 
@@ -446,14 +465,16 @@ def test_label_express_with_first_operator():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
+        StatementAsserion(
             OperationAssertion(
-                "/",
-                InvalidAtomicAssertion(),
-                AtomicAssertion(TokenType.INTEGER, 4),
+                "+",
+                OperationAssertion(
+                    "/",
+                    InvalidAtomicAssertion(),
+                    AtomicAssertion(TokenType.INTEGER, 4),
+                ),
+                AtomicAssertion(TokenType.INTEGER, 5),
             ),
-            AtomicAssertion(TokenType.INTEGER, 5),
         ),
     ).Assert(ast.Program)
 
@@ -469,13 +490,15 @@ def test_power_operator():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 2),
+        StatementAsserion(
             OperationAssertion(
-                "^",
-                AtomicAssertion(TokenType.INTEGER, 3),
+                "+",
                 AtomicAssertion(TokenType.INTEGER, 2),
+                OperationAssertion(
+                    "^",
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                    AtomicAssertion(TokenType.INTEGER, 2),
+                ),
             ),
         ),
     ).Assert(ast.Program)
@@ -492,15 +515,17 @@ def test_power_operator_with_parenthesis():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "^",
-            AtomicAssertion(TokenType.INTEGER, 2),
-            ExpressBlockionAsserion(
-                OperationAssertion(
-                    "+",
-                    AtomicAssertion(TokenType.INTEGER, 1),
-                    AtomicAssertion(TokenType.INTEGER, 3),
-                )
+        StatementAsserion(
+            OperationAssertion(
+                "^",
+                AtomicAssertion(TokenType.INTEGER, 2),
+                ExpressBlockionAsserion(
+                    OperationAssertion(
+                        "+",
+                        AtomicAssertion(TokenType.INTEGER, 1),
+                        AtomicAssertion(TokenType.INTEGER, 3),
+                    )
+                ),
             ),
         ),
     ).Assert(ast.Program)
@@ -517,15 +542,17 @@ def test_ternary_operator():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 2),
-            UnaryOperationAssertion(
-                "|",
-                AtomicAssertion(TokenType.INTEGER, 3),
-                error=None,
+        StatementAsserion(
+            OperationAssertion(
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 2),
+                UnaryOperationAssertion(
+                    "|",
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                    error=None,
+                ),
             ),
-        )
+        ),
     ).Assert(ast.Program)
 
 
@@ -540,15 +567,17 @@ def test_invalid_ternary_operator():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            AtomicAssertion(TokenType.INTEGER, 2),
-            UnaryOperationAssertion(
-                "!",
-                InvalidAtomicAssertion(),
-                error="Operand of operator '!' is invalid",
+        StatementAsserion(
+            OperationAssertion(
+                "+",
+                AtomicAssertion(TokenType.INTEGER, 2),
+                UnaryOperationAssertion(
+                    "!",
+                    InvalidAtomicAssertion(),
+                    error="Operand of operator '!' is invalid",
+                ),
             ),
-        )
+        ),
     ).Assert(ast.Program)
 
 
@@ -563,14 +592,16 @@ def test_comparison_operators():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "!=",
+        StatementAsserion(
             OperationAssertion(
-                "+",
-                AtomicAssertion(TokenType.INTEGER, 3),
-                AtomicAssertion(TokenType.INTEGER, 5),
+                "!=",
+                OperationAssertion(
+                    "+",
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                    AtomicAssertion(TokenType.INTEGER, 5),
+                ),
+                AtomicAssertion(TokenType.INTEGER, 10),
             ),
-            AtomicAssertion(TokenType.INTEGER, 10),
         ),
     ).Assert(ast.Program)
 
@@ -586,17 +617,19 @@ def test_comparison_operators_with_parenthesis():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "+",
-            ExpressBlockionAsserion(
-                OperationAssertion(
-                    "==",
-                    AtomicAssertion(TokenType.INTEGER, 5),
-                    AtomicAssertion(TokenType.INTEGER, 3),
-                )
+        StatementAsserion(
+            OperationAssertion(
+                "+",
+                ExpressBlockionAsserion(
+                    OperationAssertion(
+                        "==",
+                        AtomicAssertion(TokenType.INTEGER, 5),
+                        AtomicAssertion(TokenType.INTEGER, 3),
+                    )
+                ),
+                AtomicAssertion(TokenType.INTEGER, 2),
             ),
-            AtomicAssertion(TokenType.INTEGER, 2),
-        )
+        ),
     ).Assert(ast.Program)
 
 
@@ -611,15 +644,17 @@ def test_invalid_comparison_operators():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "!=",
+        StatementAsserion(
             OperationAssertion(
-                "+",
-                AtomicAssertion(TokenType.INTEGER, 3),
-                AtomicAssertion(TokenType.INTEGER, 5),
+                "!=",
+                OperationAssertion(
+                    "+",
+                    AtomicAssertion(TokenType.INTEGER, 3),
+                    AtomicAssertion(TokenType.INTEGER, 5),
+                ),
+                InvalidAtomicAssertion(),
             ),
-            InvalidAtomicAssertion(),
-        )
+        ),
     ).Assert(ast.Program)
 
 
@@ -634,23 +669,25 @@ def test_multiple_comparison_operators():
     ast.Program.Parse()
 
     ProgramAssertion(
-        OperationAssertion(
-            "!=",
-            UnaryOperationAssertion(
-                "!",
-                ExpressBlockionAsserion(
-                    OperationAssertion(
-                        "==",
+        StatementAsserion(
+            OperationAssertion(
+                "!=",
+                UnaryOperationAssertion(
+                    "!",
+                    ExpressBlockionAsserion(
                         OperationAssertion(
-                            "+",
-                            AtomicAssertion(TokenType.INTEGER, 3),
-                            AtomicAssertion(TokenType.INTEGER, 5),
-                        ),
-                        AtomicAssertion(TokenType.INTEGER, 10),
-                    )
+                            "==",
+                            OperationAssertion(
+                                "+",
+                                AtomicAssertion(TokenType.INTEGER, 3),
+                                AtomicAssertion(TokenType.INTEGER, 5),
+                            ),
+                            AtomicAssertion(TokenType.INTEGER, 10),
+                        )
+                    ),
+                    error=None,
                 ),
-                error=None,
+                AtomicAssertion(TokenType.INTEGER, 2),
             ),
-            AtomicAssertion(TokenType.INTEGER, 2),
-        )
+        ),
     ).Assert(ast.Program)

@@ -122,6 +122,30 @@ class ExpressBlockionAsserion(DelayAssertion):
             assertion.Assert(node.nodes[assertionIndex])
 
 
+class StatementAsserion(DelayAssertion):
+    def __init__(self, *assertions: DelayAssertion, error: str | None = None) -> None:
+        self.assertions = assertions
+        self.error = error
+
+    def Assert(self, node: Node) -> None:
+        assert isinstance(
+            node, BlockTypeNode
+        ), f"Node should be BlockTypeNode, but got {type(node)}"
+        assert (
+            node.Type == NodeType.STATEMENT
+        ), f"Node should be StatementNode, but got {node.Type.name}"
+        assert len(node.nodes) == len(
+            self.assertions
+        ), f"Statement should have {len(self.assertions)} nodes, but got {len(node.nodes)}"
+        for assertionIndex, assertion in enumerate(self.assertions):
+            assertion.Assert(node.nodes[assertionIndex])
+
+        if self.error is not None:
+            assert (
+                node.Error == self.error
+            ), f"Error should be {self.error}, but got {node.Error}"
+
+
 class ProgramAssertion(DelayAssertion):
     def __init__(self, *assertions: DelayAssertion) -> None:
         self.assertions = assertions

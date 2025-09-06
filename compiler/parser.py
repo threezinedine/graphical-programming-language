@@ -23,6 +23,8 @@ class NodeType(Enum):
     OPERATION_EXPRESSION = auto()
     UNARY_OPERATION_EXPRESSION = auto()
 
+    STATEMENT = auto()
+
     INVALID = auto()
 
 
@@ -176,6 +178,12 @@ class BlockTypeNode(Node):
         return ""
 
     def Parse(self) -> None:
+        if self.Type in [
+            NodeType.PROGRAM,
+        ]:
+            while not self._ParseStatement():
+                pass
+
         while not self._ParseUnaryOperation("|", "!"):
             pass
 
@@ -190,6 +198,52 @@ class BlockTypeNode(Node):
 
         while not self._ParseOperation("<", "<=", ">", ">=", "==", "!="):
             pass
+
+        while not self._ParseOperation("="):
+            pass
+
+    def _ParseStatement(self) -> bool:
+        tempNodes: list[Node] = []
+
+        tempStatmentNodes: list[Node] = []
+        nodeIndex = 0
+        while nodeIndex < len(self.nodes):
+            currentNode = self.nodes[nodeIndex]
+
+            if not (
+                currentNode.Type == NodeType.ATOMIC
+                and isinstance(currentNode, AtomicNode)
+                and currentNode.token.Type == TokenType.DELIMITER
+                and currentNode.token.Value == ";"
+            ):
+                tempStatmentNodes.append(deepcopy(currentNode))
+                nodeIndex += 1
+                continue
+
+            newStatementNode = BlockTypeNode(
+                NodeType.STATEMENT,
+                deepcopy(tempStatmentNodes),
+            )
+            newStatementNode.Compress()
+            newStatementNode.Parse()
+            tempNodes.append(newStatementNode)
+            tempStatmentNodes = []
+
+            nodeIndex += 1
+
+        self.nodes = deepcopy(tempNodes)
+
+        if len(tempStatmentNodes) > 0:
+            newStatementNode = BlockTypeNode(
+                NodeType.STATEMENT,
+                deepcopy(tempStatmentNodes),
+                error="Missing semicolon at the end",
+            )
+            newStatementNode.Compress()
+            newStatementNode.Parse()
+            self.nodes.append(newStatementNode)
+
+        return True
 
     def _ParseUnaryOperation(self, *operations: str) -> bool:
         hasAnyChange = False
