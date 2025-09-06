@@ -75,9 +75,9 @@ namespace ntt
                 }
             }
 
+            b8 hasMatched = NTT_FALSE;
             for (const auto &[tokenType, regexList] : regexes)
             {
-                b8 hasMatched = NTT_FALSE;
                 for (const auto &regex : regexList)
                 {
                     std::smatch match;
@@ -115,6 +115,43 @@ namespace ntt
                 if (hasMatched)
                 {
                     break;
+                }
+            }
+
+            if (!hasMatched)
+            {
+                // find the text until next non ' ' and '\n'
+                // or end of the file as invalid token.
+
+                std::string temporaryInvalidToken = "";
+                u32 characterIndex = 0;
+                u32 temporaryContentLength = (u32)temporaryContent.length();
+
+                while (characterIndex < temporaryContentLength)
+                {
+                    char currentCharacter = temporaryContent[characterIndex];
+
+                    if (currentCharacter != ' ' && currentCharacter != '\n')
+                    {
+                        temporaryInvalidToken += currentCharacter;
+                        characterIndex++;
+                    }
+                    else
+                    {
+                        Token newInvalidToken(TokenType::INVALID);
+                        newInvalidToken.SetValue<std::string>(temporaryInvalidToken);
+                        temporaryContent = temporaryContent.substr((u32)temporaryInvalidToken.length());
+                        m_tokens.push_back(newInvalidToken);
+                        break;
+                    }
+                }
+
+                if (temporaryInvalidToken.length() > 0 && characterIndex == temporaryContentLength) // end of line
+                {
+                    Token newInvalidToken(TokenType::INVALID);
+                    newInvalidToken.SetValue<std::string>(temporaryInvalidToken);
+                    m_tokens.push_back(newInvalidToken);
+                    temporaryContent = "";
                 }
             }
         }

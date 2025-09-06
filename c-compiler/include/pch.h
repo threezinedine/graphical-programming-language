@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <vector>
+#include <string>
 
 typedef unsigned long long u64;
 typedef unsigned int u32;

@@ -6,6 +6,9 @@ namespace ntt
     {
         FLOAT,
         INTEGER,
+        STRING,
+
+        INVALID,
         COUNT,
     };
 } // namespace ntt

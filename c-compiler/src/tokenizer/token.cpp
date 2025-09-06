@@ -16,21 +16,37 @@ namespace ntt
     {
     }
 
-#define GETTER_SETTER_IMPL(type, member, tokenType) \
-    template <>                                     \
-    void Token::SetValue<type>(type value)          \
-    {                                               \
-        NTT_ASSERT(m_type == TokenType::tokenType); \
-        m_value.member = value;                     \
-    }                                               \
-                                                    \
-    template <>                                     \
-    type Token::GetValue<type>() const              \
-    {                                               \
-        NTT_ASSERT(m_type == TokenType::tokenType); \
-        return m_value.member;                      \
+#define ASSERT_TYPE_IN_ARRAY(...)                                 \
+    {                                                             \
+        std::vector<TokenType> types{__VA_ARGS__};              \
+        b8 hasMatched = NTT_FALSE;                                \
+        for (const auto &tokenType : types)                       \
+        {                                                         \
+            if (m_type == tokenType)                              \
+            {                                                     \
+                hasMatched = NTT_TRUE;                            \
+                break;                                            \
+            }                                                     \
+        }                                                         \
+        NTT_ASSERT_MSG(hasMatched, "Token type does not match."); \
     }
 
-    GETTER_SETTER_IMPL(u32, intValue, INTEGER);
-    GETTER_SETTER_IMPL(f32, floatValue, FLOAT);
+#define GETTER_SETTER_IMPL(type, member, ...) \
+    template <>                               \
+    void Token::SetValue<type>(type value)    \
+    {                                         \
+        ASSERT_TYPE_IN_ARRAY(__VA_ARGS__);    \
+        m_value.member = value;               \
+    }                                         \
+                                              \
+    template <>                               \
+    type Token::GetValue<type>() const        \
+    {                                         \
+        ASSERT_TYPE_IN_ARRAY(__VA_ARGS__);    \
+        return m_value.member;                \
+    }
+
+    GETTER_SETTER_IMPL(u32, numberValue.intValue, TokenType::INTEGER);
+    GETTER_SETTER_IMPL(f32, numberValue.floatValue, TokenType::FLOAT);
+    GETTER_SETTER_IMPL(std::string, stringValue, TokenType::STRING, TokenType::INVALID);
 } // namespace ntt

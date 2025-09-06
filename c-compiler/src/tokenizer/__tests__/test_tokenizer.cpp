@@ -15,6 +15,12 @@ void AssertFloatToken(const Token &token, f32 value)
     EXPECT_THAT(token.GetValue<f32>(), ::testing::FloatEq(value));
 }
 
+void AssertInvalidToken(const Token &token, std::string value)
+{
+    ASSERT_EQ(token.GetType(), TokenType::INVALID);
+    EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
+}
+
 #define INTEGER_TOKEN_TESTING(input, value)                  \
     {                                                        \
         Tokenizer tokenizer(input);                          \
@@ -25,6 +31,12 @@ void AssertFloatToken(const Token &token, f32 value)
     {                                                      \
         Tokenizer tokenizer(input);                        \
         AssertFloatToken(tokenizer.GetTokens()[0], value); \
+    }
+
+#define INVALID_TOKEN_TESTING(input, value)                  \
+    {                                                        \
+        Tokenizer tokenizer(input);                          \
+        AssertInvalidToken(tokenizer.GetTokens()[0], value); \
     }
 
 TEST(TokenizerTest, IntegerToken)
@@ -44,7 +56,7 @@ TEST(TokenizerTest, FloatToken)
 
 TEST(TokenizerTest, MultipleMixedIntegersAndFloats)
 {
-    Tokenizer tokenizer("12 0 12. .12 3.12 23.12 0.");
+    Tokenizer tokenizer("12 0 12. \n .12 3.12 23.12 0.");
     const auto &tokens = tokenizer.GetTokens();
     ASSERT_EQ(tokens.size(), 7);
 
@@ -55,4 +67,9 @@ TEST(TokenizerTest, MultipleMixedIntegersAndFloats)
     AssertFloatToken(tokens[4], 3.12f);
     AssertFloatToken(tokens[5], 23.12f);
     AssertFloatToken(tokens[6], 0.0f);
+}
+
+TEST(TokenizerTest, TokenizeInvalidToken)
+{
+    INVALID_TOKEN_TESTING("`", "`");
 }

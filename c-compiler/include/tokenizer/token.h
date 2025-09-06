@@ -8,10 +8,16 @@ namespace ntt
      * All possible value whwich the token can hold type will be
      *      defined here.
      */
-    union TokenValue
+    struct TokenValue
     {
-        u32 intValue;
-        f32 floatValue;
+        union Number
+        {
+            u32 intValue;
+            f32 floatValue;
+        };
+
+        Number numberValue;
+        std::string stringValue;
     };
 
     class Token
