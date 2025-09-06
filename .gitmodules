@@ -1,0 +1,3 @@
+[submodule "c-compiler/vendors/gtest"]
+	path = c-compiler/vendors/gtest
+	url = https://github.com/google/googletest.git

@@ -10,7 +10,7 @@ class Parser:
         test = subparsers.add_parser("test", help="Run tests")
         test.add_argument(
             "project",
-            choices=["compiler", "spec"],
+            choices=["compiler", "spec", "c-compiler"],
             default="compiler",
             type=str,
         )
@@ -22,11 +22,12 @@ class Parser:
             default="",
         )
 
-        add = subparsers = subparsers.add_parser(
-            "add", help="Add new package using pip"
-        )
+        add = subparsers.add_parser("add", help="Add new package using pip")
         add.add_argument("project", choices=["compiler"], type=str)
         add.add_argument("package", type=str, help="Package name to add")
+
+        build = subparsers.add_parser("build", help="Build the project")
+        build.add_argument("project", choices=["c-compiler"], type=str)
 
         self._args = parser.parse_args()
 

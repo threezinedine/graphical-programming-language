@@ -14,6 +14,9 @@ class Config:
         os.path.join(COMPILER_DIR, "requirements.txt")
     )
 
+    RELATIVE_C_COMPILER_DIR = "c-compiler"
+    C_COMPILER_DIR = os.path.normpath(os.path.join(BASE_CMD, RELATIVE_C_COMPILER_DIR))
+
     MACHINE_DIR = os.path.normpath(os.path.join(BASE_CMD, "machine"))
 
     LOGGER_NAME = "GPL-BUILD"

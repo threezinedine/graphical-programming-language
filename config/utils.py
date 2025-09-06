@@ -204,3 +204,71 @@ def RunSpecTest(folder: str, spec: str) -> None:
     except Exception as e:
         logger.error(f"Failed to run tests in '{folder}': {e}")
         exit(Config.BUILD_EXIT_ERROR_CODE)
+
+
+def ConfigureCCompiler():
+    try:
+        logger.info("Configuring C Compiler...")
+        subprocess.run(
+            [
+                "cmake",
+                "-B",
+                "build/VC17",
+                "-S",
+                ".",
+                "-G",
+                "Visual Studio 17 2022",
+            ],
+            check=True,
+            shell=True,
+            cwd=Config.C_COMPILER_DIR,
+        )
+        logger.info("C Compiler is configured successfully.")
+    except Exception as e:
+        logger.error(f"Failed to configure C Compiler: {e}")
+        exit(Config.BUILD_EXIT_ERROR_CODE)
+
+
+def BuildCCompiler():
+    try:
+        logger.info("Building C Compiler...")
+        subprocess.run(
+            [
+                "cmake",
+                "--build",
+                "build/VC17",
+                "--config",
+                "Debug",
+            ],
+            check=True,
+            shell=True,
+            cwd=Config.C_COMPILER_DIR,
+        )
+        logger.info("C Compiler is built successfully.")
+    except Exception as e:
+        logger.error(f"Failed to build C Compiler: {e}")
+        exit(Config.BUILD_EXIT_ERROR_CODE)
+
+
+def RunCCompilerTest():
+    try:
+        logger.info("Running C Compiler tests...")
+        testPath = os.path.join(
+            Config.C_COMPILER_DIR,
+            "build",
+            "VC17",
+            "Debug",
+            "CCompiler_tests.exe",
+        )
+        subprocess.run(
+            [
+                testPath,
+            ],
+            check=True,
+            shell=True,
+            cwd=Config.C_COMPILER_DIR,
+        )
+        logger.info("C Compiler tests completed successfully.")
+    except Exception as e:
+        logger.error(f"Failed to run C Compiler tests: {e}")
+        exit(Config.BUILD_EXIT_ERROR_CODE)
