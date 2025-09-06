@@ -25,8 +25,6 @@ if (x > 10) {
     ast.Program.Compress()
     ast.Program.Parse()
 
-    print(ast.Program)
-
     ProgramAssertion(
         IfStatementAsserion(
             condition=ExpressBlockionAsserion(
@@ -115,8 +113,6 @@ if x > 10 {
 
     ast.Program.Compress()
     ast.Program.Parse()
-
-    print(ast.Program)
 
     ProgramAssertion(
         IfStatementAsserion(
