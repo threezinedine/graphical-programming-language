@@ -1,6 +1,3 @@
 #pragma once
 
-namespace ntt
-{
-
-} // namespace ntt
+#include "tokenizer/tokenizer.h"

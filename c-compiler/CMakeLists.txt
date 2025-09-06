@@ -43,6 +43,12 @@ target_include_directories(
     include
 )
 
+target_precompile_headers(
+    ${PROJECT_NAME} 
+    PUBLIC 
+    include/pch.h
+)
+
 unset(CMAKE_FOLDER)
 
 set(CMAKE_FOLDER "Dependencies")
@@ -65,6 +71,13 @@ target_link_libraries(
     ntt-gtest
     ${PROJECT_NAME}
 )
+
+target_include_directories(
+    ${TEST_NAME}
+    PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 
 unset(CMAKE_FOLDER)
 
