@@ -83,6 +83,10 @@ namespace ntt
 
             if (currentNodeToken.GetValue<std::string>() == bracketOpen)
             {
+                if (bracketDepth > 0)
+                {
+                    temporaryCompressedNode.push_back(currentNode);
+                }
                 bracketDepth++;
                 nodeIndex++;
                 continue;
@@ -100,6 +104,7 @@ namespace ntt
                 }
                 else
                 {
+                    temporaryCompressedNode.push_back(currentNode);
                     nodeIndex++;
                 }
             }

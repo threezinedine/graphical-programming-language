@@ -39,3 +39,32 @@ TEST(BlockNodeCompressTest, HasBlockCode)
         })
         ->Assert(CreateRef<BlockNode>(blockNode));
 }
+
+TEST(BlockNodeCompressTest, NestedBlockCode)
+{
+    BlockNode blockNode(
+        NodeType::PROGRAM,
+        "3 + (2 + (5 - 3))");
+    blockNode.Compress();
+
+    CreateRef<BlockAssertion>(
+        NodeType::PROGRAM,
+        Vector<Ref<DelayAssertion>>{
+            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(3)),
+            CreateRef<AtomicAssertion>(TokenType::OPERATOR, "+"),
+            CreateRef<BlockAssertion>(
+                NodeType::EXPRESSION,
+                Vector<Ref<DelayAssertion>>{
+                    CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(2)),
+                    CreateRef<AtomicAssertion>(TokenType::OPERATOR, "+"),
+                    CreateRef<BlockAssertion>(
+                        NodeType::EXPRESSION,
+                        Vector<Ref<DelayAssertion>>{
+                            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(5)),
+                            CreateRef<AtomicAssertion>(TokenType::OPERATOR, "-"),
+                            CreateRef<AtomicAssertion>(TokenType::INTEGER, u32(3)),
+                        }),
+                }),
+        })
+        ->Assert(CreateRef<BlockNode>(blockNode));
+}
