@@ -10,6 +10,7 @@ namespace ntt
         KEYWORD,
         OPEN_BRACKET,
         CLOSE_BRACKET,
+        DELIMITER,
 
         INVALID,
         COUNT,

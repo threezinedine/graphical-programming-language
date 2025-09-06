@@ -15,33 +15,39 @@ void AssertFloatToken(const Token &token, f32 value)
     EXPECT_THAT(token.GetValue<f32>(), ::testing::FloatEq(value));
 }
 
-void AssertInvalidToken(const Token &token, std::string value)
+void AssertInvalidToken(const Token &token, const std::string &value)
 {
     ASSERT_EQ(token.GetType(), TokenType::INVALID);
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
-void AssertStringToken(const Token &token, std::string value)
+void AssertStringToken(const Token &token, const std::string &value)
 {
     ASSERT_EQ(token.GetType(), TokenType::STRING);
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
-void AssertKeywordToken(const Token &token, std::string value)
+void AssertKeywordToken(const Token &token, const std::string &value)
 {
     ASSERT_EQ(token.GetType(), TokenType::KEYWORD);
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
-void AssertOpenBracketToken(const Token &token, std::string value)
+void AssertOpenBracketToken(const Token &token, const std::string &value)
 {
     ASSERT_EQ(token.GetType(), TokenType::OPEN_BRACKET);
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
-void AssertCloseBracketToken(const Token &token, std::string value)
+void AssertCloseBracketToken(const Token &token, const std::string &value)
 {
     ASSERT_EQ(token.GetType(), TokenType::CLOSE_BRACKET);
+    EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
+}
+
+void AssertDelimiterToken(const Token &token, const std::string &value)
+{
+    ASSERT_EQ(token.GetType(), TokenType::DELIMITER);
     EXPECT_THAT(token.GetValue<std::string>(), ::testing::StrEq(value));
 }
 
@@ -85,6 +91,12 @@ void AssertCloseBracketToken(const Token &token, std::string value)
     {                                                             \
         Tokenizer tokenizer(input);                               \
         AssertCloseBracketToken(tokenizer.GetTokens()[0], value); \
+    }
+
+#define DELIMITER_TOKEN_TESTING(input, value)                  \
+    {                                                          \
+        Tokenizer tokenizer(input);                            \
+        AssertDelimiterToken(tokenizer.GetTokens()[0], value); \
     }
 
 TEST(TokenizerTest, IntegerToken)
@@ -184,12 +196,16 @@ TEST(TokenizerTest, TokenizeKeywords)
 
 TEST(TokenizerTest, TokenizeBrackets)
 {
-    {
-        OPEN_BRACKET_TOKEN_TESTING("(", "(");
-        CLOSE_BRACKET_TOKEN_TESTING(")", ")");
-        OPEN_BRACKET_TOKEN_TESTING("{", "{");
-        CLOSE_BRACKET_TOKEN_TESTING("}", "}");
-        OPEN_BRACKET_TOKEN_TESTING("[", "[");
-        CLOSE_BRACKET_TOKEN_TESTING("]", "]");
-    }
+    OPEN_BRACKET_TOKEN_TESTING("(", "(");
+    CLOSE_BRACKET_TOKEN_TESTING(")", ")");
+    OPEN_BRACKET_TOKEN_TESTING("{", "{");
+    CLOSE_BRACKET_TOKEN_TESTING("}", "}");
+    OPEN_BRACKET_TOKEN_TESTING("[", "[");
+    CLOSE_BRACKET_TOKEN_TESTING("]", "]");
+}
+
+TEST(TokenizerTest, TokenizeDelimiter)
+{
+    DELIMITER_TOKEN_TESTING(",", ",");
+    DELIMITER_TOKEN_TESTING(";", ";");
 }

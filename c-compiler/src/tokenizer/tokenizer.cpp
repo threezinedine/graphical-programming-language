@@ -10,6 +10,13 @@ namespace ntt
 
         std::vector<TokenRegexPair> regexes = {
             {
+                TokenType::DELIMITER,
+                {
+                    "^\\;",
+                    "^\\,",
+                },
+            },
+            {
                 TokenType::OPEN_BRACKET,
                 {
                     "^\\(",
@@ -150,6 +157,7 @@ namespace ntt
                         case TokenType::KEYWORD:
                         case TokenType::OPEN_BRACKET:
                         case TokenType::CLOSE_BRACKET:
+                        case TokenType::DELIMITER:
                         {
                             token.SetValue<std::string>(matchedStr);
                             break;
