@@ -125,16 +125,43 @@ namespace ntt
 
     Tokenizer::Tokenizer(const char *input) : m_input(input)
     {
+        PreProcessContent();
         TokenizeInput();
     }
 
     Tokenizer::Tokenizer(const std::string &input) : m_input(input)
     {
+        PreProcessContent();
         TokenizeInput();
     }
 
     Tokenizer::~Tokenizer()
     {
+    }
+
+    void Tokenizer::PreProcessContent()
+    {
+        std::string temporaryContent = "";
+        u32 characterIndex = 0;
+        u32 inputLength = (u32)m_input.length();
+
+        while (characterIndex < inputLength)
+        {
+            char curentCharacter = m_input[characterIndex];
+
+            if (curentCharacter != '\n')
+            {
+                temporaryContent += curentCharacter;
+            }
+            else
+            {
+                temporaryContent += ' ';
+            }
+
+            characterIndex++;
+        }
+
+        m_input = std::move(temporaryContent);
     }
 
     void Tokenizer::TokenizeInput()

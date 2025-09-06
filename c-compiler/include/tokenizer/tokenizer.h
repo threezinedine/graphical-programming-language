@@ -23,6 +23,12 @@ namespace ntt
 
     private:
         /**
+         * Used for converting all `\r\n` or `\n` to `` in the input string.
+         * This is called inside the constructor before tokenization.
+         */
+        void PreProcessContent();
+
+        /**
          * Actually perform the tokenization of the input string. This is called
          *      inside the constructor. The `m_tokens` will be populated after this call.
          */

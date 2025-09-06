@@ -274,16 +274,17 @@ TEST(TokenizerTest, TokenizeOperators)
     OPERATOR_TOKEN_TESTING("||", "||");
 }
 
-TEST(TokenizerTest, DISABLED_FinalMix)
-{
-    Tokenizer tokenizer(R"(
-
-TEST(TokenizerTest, DISABLED_FinalMix)
+TEST(TokenizerTest, FinalMix)
 {
     Tokenizer tokenizer(R"(
 const pi = 3.14;
 let radius = 10;
-let area = pi * (radius * radius);
+if (radius > 0) {
+    let area = pi * radius * radius;
+    print("Area is: " + area);
+} else {
+    print("Invalid radius");
+}
 )");
 
     const auto &tokens = tokenizer.GetTokens();
@@ -291,6 +292,44 @@ let area = pi * (radius * radius);
 
     AssertKeywordToken(tokens[index++], "const");
     AssertIdentifierToken(tokens[index++], "pi");
-    AssertDelimiterToken(tokens[index++], "=");
+    AssertOperatorToken(tokens[index++], "=");
     AssertFloatToken(tokens[index++], 3.14f);
+    AssertDelimiterToken(tokens[index++], ";");
+    AssertKeywordToken(tokens[index++], "let");
+    AssertIdentifierToken(tokens[index++], "radius");
+    AssertOperatorToken(tokens[index++], "=");
+    AssertIntegerToken(tokens[index++], 10);
+    AssertDelimiterToken(tokens[index++], ";");
+    AssertKeywordToken(tokens[index++], "if");
+    AssertBracketToken(tokens[index++], "(");
+    AssertIdentifierToken(tokens[index++], "radius");
+    AssertOperatorToken(tokens[index++], ">");
+    AssertIntegerToken(tokens[index++], 0);
+    AssertBracketToken(tokens[index++], ")");
+    AssertBracketToken(tokens[index++], "{");
+    AssertKeywordToken(tokens[index++], "let");
+    AssertIdentifierToken(tokens[index++], "area");
+    AssertOperatorToken(tokens[index++], "=");
+    AssertIdentifierToken(tokens[index++], "pi");
+    AssertOperatorToken(tokens[index++], "*");
+    AssertIdentifierToken(tokens[index++], "radius");
+    AssertOperatorToken(tokens[index++], "*");
+    AssertIdentifierToken(tokens[index++], "radius");
+    AssertDelimiterToken(tokens[index++], ";");
+    AssertIdentifierToken(tokens[index++], "print");
+    AssertBracketToken(tokens[index++], "(");
+    AssertStringToken(tokens[index++], R"("Area is: ")");
+    AssertOperatorToken(tokens[index++], "+");
+    AssertIdentifierToken(tokens[index++], "area");
+    AssertBracketToken(tokens[index++], ")");
+    AssertDelimiterToken(tokens[index++], ";");
+    AssertBracketToken(tokens[index++], "}");
+    AssertKeywordToken(tokens[index++], "else");
+    AssertBracketToken(tokens[index++], "{");
+    AssertIdentifierToken(tokens[index++], "print");
+    AssertBracketToken(tokens[index++], "(");
+    AssertStringToken(tokens[index++], R"("Invalid radius")");
+    AssertBracketToken(tokens[index++], ")");
+    AssertDelimiterToken(tokens[index++], ";");
+    AssertBracketToken(tokens[index++], "}");
 }
