@@ -54,7 +54,8 @@ namespace ntt
                        TokenType::BRACKET,
                        TokenType::DELIMITER,
                        TokenType::IDENTIFIER,
-                       TokenType::OPERATOR);
+                       TokenType::OPERATOR,
+                       TokenType::BOOLEAN);
 
     JSON Token::ToJSON() const
     {

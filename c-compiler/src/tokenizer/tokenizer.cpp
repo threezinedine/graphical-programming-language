@@ -77,6 +77,13 @@ namespace ntt
                 },
             },
             {
+                TokenType::BOOLEAN,
+                {
+                    "^true",
+                    "^false",
+                },
+            },
+            {
                 TokenType::IDENTIFIER,
                 {
                     "^[a-zA-Z_][a-zA-Z0-9_]*",
@@ -242,6 +249,7 @@ namespace ntt
                             break;
                         }
                         case TokenType::STRING:
+                        case TokenType::BOOLEAN:
                         case TokenType::DELIMITER:
                         case TokenType::BRACKET:
                         case TokenType::INVALID:

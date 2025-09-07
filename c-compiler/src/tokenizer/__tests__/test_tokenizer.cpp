@@ -30,6 +30,7 @@ using namespace ntt;
 FUNC_ASSERT_TOKEN_IMPL(INTEGER, u32, Eq, );
 FUNC_ASSERT_TOKEN_IMPL(FLOAT, f32, FloatEq, );
 FUNC_ASSERT_TOKEN_IMPL(INVALID, std::string, StrEq, .c_str());
+FUNC_ASSERT_TOKEN_IMPL(BOOLEAN, std::string, StrEq, .c_str());
 FUNC_ASSERT_TOKEN_IMPL(STRING, std::string, StrEq, .c_str());
 FUNC_ASSERT_TOKEN_IMPL(KEYWORD, std::string, StrEq, .c_str());
 FUNC_ASSERT_TOKEN_IMPL(IDENTIFIER, std::string, StrEq, .c_str());
@@ -112,6 +113,11 @@ TEST(TokenizerTest, MutipleMixedIntegersFloatsStringsAndInvalids)
     LINE_PROPAGATION(AssertSTRINGToken, tokens[2], R"("Translate")", 22, 11);
     LINE_PROPAGATION(AssertINVALIDToken, tokens[3], "`", 35, 1);
     LINE_PROPAGATION(AssertFLOATToken, tokens[4], 3.12f, 37, 4);
+}
+
+TEST(TokenizerTest, TokenizeBoolean)
+{
+    TOKEN_TESTING(BOOLEAN, "true", "true", 0, 4);
 }
 
 TEST(TokenizerTest, TokenizeKeywords)
