@@ -8,6 +8,7 @@ namespace ntt
         PROGRAM,
         EXPRESSION,
         INDEX,
+        BLOCK,
 
         ATOMIC,
 

@@ -34,6 +34,7 @@ namespace ntt
 
     void BlockNode::Compress()
     {
+        m_children = CompressWithBrackets(m_children, NodeType::BLOCK, "{", "}");
         m_children = CompressWithBrackets(m_children, NodeType::EXPRESSION, "(", ")");
         m_children = CompressWithBrackets(m_children, NodeType::INDEX, "[", "]");
     }

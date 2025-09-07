@@ -67,3 +67,15 @@ TEST(BlockNodeCompressTest, OnlySquareBrackets)
             ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
 }
+
+TEST(BlockNodeCompressTest, OnlyBrackets)
+{
+    COMPRESS_ONLY_DEFINE("{ print(\"Hello, World!\"); }");
+
+    PROGRAM_ASSERTION(
+        BLOCK_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "print"),
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::STRING, "\"Hello, World!\"")),
+            ATOMIC_ASSERTION(TokenType::DELIMITER, ";")));
+}

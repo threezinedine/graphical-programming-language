@@ -12,7 +12,23 @@
 	"settings": {
 		"files.associations": {
 			"*.py": "python",
-			"xstring": "cpp"
+			"xstring": "cpp",
+			"any": "cpp",
+			"array": "cpp",
+			"compare": "cpp",
+			"filesystem": "cpp",
+			"functional": "cpp",
+			"memory": "cpp",
+			"ranges": "cpp",
+			"ratio": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"variant": "cpp",
+			"xmemory": "cpp",
+			"xtr1common": "cpp",
+			"xutility": "cpp",
+			"vector": "cpp"
 		}
 	}
 }
