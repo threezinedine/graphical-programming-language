@@ -178,7 +178,7 @@ namespace ntt
                 parsedNodes,
                 newParsedNodes,
                 hasAnyModified,
-                std::set<String>{"+"});
+                std::set<String>{"+", "-"});
             parsedNodes = newParsedNodes;
         }
 
@@ -302,20 +302,20 @@ namespace ntt
 
             if (sourceNodeIndex + 1 >= numberOfSourceNodes)
             {
-                Ref<Node> newUnaryNode = CreateRef<OperationNode>(
+                Ref<Node> newOperation = CreateRef<OperationNode>(
                     currentNode, CreateRef<InvalidNode>(), CreateRef<InvalidNode>());
-                newUnaryNode->AddError(ErrorType::MISSING_RIGHT_OPERAND);
-                outNodes.push_back(newUnaryNode);
+                newOperation->AddError(ErrorType::MISSING_RIGHT_OPERAND);
+                outNodes.push_back(newOperation);
                 sourceNodeIndex++;
                 continue;
             }
 
             const Ref<Node> &rightOperandNode = sourceNodes[sourceNodeIndex + 1];
-            const Ref<Node> &leftOperandNode = sourceNodes[sourceNodeIndex - 1];
+            const Ref<Node> &leftOperandNode = outNodes.back();
 
-            Ref<Node> newUnaryNode = CreateRef<OperationNode>(currentNode, leftOperandNode, rightOperandNode);
+            Ref<Node> newOperation = CreateRef<OperationNode>(currentNode, leftOperandNode, rightOperandNode);
             outNodes.pop_back();
-            outNodes.push_back(newUnaryNode);
+            outNodes.push_back(newOperation);
             foundUnary = NTT_TRUE;
             sourceNodeIndex += 2;
         }
