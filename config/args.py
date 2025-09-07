@@ -29,6 +29,9 @@ class Parser:
         build = subparsers.add_parser("build", help="Build the project")
         build.add_argument("project", choices=["c-compiler"], type=str)
 
+        config = subparsers.add_parser("config", help="Configure the project")
+        config.add_argument("project", choices=["c-compiler"], type=str)
+
         self._args = parser.parse_args()
 
     @property

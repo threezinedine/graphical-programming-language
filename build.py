@@ -8,6 +8,7 @@ from config.utils import (
     ConfigureCCompiler,
     BuildCCompiler,
     RunCCompilerTest,
+    InstallDependencies,
 )
 
 
@@ -15,7 +16,10 @@ def main() -> None:
     parser = Parser()
     args = parser.Args
 
-    if args.command == "test":
+    if args.command == "config":
+        if args.project == "c-compiler":
+            InstallDependencies()
+    elif args.command == "test":
         if args.project == "compiler":
             CreateEnv(Config.RELATIVE_COMPILER_DIR)
             RunTest(Config.RELATIVE_COMPILER_DIR)
@@ -31,6 +35,7 @@ def main() -> None:
             AddPackage(Config.RELATIVE_COMPILER_DIR, args.package)
     elif args.command == "build":
         if args.project == "c-compiler":
+            InstallDependencies()
             ConfigureCCompiler()
             BuildCCompiler()
 

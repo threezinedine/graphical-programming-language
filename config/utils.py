@@ -206,6 +206,27 @@ def RunSpecTest(folder: str, spec: str) -> None:
         exit(Config.BUILD_EXIT_ERROR_CODE)
 
 
+def InstallDependencies():
+    try:
+        logger.info("Installing dependencies...")
+        subprocess.run(
+            [
+                "git",
+                "submodule",
+                "update",
+                "--init",
+                "--recursive",
+            ],
+            check=True,
+            shell=True,
+            cwd=Config.BASE_CMD,
+        )
+        logger.info("Dependencies are installed successfully.")
+    except Exception as e:
+        logger.error(f"Failed to install dependencies: {e}")
+        exit(Config.BUILD_EXIT_ERROR_CODE)
+
+
 def ConfigureCCompiler():
     try:
         logger.info("Configuring C Compiler...")
