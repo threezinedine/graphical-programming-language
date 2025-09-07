@@ -102,8 +102,14 @@ namespace ntt
             }
             else if (currentNodeToken.GetValue<std::string>() == bracketClose)
             {
-                bracketDepth--;
                 if (bracketDepth == 0)
+                {
+                    // unmatched closing bracket, just push to the result
+                    compressedNodes.push_back(currentNode);
+                    nodeIndex++;
+                    continue;
+                }
+                else if (bracketDepth == 1)
                 {
                     Ref<BlockNode> newBlockNode = CreateRef<BlockNode>(blockType, temporaryCompressedNode);
                     newBlockNode->Compress();
@@ -116,6 +122,7 @@ namespace ntt
                     temporaryCompressedNode.push_back(currentNode);
                     nodeIndex++;
                 }
+                bracketDepth--;
             }
         }
 

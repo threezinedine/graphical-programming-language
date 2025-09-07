@@ -105,3 +105,14 @@ if (tokens[0] == "a")
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
             ATOMIC_ASSERTION(TokenType::DELIMITER, ";")));
 }
+
+TEST(BlockNodeCompressTest, OnlyCloseBracket)
+{
+    COMPRESS_ONLY_DEFINE("print(\"Testing\")}");
+
+    PROGRAM_ASSERTION(
+        ATOMIC_ASSERTION(TokenType::IDENTIFIER, "print"),
+        EXPRESSION_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::STRING, "\"Testing\"")),
+        ATOMIC_ASSERTION(TokenType::BRACKET, "}"));
+}
