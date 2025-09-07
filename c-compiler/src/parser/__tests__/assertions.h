@@ -64,9 +64,29 @@ private:
     TokenValue m_expectValue;
 };
 
+class UnaryOperationAssertion : public DelayAssertion
+{
+public:
+    UnaryOperationAssertion(Ref<DelayAssertion> operation, Ref<DelayAssertion> operand,
+                            ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error), m_operation(operation), m_operand(operand) {}
+
+    ~UnaryOperationAssertion() = default;
+
+    void Assert(Ref<Node> node) override;
+
+private:
+    Ref<DelayAssertion> m_operation;
+    Ref<DelayAssertion> m_operand;
+};
+
 #define COMPRESS_ONLY_DEFINE(content)                \
     BlockNode blockNode(NodeType::PROGRAM, content); \
     blockNode.Compress();
+
+#define PARSE_DEFINE(content)     \
+    COMPRESS_ONLY_DEFINE(content) \
+    blockNode.Parse();
 
 #define PROGRAM_ASSERTION(...)                                                             \
     CreateRef<BlockAssertion>(NodeType::PROGRAM, Vector<Ref<DelayAssertion>>{__VA_ARGS__}) \
@@ -96,3 +116,9 @@ private:
 
 #define ATOMIC_ASSERTION(type, value) \
     CreateRef<AtomicAssertion>(type, value)
+
+#define UNARY_ASSERTION(operation, operand) \
+    CreateRef<UnaryOperationAssertion>(operation, operand)
+
+#define UNARY_ASSERTION_ERR(err, operation, operand) \
+    CreateRef<UnaryOperationAssertion>(operation, operand, err)

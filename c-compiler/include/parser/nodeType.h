@@ -12,6 +12,8 @@ namespace ntt
 
         ATOMIC,
 
+        UNARY_OPERATION,
+
         INVALID,
         COUNT,
     };

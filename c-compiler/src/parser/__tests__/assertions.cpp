@@ -55,3 +55,20 @@ void AtomicAssertion::Assert(Ref<Node> node)
         break;
     }
 }
+
+void UnaryOperationAssertion::Assert(Ref<Node> node)
+{
+    EXPECT_THAT(node->GetType(), NodeType::UNARY_OPERATION);
+
+    UnaryOperationNode *unaryNode = dynamic_cast<UnaryOperationNode *>(node.get());
+    EXPECT_THAT(unaryNode != nullptr, true);
+
+    m_operand->Assert(unaryNode->GetOperand());
+    m_operation->Assert(unaryNode->GetOperator());
+
+    if (HasError())
+    {
+        EXPECT_THAT(node->GetErrors(),
+                    ::testing::Contains(static_cast<ErrorType>(GetError())));
+    }
+}

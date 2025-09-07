@@ -1,6 +1,8 @@
 #include "parser/blockNode.h"
 #include "tokenizer/tokenizer.h"
 #include "parser/atomic.h"
+#include <set>
+#include "parser/unaryOperationNode.h"
 
 namespace ntt
 {
@@ -137,8 +139,68 @@ namespace ntt
         return compressedNodes;
     }
 
+    static void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
+                                     Vector<Ref<Node>> &outNodes,
+                                     b8 &foundUnary,
+                                     const std::set<String> &operators);
+
     void BlockNode::Parse()
     {
+        Vector<Ref<Node>> parsedNodes = m_children;
+        b8 hasAnyModified = NTT_TRUE;
+
+        while (hasAnyModified)
+        {
+            Vector<Ref<Node>> newParsedNodes;
+            ParseUnaryOperations(
+                parsedNodes,
+                newParsedNodes,
+                hasAnyModified,
+                std::set<String>{"!"});
+            parsedNodes = newParsedNodes;
+            hasAnyModified = NTT_FALSE;
+        }
+
+		m_children = parsedNodes;
+    }
+
+    void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
+                              Vector<Ref<Node>> &outNodes,
+                              b8 &foundUnary,
+                              const std::set<String> &operators)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        while (sourceNodeIndex < numberOfSourceNodes)
+        {
+            const Ref<Node> &currentNode = sourceNodes[sourceNodeIndex];
+
+            if (currentNode->GetType() != NodeType::ATOMIC)
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
+            const Token &currentNodeToken = atomicNode->GetToken();
+
+            if (currentNodeToken.GetType() != TokenType::OPERATOR)
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            const Ref<Node> &operandNode = sourceNodes[sourceNodeIndex + 1];
+
+            Ref<Node> newUnaryNode = CreateRef<UnaryOperationNode>(currentNode, operandNode);
+            outNodes.push_back(newUnaryNode);
+            foundUnary = NTT_TRUE;
+            sourceNodeIndex += 2;
+        }
     }
 
     void BlockNode::TokenizeContent()
