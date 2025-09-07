@@ -40,3 +40,19 @@ TEST(BlockNodeCompressTest, NestedBlockCode)
                 ATOMIC_ASSERTION(TokenType::OPERATOR, "-"),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)))));
 }
+
+TEST(BlockNodeCompressTest, NestedBlockCodeWithSquareBrackets)
+{
+    COMPRESS_ONLY_DEFINE("3 + [2 + (5 - 3)]");
+
+    PROGRAM_ASSERTION(
+        ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+        ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+        INDEX_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)),
+                ATOMIC_ASSERTION(TokenType::OPERATOR, "-"),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)))));
+}

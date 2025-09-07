@@ -35,6 +35,7 @@ namespace ntt
     void BlockNode::Compress()
     {
         m_children = CompressWithBrackets(m_children, NodeType::EXPRESSION, "(", ")");
+        m_children = CompressWithBrackets(m_children, NodeType::INDEX, "[", "]");
     }
 
     Vector<Ref<Node>> BlockNode::CompressWithBrackets(const Vector<Ref<Node>> &nodes,
@@ -57,7 +58,14 @@ namespace ntt
 
             if (currentNode->GetType() != NodeType::ATOMIC)
             {
-                compressedNodes.push_back(currentNode);
+                if (bracketDepth == 0)
+                {
+                    compressedNodes.push_back(currentNode);
+                }
+                else
+                {
+                    temporaryCompressedNode.push_back(currentNode);
+                }
                 nodeIndex++;
                 continue;
             }
@@ -99,7 +107,7 @@ namespace ntt
                     Ref<BlockNode> newBlockNode = CreateRef<BlockNode>(blockType, temporaryCompressedNode);
                     newBlockNode->Compress();
                     compressedNodes.push_back(newBlockNode);
-                    nodeIndex += u32(temporaryCompressedNode.size() + 1);
+                    nodeIndex++;
                     temporaryCompressedNode.clear();
                 }
                 else

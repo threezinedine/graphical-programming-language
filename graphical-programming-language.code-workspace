@@ -1,8 +1,18 @@
 {
 	"folders": [
 		{
+			"name": "c-compiler",
+			"path": "c-compiler"
+		},
+		{
+			"name": "graphical-programming-language",
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"files.associations": {
+			"*.py": "python",
+			"xstring": "cpp"
+		}
+	}
 }

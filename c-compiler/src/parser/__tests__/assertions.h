@@ -65,5 +65,8 @@ private:
 #define EXPRESSION_ASSERTION(...) \
     CreateRef<BlockAssertion>(NodeType::EXPRESSION, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
 
+#define INDEX_ASSERTION(...) \
+    CreateRef<BlockAssertion>(NodeType::INDEX, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
+
 #define ATOMIC_ASSERTION(type, value) \
     CreateRef<AtomicAssertion>(type, value)
