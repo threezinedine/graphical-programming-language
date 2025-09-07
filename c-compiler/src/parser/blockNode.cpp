@@ -225,6 +225,15 @@ namespace ntt
             else if (operandNode->GetType() == NodeType::UNARY_OPERATION)
             {
             }
+            else if (operandNode->GetType() == NodeType::BLOCK)
+            {
+                Ref<Node> newUnaryNode = CreateRef<UnaryOperationNode>(
+                    currentNode, CreateRef<InvalidNode>());
+                newUnaryNode->AddError(ErrorType::MISSING_RIGHT_OPERAND);
+                outNodes.push_back(newUnaryNode);
+                sourceNodeIndex++;
+                continue;
+            }
             else
             {
                 outNodes.push_back(currentNode);

@@ -34,3 +34,26 @@ TEST(UnaryOperationsTest, NestedUnaryOperand)
                 ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
                 ATOMIC_ASSERTION(TokenType::IDENTIFIER, "test"))));
 }
+
+TEST(UnaryOperationsTest, UnaryWithExpressionOperand)
+{
+    PARSE_DEFINE("!(true)");
+
+    PROGRAM_ASSERTION(
+        UNARY_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE))));
+}
+
+TEST(UnaryOperationsTest, UnaryWithInvalidOperand)
+{
+    PARSE_DEFINE("!{ }");
+
+    PROGRAM_ASSERTION(
+        UNARY_ASSERTION_ERR(
+            ErrorType::MISSING_RIGHT_OPERAND,
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
+            INVALID_ASSERTION()),
+        BLOCK_ASSERTION());
+}
