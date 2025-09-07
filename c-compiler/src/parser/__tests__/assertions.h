@@ -78,6 +78,16 @@ private:
     TokenValue m_expectValue;
 };
 
+class InvalidAssertion : public DelayAssertion
+{
+public:
+    InvalidAssertion(ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error) {}
+    ~InvalidAssertion() = default;
+
+    void Assert(Ref<Node> node) override;
+};
+
 class UnaryOperationAssertion : public DelayAssertion
 {
 public:
@@ -130,6 +140,9 @@ private:
 
 #define ATOMIC_ASSERTION(type, value) \
     CreateRef<AtomicAssertion>(type, value)
+
+#define INVALID_ASSERTION() \
+    CreateRef<InvalidAssertion>()
 
 #define UNARY_ASSERTION(operation, operand) \
     CreateRef<UnaryOperationAssertion>(operation, operand)

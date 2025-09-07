@@ -59,6 +59,17 @@ void AtomicAssertion::Assert(Ref<Node> node)
     }
 }
 
+void InvalidAssertion::Assert(Ref<Node> node)
+{
+    EXPECT_THAT(node->GetType(), NodeType::INVALID);
+
+    if (HasError())
+    {
+        EXPECT_THAT(node->GetErrors(),
+                    ::testing::Contains(static_cast<ErrorType>(GetError())));
+    }
+}
+
 void UnaryOperationAssertion::Assert(Ref<Node> node)
 {
     EXPECT_THAT(node->GetType(), NodeType::UNARY_OPERATION);

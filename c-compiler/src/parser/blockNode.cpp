@@ -3,6 +3,7 @@
 #include "parser/atomic.h"
 #include <set>
 #include "parser/unaryOperationNode.h"
+#include "parser/invalid.h"
 
 namespace ntt
 {
@@ -161,7 +162,7 @@ namespace ntt
             hasAnyModified = NTT_FALSE;
         }
 
-		m_children = parsedNodes;
+        m_children = parsedNodes;
     }
 
     void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
@@ -190,6 +191,16 @@ namespace ntt
             if (currentNodeToken.GetType() != TokenType::OPERATOR)
             {
                 outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            if (sourceNodeIndex + 1 >= numberOfSourceNodes)
+            {
+                Ref<Node> newUnaryNode = CreateRef<UnaryOperationNode>(
+                    currentNode, CreateRef<InvalidNode>());
+                newUnaryNode->AddError(ErrorType::MISSING_RIGHT_OPERAND);
+                outNodes.push_back(newUnaryNode);
                 sourceNodeIndex++;
                 continue;
             }

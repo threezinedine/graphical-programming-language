@@ -11,3 +11,14 @@ TEST(UnaryOperationsTest, SimpleUnaryPlus)
             ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
             ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE)));
 }
+
+TEST(UnaryOperationsTest, MissingOperand)
+{
+    PARSE_DEFINE("! ");
+
+    PROGRAM_ASSERTION(
+        UNARY_ASSERTION_ERR(
+            ErrorType::MISSING_RIGHT_OPERAND,
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
+            INVALID_ASSERTION()));
+}
