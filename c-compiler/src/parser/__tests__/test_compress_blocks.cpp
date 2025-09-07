@@ -79,3 +79,29 @@ TEST(BlockNodeCompressTest, OnlyBrackets)
                 ATOMIC_ASSERTION(TokenType::STRING, "\"Hello, World!\"")),
             ATOMIC_ASSERTION(TokenType::DELIMITER, ";")));
 }
+
+TEST(BlockNodeCompressTest, MixBrackets)
+{
+    COMPRESS_ONLY_DEFINE(R"(
+if (tokens[0] == "a")
+{
+    print("Hello, World!", 4);
+}
+)");
+
+    PROGRAM_ASSERTION(
+        ATOMIC_ASSERTION(TokenType::KEYWORD, "if"),
+        EXPRESSION_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "tokens"),
+            INDEX_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(0))),
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "=="),
+            ATOMIC_ASSERTION(TokenType::STRING, "\"a\"")),
+        BLOCK_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "print"),
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::STRING, "\"Hello, World!\""),
+                ATOMIC_ASSERTION(TokenType::DELIMITER, ","),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
+            ATOMIC_ASSERTION(TokenType::DELIMITER, ";")));
+}
