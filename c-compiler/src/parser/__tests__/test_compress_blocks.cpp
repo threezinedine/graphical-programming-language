@@ -135,7 +135,8 @@ TEST(BlockNodeCompressTest, NestedMissingBrackets)
     PROGRAM_ASSERTION(
         BLOCK_ASSERTION(
             ATOMIC_ASSERTION(TokenType::IDENTIFIER, "print"),
-            EXPRESSION_ASSERTION(
+            EXPRESSION_ASSERTION_ERR(
+                ErrorType::MISSING_END_BRACKET,
                 ATOMIC_ASSERTION(TokenType::STRING, "\"Testing\""))),
         ATOMIC_ASSERTION(TokenType::BRACKET, ")"));
 }

@@ -130,6 +130,7 @@ namespace ntt
         {
             Ref<BlockNode> newBlockNode = CreateRef<BlockNode>(blockType, temporaryCompressedNode);
             newBlockNode->Compress();
+            newBlockNode->AddError(ErrorType::MISSING_END_BRACKET);
             compressedNodes.push_back(newBlockNode);
         }
 

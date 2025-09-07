@@ -14,6 +14,12 @@ void BlockAssertion::Assert(Ref<Node> node)
     {
         m_assertions[i]->Assert(blockNode->GetChildren()[i]);
     }
+
+    if (HasError())
+    {
+        EXPECT_THAT(node->GetErrors(),
+                    ::testing::Contains(static_cast<ErrorType>(GetError())));
+    }
 }
 
 void AtomicAssertion::Assert(Ref<Node> node)

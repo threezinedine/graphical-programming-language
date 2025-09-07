@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "nodeType.h"
+#include "error.h"
 
 namespace ntt
 {
@@ -34,5 +35,13 @@ namespace ntt
          * Actually perform the parsing of this node.
          */
         virtual void Parse() = 0;
+
+        const Vector<ErrorType> &GetErrors() const { return m_errors; }
+        void AddError(ErrorType error) { m_errors.push_back(error); }
+        void ClearErrors() { m_errors.clear(); }
+        b8 HasErrors() const { return !m_errors.empty(); }
+
+    private:
+        Vector<ErrorType> m_errors;
     };
 } // namespace ntt
