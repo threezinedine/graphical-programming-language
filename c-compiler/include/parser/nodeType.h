@@ -13,6 +13,7 @@ namespace ntt
         ATOMIC,
 
         UNARY_OPERATION,
+        OPERATION,
 
         INVALID,
         COUNT,

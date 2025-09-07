@@ -4,6 +4,7 @@
 #include <set>
 #include "parser/unaryOperationNode.h"
 #include "parser/invalid.h"
+#include "parser/operationNode.h"
 
 namespace ntt
 {
@@ -145,6 +146,11 @@ namespace ntt
                                      b8 &foundUnary,
                                      const std::set<String> &operators);
 
+    static void ParseOperations(const Vector<Ref<Node>> &sourceNodes,
+                                Vector<Ref<Node>> &outNodes,
+                                b8 &foundUnary,
+                                const std::set<String> &operators);
+
     void BlockNode::Parse()
     {
         Vector<Ref<Node>> parsedNodes = m_children;
@@ -159,6 +165,20 @@ namespace ntt
                 newParsedNodes,
                 hasAnyModified,
                 std::set<String>{"!"});
+            parsedNodes = newParsedNodes;
+        }
+
+        hasAnyModified = NTT_TRUE;
+
+        while (hasAnyModified)
+        {
+            hasAnyModified = NTT_FALSE;
+            Vector<Ref<Node>> newParsedNodes;
+            ParseOperations(
+                parsedNodes,
+                newParsedNodes,
+                hasAnyModified,
+                std::set<String>{"+"});
             parsedNodes = newParsedNodes;
         }
 
@@ -188,7 +208,8 @@ namespace ntt
             Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
             const Token &currentNodeToken = atomicNode->GetToken();
 
-            if (currentNodeToken.GetType() != TokenType::OPERATOR)
+            if (currentNodeToken.GetType() != TokenType::OPERATOR ||
+                operators.find(currentNodeToken.GetValue<String>()) == operators.end())
             {
                 outNodes.push_back(currentNode);
                 sourceNodeIndex++;
@@ -242,6 +263,58 @@ namespace ntt
             }
 
             Ref<Node> newUnaryNode = CreateRef<UnaryOperationNode>(currentNode, operandNode);
+            outNodes.push_back(newUnaryNode);
+            foundUnary = NTT_TRUE;
+            sourceNodeIndex += 2;
+        }
+    }
+
+    void ParseOperations(const Vector<Ref<Node>> &sourceNodes,
+                         Vector<Ref<Node>> &outNodes,
+                         b8 &foundUnary,
+                         const std::set<String> &operators)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        while (sourceNodeIndex < numberOfSourceNodes)
+        {
+            const Ref<Node> &currentNode = sourceNodes[sourceNodeIndex];
+
+            if (currentNode->GetType() != NodeType::ATOMIC)
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
+            const Token &currentNodeToken = atomicNode->GetToken();
+
+            if (currentNodeToken.GetType() != TokenType::OPERATOR ||
+                operators.find(currentNodeToken.GetValue<String>()) == operators.end())
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            if (sourceNodeIndex + 1 >= numberOfSourceNodes)
+            {
+                Ref<Node> newUnaryNode = CreateRef<OperationNode>(
+                    currentNode, CreateRef<InvalidNode>(), CreateRef<InvalidNode>());
+                newUnaryNode->AddError(ErrorType::MISSING_RIGHT_OPERAND);
+                outNodes.push_back(newUnaryNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            const Ref<Node> &rightOperandNode = sourceNodes[sourceNodeIndex + 1];
+            const Ref<Node> &leftOperandNode = sourceNodes[sourceNodeIndex - 1];
+
+            Ref<Node> newUnaryNode = CreateRef<OperationNode>(currentNode, leftOperandNode, rightOperandNode);
+            outNodes.pop_back();
             outNodes.push_back(newUnaryNode);
             foundUnary = NTT_TRUE;
             sourceNodeIndex += 2;

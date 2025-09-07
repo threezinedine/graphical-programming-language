@@ -111,6 +111,27 @@ private:
     Ref<DelayAssertion> m_operand;
 };
 
+class OperationAssertion : public DelayAssertion
+{
+public:
+    OperationAssertion(Ref<DelayAssertion> operatorNode,
+                       Ref<DelayAssertion> leftOperand,
+                       Ref<DelayAssertion> rightOperand,
+                       ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error), m_operatorNode(operatorNode),
+          m_leftOperand(leftOperand), m_rightOperand(rightOperand) {}
+
+    ~OperationAssertion() = default;
+
+protected:
+    void _Assert(Ref<Node> node) override;
+
+private:
+    Ref<DelayAssertion> m_operatorNode;
+    Ref<DelayAssertion> m_leftOperand;
+    Ref<DelayAssertion> m_rightOperand;
+};
+
 #define COMPRESS_ONLY_DEFINE(content)                \
     BlockNode blockNode(NodeType::PROGRAM, content); \
     blockNode.Compress();
@@ -156,3 +177,9 @@ private:
 
 #define UNARY_ASSERTION_ERR(err, operation, operand) \
     CreateRef<UnaryOperationAssertion>(operation, operand, err)
+
+#define OPERATION_ASSERTION(operatorNode, leftOperand, rightOperand) \
+    CreateRef<OperationAssertion>(operatorNode, leftOperand, rightOperand)
+
+#define OPERATION_ASSERTION_ERR(err, operatorNode, leftOperand, rightOperand) \
+    CreateRef<OperationAssertion>(operatorNode, leftOperand, rightOperand, err)
