@@ -77,13 +77,6 @@ namespace ntt
                 },
             },
             {
-                TokenType::BOOLEAN,
-                {
-                    "^true",
-                    "^false",
-                },
-            },
-            {
                 TokenType::IDENTIFIER,
                 {
                     "^[a-zA-Z_][a-zA-Z0-9_]*",
@@ -241,18 +234,23 @@ namespace ntt
                             {
                                 token = Token(TokenType::KEYWORD, currentRawInputIndex);
                             }
+                            else if (matchedStr == "true")
+                            {
+                                token = Token(TokenType::BOOLEAN, currentRawInputIndex);
+                                token.SetValue<b8>(NTT_TRUE);
+                                break;
+                            }
+                            else if (matchedStr == "false")
+                            {
+                                token = Token(TokenType::BOOLEAN, currentRawInputIndex);
+                                token.SetValue<b8>(NTT_FALSE);
+                                break;
+                            }
                             else
                             {
                                 token = Token(TokenType::IDENTIFIER, currentRawInputIndex);
                             }
                             token.SetValue<std::string>(matchedStr);
-                            break;
-                        }
-                        case TokenType::BOOLEAN:
-                        {
-                            b8 boolValue = (matchedStr == "true");
-                            token.SetValue<b8>(boolValue);
-                            token.SetLength((u32)matchedStr.length());
                             break;
                         }
                         case TokenType::STRING:

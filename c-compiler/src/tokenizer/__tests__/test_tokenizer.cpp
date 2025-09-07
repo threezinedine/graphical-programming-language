@@ -118,6 +118,19 @@ TEST(TokenizerTest, MutipleMixedIntegersFloatsStringsAndInvalids)
 TEST(TokenizerTest, TokenizeBoolean)
 {
     TOKEN_TESTING(BOOLEAN, "true", NTT_TRUE, 0, 4);
+    TOKEN_TESTING(BOOLEAN, "false", NTT_FALSE, 0, 5);
+}
+
+TEST(TokenizerTest, MultipleMixedBooleans)
+{
+    Tokenizer tokenizer("truer false true false");
+    const auto &tokens = tokenizer.GetTokens();
+    ASSERT_EQ(tokens.size(), 4);
+
+    LINE_PROPAGATION(AssertIDENTIFIERToken, tokens[0], "truer", 0, 5);
+    LINE_PROPAGATION(AssertBOOLEANToken, tokens[1], NTT_FALSE, 6, 5);
+    LINE_PROPAGATION(AssertBOOLEANToken, tokens[2], NTT_TRUE, 12, 4);
+    LINE_PROPAGATION(AssertBOOLEANToken, tokens[3], NTT_FALSE, 17, 5);
 }
 
 TEST(TokenizerTest, TokenizeKeywords)
