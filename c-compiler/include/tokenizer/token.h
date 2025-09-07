@@ -23,7 +23,7 @@ namespace ntt
     class Token
     {
     public:
-        Token(TokenType type);
+        Token(TokenType type, u32 startIndex);
         Token(const Token &other);
         ~Token();
 
@@ -31,6 +31,11 @@ namespace ntt
          * @return The type of the token.
          */
         inline TokenType GetType() const { return m_type; }
+
+        inline u32 GetStartIndex() const { return m_startIndex; }
+
+        inline u32 GetLength() const { return m_length; }
+        inline void SetLength(u32 length) { m_length = length; }
 
         template <typename T>
         void SetValue(T value);
@@ -43,5 +48,7 @@ namespace ntt
     private:
         TokenType m_type;
         TokenValue m_value;
+        u32 m_startIndex;
+        u32 m_length;
     };
 } // namespace ntt

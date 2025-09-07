@@ -161,6 +161,7 @@ namespace ntt
             characterIndex++;
         }
 
+        NTT_ASSERT(temporaryContent.length() == m_input.length());
         m_input = std::move(temporaryContent);
     }
 
@@ -200,6 +201,7 @@ namespace ntt
             }
 
             b8 hasMatched = NTT_FALSE;
+            u32 currentRawInputIndex = (u32)m_input.length() - (u32)temporaryContent.length();
             for (const auto &[tokenType, regexList] : regexes)
             {
                 for (const auto &regex : regexList)
@@ -210,7 +212,7 @@ namespace ntt
                     {
                         std::string matchedStr = match.str(0);
                         temporaryContent = temporaryContent.substr(matchedStr.length());
-                        Token token(tokenType);
+                        Token token(tokenType, currentRawInputIndex);
 
                         switch (tokenType)
                         {
@@ -230,11 +232,11 @@ namespace ntt
                         {
                             if (keywords.find(matchedStr) != keywords.end())
                             {
-                                token = Token(TokenType::KEYWORD);
+                                token = Token(TokenType::KEYWORD, currentRawInputIndex);
                             }
                             else
                             {
-                                token = Token(TokenType::IDENTIFIER);
+                                token = Token(TokenType::IDENTIFIER, currentRawInputIndex);
                             }
                             token.SetValue<std::string>(matchedStr);
                             break;
@@ -252,6 +254,7 @@ namespace ntt
                             break;
                         }
 
+                        token.SetLength((u32)matchedStr.length());
                         hasMatched = NTT_TRUE;
                         m_tokens.push_back(token);
                         break;
@@ -266,7 +269,7 @@ namespace ntt
 
             if (!hasMatched)
             {
-                // find the text until next non ' ' and '\n'
+                // find the text until next non ' '
                 // or end of the file as invalid token.
 
                 std::string temporaryInvalidToken = "";
@@ -277,15 +280,16 @@ namespace ntt
                 {
                     char currentCharacter = temporaryContent[characterIndex];
 
-                    if (currentCharacter != ' ' && currentCharacter != '\n')
+                    if (currentCharacter != ' ')
                     {
                         temporaryInvalidToken += currentCharacter;
                         characterIndex++;
                     }
                     else
                     {
-                        Token newInvalidToken(TokenType::INVALID);
+                        Token newInvalidToken(TokenType::INVALID, currentRawInputIndex);
                         newInvalidToken.SetValue<std::string>(temporaryInvalidToken);
+                        newInvalidToken.SetLength((u32)temporaryInvalidToken.length());
                         temporaryContent = temporaryContent.substr((u32)temporaryInvalidToken.length());
                         m_tokens.push_back(newInvalidToken);
                         break;
@@ -294,8 +298,9 @@ namespace ntt
 
                 if (temporaryInvalidToken.length() > 0 && characterIndex == temporaryContentLength) // end of line
                 {
-                    Token newInvalidToken(TokenType::INVALID);
+                    Token newInvalidToken(TokenType::INVALID, currentRawInputIndex);
                     newInvalidToken.SetValue<std::string>(temporaryInvalidToken);
+                    newInvalidToken.SetLength((u32)temporaryInvalidToken.length());
                     m_tokens.push_back(newInvalidToken);
                     temporaryContent = "";
                 }

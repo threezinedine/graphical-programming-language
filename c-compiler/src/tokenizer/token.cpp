@@ -2,13 +2,14 @@
 
 namespace ntt
 {
-    Token::Token(TokenType type)
-        : m_type(type)
+    Token::Token(TokenType type, u32 startIndex)
+        : m_type(type), m_startIndex(startIndex)
     {
     }
 
     Token::Token(const Token &other)
-        : m_type(other.m_type), m_value(other.m_value)
+        : m_type(other.m_type), m_value(other.m_value),
+          m_startIndex(other.m_startIndex), m_length(other.m_length)
     {
     }
 
@@ -59,6 +60,8 @@ namespace ntt
     {
         JSON json;
         json["type"] = TokenTypeToString(m_type);
+        json["startIndex"] = m_startIndex;
+        json["length"] = m_length;
         switch (m_type)
         {
         case TokenType::INTEGER:
