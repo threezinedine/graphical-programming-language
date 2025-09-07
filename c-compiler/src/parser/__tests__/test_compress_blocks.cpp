@@ -116,3 +116,14 @@ TEST(BlockNodeCompressTest, OnlyCloseBracket)
             ATOMIC_ASSERTION(TokenType::STRING, "\"Testing\"")),
         ATOMIC_ASSERTION(TokenType::BRACKET, "}"));
 }
+
+TEST(BlockNodeCompressTest, MissingCloseBracket)
+{
+    COMPRESS_ONLY_DEFINE("{print(\"Testing\")");
+
+    PROGRAM_ASSERTION(
+        BLOCK_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "print"),
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::STRING, "\"Testing\""))));
+}

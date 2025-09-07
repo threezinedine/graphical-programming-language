@@ -126,6 +126,13 @@ namespace ntt
             }
         }
 
+        if (temporaryCompressedNode.size() > 0)
+        {
+            Ref<BlockNode> newBlockNode = CreateRef<BlockNode>(blockType, temporaryCompressedNode);
+            newBlockNode->Compress();
+            compressedNodes.push_back(newBlockNode);
+        }
+
         return compressedNodes;
     }
 
