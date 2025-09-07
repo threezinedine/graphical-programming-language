@@ -152,6 +152,7 @@ namespace ntt
 
         while (hasAnyModified)
         {
+            hasAnyModified = NTT_FALSE;
             Vector<Ref<Node>> newParsedNodes;
             ParseUnaryOperations(
                 parsedNodes,
@@ -159,7 +160,6 @@ namespace ntt
                 hasAnyModified,
                 std::set<String>{"!"});
             parsedNodes = newParsedNodes;
-            hasAnyModified = NTT_FALSE;
         }
 
         m_children = parsedNodes;
@@ -206,6 +206,31 @@ namespace ntt
             }
 
             const Ref<Node> &operandNode = sourceNodes[sourceNodeIndex + 1];
+
+            if (operandNode->GetType() == NodeType::ATOMIC)
+            {
+                const Token &operandToken = static_cast<Atomic *>(operandNode.get())->GetToken();
+
+                if (operandToken.GetType() == TokenType::OPERATOR &&
+                    operators.find(currentNodeToken.GetValue<String>()) != operators.end())
+                {
+                    outNodes.push_back(currentNode);
+                    sourceNodeIndex++;
+                    continue;
+                }
+            }
+            else if (operandNode->GetType() == NodeType::EXPRESSION)
+            {
+            }
+            else if (operandNode->GetType() == NodeType::UNARY_OPERATION)
+            {
+            }
+            else
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
 
             Ref<Node> newUnaryNode = CreateRef<UnaryOperationNode>(currentNode, operandNode);
             outNodes.push_back(newUnaryNode);

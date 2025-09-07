@@ -22,3 +22,15 @@ TEST(UnaryOperationsTest, MissingOperand)
             ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
             INVALID_ASSERTION()));
 }
+
+TEST(UnaryOperationsTest, NestedUnaryOperand)
+{
+    PARSE_DEFINE("!!test");
+
+    PROGRAM_ASSERTION(
+        UNARY_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
+            UNARY_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
+                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "test"))));
+}
