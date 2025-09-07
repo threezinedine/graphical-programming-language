@@ -12,6 +12,7 @@ namespace ntt
     {
         union Number
         {
+            b8 boolValue;
             u32 intValue;
             f32 floatValue;
         };

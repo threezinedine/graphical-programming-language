@@ -248,8 +248,14 @@ namespace ntt
                             token.SetValue<std::string>(matchedStr);
                             break;
                         }
-                        case TokenType::STRING:
                         case TokenType::BOOLEAN:
+                        {
+                            b8 boolValue = (matchedStr == "true");
+                            token.SetValue<b8>(boolValue);
+                            token.SetLength((u32)matchedStr.length());
+                            break;
+                        }
+                        case TokenType::STRING:
                         case TokenType::DELIMITER:
                         case TokenType::BRACKET:
                         case TokenType::INVALID:

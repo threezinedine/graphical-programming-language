@@ -9,5 +9,5 @@ TEST(UnaryOperationsTest, SimpleUnaryPlus)
     PROGRAM_ASSERTION(
         UNARY_ASSERTION(
             ATOMIC_ASSERTION(TokenType::OPERATOR, "!"),
-            ATOMIC_ASSERTION(TokenType::BOOLEAN, "true")));
+            ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE)));
 }

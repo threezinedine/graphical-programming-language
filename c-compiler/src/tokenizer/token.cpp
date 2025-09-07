@@ -49,13 +49,13 @@ namespace ntt
 
     GETTER_SETTER_IMPL(u32, numberValue.intValue, TokenType::INTEGER);
     GETTER_SETTER_IMPL(f32, numberValue.floatValue, TokenType::FLOAT);
+    GETTER_SETTER_IMPL(b8, numberValue.boolValue, TokenType::BOOLEAN);
     GETTER_SETTER_IMPL(std::string, stringValue, TokenType::STRING,
                        TokenType::INVALID, TokenType::KEYWORD,
                        TokenType::BRACKET,
                        TokenType::DELIMITER,
                        TokenType::IDENTIFIER,
-                       TokenType::OPERATOR,
-                       TokenType::BOOLEAN);
+                       TokenType::OPERATOR);
 
     JSON Token::ToJSON() const
     {
@@ -70,6 +70,9 @@ namespace ntt
             break;
         case TokenType::FLOAT:
             json["value"] = m_value.numberValue.floatValue;
+            break;
+        case TokenType::BOOLEAN:
+            json["value"] = m_value.numberValue.boolValue;
             break;
         case TokenType::STRING:
         case TokenType::INVALID:

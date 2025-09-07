@@ -44,8 +44,8 @@ Ref<T> CreateRef(Args &&...args)
     return std::make_shared<T>(std::forward<Args>(args)...);
 }
 
-#define NTT_TRUE true
-#define NTT_FALSE false
+#define NTT_TRUE b8(true)
+#define NTT_FALSE b8(false)
 
 #define NTT_NULL nullptr
 

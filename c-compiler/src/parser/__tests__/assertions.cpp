@@ -40,8 +40,10 @@ void AtomicAssertion::Assert(Ref<Node> node)
     case TokenType::FLOAT:
         EXPECT_THAT(token.GetValue<f32>(), m_expectValue.numberValue.floatValue);
         break;
-    case TokenType::STRING:
     case TokenType::BOOLEAN:
+        EXPECT_THAT(token.GetValue<b8>(), m_expectValue.numberValue.boolValue);
+        break;
+    case TokenType::STRING:
     case TokenType::INVALID:
     case TokenType::KEYWORD:
     case TokenType::BRACKET:

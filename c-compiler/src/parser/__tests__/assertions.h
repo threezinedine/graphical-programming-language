@@ -44,15 +44,29 @@ public:
     {
         m_expectValue.numberValue.intValue = expectValue;
     }
+
     AtomicAssertion(TokenType expectType, f32 expectValue, ErrorType error = ErrorType::NO_ERROR)
         : DelayAssertion(error), m_expectType(expectType)
     {
         m_expectValue.numberValue.floatValue = expectValue;
     }
+
     AtomicAssertion(TokenType expectType, const String &expectValue, ErrorType error = ErrorType::NO_ERROR)
         : DelayAssertion(error), m_expectType(expectType)
     {
         m_expectValue.stringValue = expectValue;
+    }
+
+    AtomicAssertion(TokenType expectType, const char *expectValue, ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error), m_expectType(expectType)
+    {
+        m_expectValue.stringValue = expectValue;
+    }
+
+    AtomicAssertion(TokenType expectType, b8 expectValue, ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error), m_expectType(expectType)
+    {
+        m_expectValue.numberValue.boolValue = expectValue;
     }
 
     ~AtomicAssertion() = default;
