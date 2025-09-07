@@ -1,7 +1,19 @@
 #include "test_common.h"
 #include "assertions.h"
 
-void BlockAssertion::Assert(Ref<Node> node)
+void DelayAssertion::Assert(Ref<Node> node)
+{
+    _Assert(node);
+
+    if (HasError())
+    {
+        EXPECT_THAT(node->HasErrors(), true);
+        EXPECT_THAT(node->GetErrors(),
+                    ::testing::Contains(static_cast<ErrorType>(GetError())));
+    }
+}
+
+void BlockAssertion::_Assert(Ref<Node> node)
 {
     EXPECT_THAT(node->GetType(), m_blockType);
 
@@ -14,15 +26,9 @@ void BlockAssertion::Assert(Ref<Node> node)
     {
         m_assertions[i]->Assert(blockNode->GetChildren()[i]);
     }
-
-    if (HasError())
-    {
-        EXPECT_THAT(node->GetErrors(),
-                    ::testing::Contains(static_cast<ErrorType>(GetError())));
-    }
 }
 
-void AtomicAssertion::Assert(Ref<Node> node)
+void AtomicAssertion::_Assert(Ref<Node> node)
 {
     EXPECT_THAT(node->GetType(), NodeType::ATOMIC);
 
@@ -59,7 +65,7 @@ void AtomicAssertion::Assert(Ref<Node> node)
     }
 }
 
-void InvalidAssertion::Assert(Ref<Node> node)
+void InvalidAssertion::_Assert(Ref<Node> node)
 {
     EXPECT_THAT(node->GetType(), NodeType::INVALID);
 
@@ -70,7 +76,7 @@ void InvalidAssertion::Assert(Ref<Node> node)
     }
 }
 
-void UnaryOperationAssertion::Assert(Ref<Node> node)
+void UnaryOperationAssertion::_Assert(Ref<Node> node)
 {
     EXPECT_THAT(node->GetType(), NodeType::UNARY_OPERATION);
 

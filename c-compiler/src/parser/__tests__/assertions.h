@@ -10,10 +10,13 @@ public:
     DelayAssertion(ErrorType error) : m_error(error) {}
     virtual ~DelayAssertion() = default;
 
-    virtual void Assert(Ref<Node> node) = 0;
+    void Assert(Ref<Node> node);
 
     virtual b8 HasError() const { return m_error != ErrorType::NO_ERROR; }
     virtual ErrorType GetError() const { return m_error; }
+
+protected:
+    virtual void _Assert(Ref<Node> node) = 0;
 
 private:
     ErrorType m_error;
@@ -29,7 +32,8 @@ public:
 
     ~BlockAssertion() = default;
 
-    void Assert(Ref<Node> node) override;
+protected:
+    void _Assert(Ref<Node> node) override;
 
 private:
     NodeType m_blockType;
@@ -71,7 +75,8 @@ public:
 
     ~AtomicAssertion() = default;
 
-    void Assert(Ref<Node> node) override;
+protected:
+    void _Assert(Ref<Node> node) override;
 
 private:
     TokenType m_expectType;
@@ -85,7 +90,8 @@ public:
         : DelayAssertion(error) {}
     ~InvalidAssertion() = default;
 
-    void Assert(Ref<Node> node) override;
+protected:
+    void _Assert(Ref<Node> node) override;
 };
 
 class UnaryOperationAssertion : public DelayAssertion
@@ -97,7 +103,8 @@ public:
 
     ~UnaryOperationAssertion() = default;
 
-    void Assert(Ref<Node> node) override;
+protected:
+    void _Assert(Ref<Node> node) override;
 
 private:
     Ref<DelayAssertion> m_operation;
