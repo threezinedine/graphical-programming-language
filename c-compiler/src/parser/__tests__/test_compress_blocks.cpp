@@ -56,3 +56,14 @@ TEST(BlockNodeCompressTest, NestedBlockCodeWithSquareBrackets)
                 ATOMIC_ASSERTION(TokenType::OPERATOR, "-"),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)))));
 }
+
+TEST(BlockNodeCompressTest, OnlySquareBrackets)
+{
+    COMPRESS_ONLY_DEFINE("[2.2 + 4]");
+
+    PROGRAM_ASSERTION(
+        INDEX_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::FLOAT, 2.2f),
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+}
