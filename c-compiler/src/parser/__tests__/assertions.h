@@ -182,4 +182,4 @@ private:
     CreateRef<OperationAssertion>(ATOMIC_ASSERTION(TokenType::OPERATOR, operator), leftOperand, rightOperand)
 
 #define OPERATION_ASSERTION_ERR(err, leftOperand, operator, rightOperand) \
-    CreateRef<OperationAssertion>(leftOperand, ATOMIC_ASSERTION(TokenType::OPERATOR, operator), rightOperand, err)
+    CreateRef<OperationAssertion>(ATOMIC_ASSERTION(TokenType::OPERATOR, operator), leftOperand, rightOperand, err)

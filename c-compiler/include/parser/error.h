@@ -6,6 +6,7 @@ namespace ntt
     enum class ErrorType
     {
         MISSING_END_BRACKET,
+        MISSING_LEFT_OPERAND,
         MISSING_RIGHT_OPERAND,
 
         NO_ERROR,

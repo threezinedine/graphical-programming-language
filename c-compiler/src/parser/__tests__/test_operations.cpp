@@ -89,3 +89,15 @@ TEST(OperationTest, OperaionWithBrackets)
             "*",
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
 }
+
+TEST(OperationTest, MissingRightOperand)
+{
+    PARSE_DEFINE("3 + ");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION_ERR(
+            ErrorType::MISSING_RIGHT_OPERAND,
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+            "+",
+            INVALID_ASSERTION()));
+}

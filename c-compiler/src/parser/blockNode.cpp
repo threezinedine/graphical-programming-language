@@ -333,24 +333,44 @@ namespace ntt
                 continue;
             }
 
-            if (sourceNodeIndex + 1 >= numberOfSourceNodes)
+            Ref<Node> leftOperandNode = NTT_NULL;
+            Ref<Node> rightOperandNode = NTT_NULL;
+            u8 moveIndexSteps = 0;
+            Vector<ErrorType> errors;
+
+            if (outNodes.size() > 0)
             {
-                Ref<Node> newOperation = CreateRef<OperationNode>(
-                    currentNode, CreateRef<InvalidNode>(), CreateRef<InvalidNode>());
-                newOperation->AddError(ErrorType::MISSING_RIGHT_OPERAND);
-                outNodes.push_back(newOperation);
-                sourceNodeIndex++;
-                continue;
+                leftOperandNode = outNodes.back();
+            }
+            else
+            {
+                leftOperandNode = CreateRef<InvalidNode>();
+                errors.push_back(ErrorType::MISSING_LEFT_OPERAND);
             }
 
-            const Ref<Node> &rightOperandNode = sourceNodes[sourceNodeIndex + 1];
-            const Ref<Node> &leftOperandNode = outNodes.back();
+            if (sourceNodeIndex + 1 < numberOfSourceNodes)
+            {
+                rightOperandNode = sourceNodes[sourceNodeIndex + 1];
+                moveIndexSteps += 2;
+            }
+            else
+            {
+                rightOperandNode = CreateRef<InvalidNode>();
+                errors.push_back(ErrorType::MISSING_RIGHT_OPERAND);
+                moveIndexSteps += 1;
+            }
 
             Ref<Node> newOperation = CreateRef<OperationNode>(currentNode, leftOperandNode, rightOperandNode);
+
+            for (const auto &error : errors)
+            {
+                newOperation->AddError(error);
+            }
+
             outNodes.pop_back();
             outNodes.push_back(newOperation);
             foundUnary = NTT_TRUE;
-            sourceNodeIndex += 2;
+            sourceNodeIndex += moveIndexSteps;
         }
     }
 
