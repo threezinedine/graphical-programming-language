@@ -60,3 +60,17 @@ TEST(OperationTest, MixedOperations)
                 "/",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
 }
+
+TEST(OperationTest, PowerOperation)
+{
+    PARSE_DEFINE("3 * 4 ^ 2");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+            "*",
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
+                "^",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))));
+}
