@@ -40,3 +40,23 @@ TEST(OperationTest, MultipleAndDivider)
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
 }
+
+TEST(OperationTest, MixedOperations)
+{
+    PARSE_DEFINE("3 + 4 * 2 - 1 / 5");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::OPERATOR, "-"),
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::OPERATOR, "*"),
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))),
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::OPERATOR, "/"),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(1)),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
+}
