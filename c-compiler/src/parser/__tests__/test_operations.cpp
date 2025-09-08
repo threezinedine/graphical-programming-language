@@ -101,3 +101,18 @@ TEST(OperationTest, MissingRightOperand)
             "+",
             INVALID_ASSERTION()));
 }
+
+TEST(OperationTest, MixedMissingRightOperand)
+{
+    PARSE_DEFINE("3 * + 4");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            OPERATION_ASSERTION_ERR(
+                ErrorType::MISSING_RIGHT_OPERAND,
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "*",
+                INVALID_ASSERTION()),
+            "+",
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+}

@@ -218,6 +218,36 @@ namespace ntt
         m_children = parsedNodes;
     }
 
+    static b8 IsOperandValidNode(const Ref<Node> &node)
+    {
+        if (node->GetType() != NodeType::ATOMIC &&
+            node->GetType() != NodeType::EXPRESSION &&
+            node->GetType() != NodeType::UNARY_OPERATION &&
+            node->GetType() != NodeType::OPERATION)
+        {
+            return NTT_FALSE;
+        }
+
+        if (node->GetType() == NodeType::ATOMIC)
+        {
+            const Token &token = static_cast<Atomic *>(node.get())->GetToken();
+            if (token.GetType() == TokenType::BOOLEAN ||
+                token.GetType() == TokenType::FLOAT ||
+                token.GetType() == TokenType::INTEGER ||
+                token.GetType() == TokenType::STRING ||
+                token.GetType() == TokenType::IDENTIFIER)
+            {
+                return NTT_TRUE;
+            }
+            else
+            {
+                return NTT_FALSE;
+            }
+        }
+
+        return NTT_TRUE;
+    }
+
     void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
                               Vector<Ref<Node>> &outNodes,
                               b8 &foundUnary,
@@ -348,7 +378,8 @@ namespace ntt
                 errors.push_back(ErrorType::MISSING_LEFT_OPERAND);
             }
 
-            if (sourceNodeIndex + 1 < numberOfSourceNodes)
+            if (sourceNodeIndex + 1 < numberOfSourceNodes &&
+                IsOperandValidNode(sourceNodes[sourceNodeIndex + 1]))
             {
                 rightOperandNode = sourceNodes[sourceNodeIndex + 1];
                 moveIndexSteps += 2;
