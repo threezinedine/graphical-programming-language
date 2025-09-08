@@ -74,3 +74,18 @@ TEST(OperationTest, PowerOperation)
                 "^",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))));
 }
+
+TEST(OperationTest, OperaionWithBrackets)
+{
+    PARSE_DEFINE("(3 + 4) * 2");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            EXPRESSION_ASSERTION(
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                    "+",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))),
+            "*",
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
+}

@@ -156,6 +156,11 @@ namespace ntt
         Vector<Ref<Node>> parsedNodes = m_children;
         b8 hasAnyModified = NTT_TRUE;
 
+        for (auto &node : m_children)
+        {
+            node->Parse();
+        }
+
         while (hasAnyModified)
         {
             hasAnyModified = NTT_FALSE;
