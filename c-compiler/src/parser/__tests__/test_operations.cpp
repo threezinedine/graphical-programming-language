@@ -8,8 +8,8 @@ TEST(OperationTest, SimpleAddition)
 
     PROGRAM_ASSERTION(
         OPERATION_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+            "+",
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
 }
 
@@ -19,11 +19,11 @@ TEST(OperationTest, MultipleOperations)
 
     PROGRAM_ASSERTION(
         OPERATION_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::OPERATOR, "-"),
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "+",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
+            "-",
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
 }
 
@@ -33,11 +33,11 @@ TEST(OperationTest, MultipleAndDivider)
 
     PROGRAM_ASSERTION(
         OPERATION_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::OPERATOR, "/"),
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::OPERATOR, "*"),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "*",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
+            "/",
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
 }
 
@@ -47,16 +47,16 @@ TEST(OperationTest, MixedOperations)
 
     PROGRAM_ASSERTION(
         OPERATION_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::OPERATOR, "-"),
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::OPERATOR, "+"),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "+",
                 OPERATION_ASSERTION(
-                    ATOMIC_ASSERTION(TokenType::OPERATOR, "*"),
                     ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
+                    "*",
                     ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))),
+            "-",
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::OPERATOR, "/"),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(1)),
+                "/",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
 }

@@ -173,13 +173,13 @@ private:
     CreateRef<InvalidAssertion>()
 
 #define UNARY_ASSERTION(operation, operand) \
-    CreateRef<UnaryOperationAssertion>(operation, operand)
+    CreateRef<UnaryOperationAssertion>(ATOMIC_ASSERTION(TokenType::OPERATOR, operation), operand)
 
 #define UNARY_ASSERTION_ERR(err, operation, operand) \
-    CreateRef<UnaryOperationAssertion>(operation, operand, err)
+    CreateRef<UnaryOperationAssertion>(ATOMIC_ASSERTION(TokenType::OPERATOR, operation), operand, err)
 
-#define OPERATION_ASSERTION(operatorNode, leftOperand, rightOperand) \
-    CreateRef<OperationAssertion>(operatorNode, leftOperand, rightOperand)
+#define OPERATION_ASSERTION(leftOperand, operator, rightOperand) \
+    CreateRef<OperationAssertion>(ATOMIC_ASSERTION(TokenType::OPERATOR, operator), leftOperand, rightOperand)
 
-#define OPERATION_ASSERTION_ERR(err, operatorNode, leftOperand, rightOperand) \
-    CreateRef<OperationAssertion>(operatorNode, leftOperand, rightOperand, err)
+#define OPERATION_ASSERTION_ERR(err, leftOperand, operator, rightOperand) \
+    CreateRef<OperationAssertion>(leftOperand, ATOMIC_ASSERTION(TokenType::OPERATOR, operator), rightOperand, err)
