@@ -116,3 +116,15 @@ TEST(OperationTest, MixedMissingRightOperand)
             "+",
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
 }
+
+TEST(OperationTest, MissingLeftOperand)
+{
+    PARSE_DEFINE("+ 4");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION_ERR(
+            ErrorType::MISSING_LEFT_OPERAND,
+            INVALID_ASSERTION(),
+            "+",
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+}

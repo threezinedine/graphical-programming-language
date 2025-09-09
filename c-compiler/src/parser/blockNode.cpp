@@ -371,6 +371,7 @@ namespace ntt
             if (outNodes.size() > 0)
             {
                 leftOperandNode = outNodes.back();
+                outNodes.pop_back();
             }
             else
             {
@@ -398,7 +399,6 @@ namespace ntt
                 newOperation->AddError(error);
             }
 
-            outNodes.pop_back();
             outNodes.push_back(newOperation);
             foundUnary = NTT_TRUE;
             sourceNodeIndex += moveIndexSteps;
