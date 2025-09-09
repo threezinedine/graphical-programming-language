@@ -170,3 +170,17 @@ TEST(OperationTest, NestedWithBrackets)
                 "^",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
 }
+
+TEST(OperationTest, AssignOperation)
+{
+    PARSE_DEFINE("a = 3 + 4");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+            "=",
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "+",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
+}
