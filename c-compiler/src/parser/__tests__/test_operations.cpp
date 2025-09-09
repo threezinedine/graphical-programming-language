@@ -148,3 +148,25 @@ TEST(OperationTest, FinalMixed)
                 "/",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
 }
+
+TEST(OperationTest, NestedWithBrackets)
+{
+    PARSE_DEFINE("(3 + 4) * (2 - 1) ^ 5");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            EXPRESSION_ASSERTION(
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                    "+",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))),
+            "*",
+            OPERATION_ASSERTION(
+                EXPRESSION_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
+                        "-",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(1)))),
+                "^",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
+}
