@@ -128,3 +128,23 @@ TEST(OperationTest, MissingLeftOperand)
             "+",
             ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
 }
+
+TEST(OperationTest, FinalMixed)
+{
+    PARSE_DEFINE("+ 4 * - 2 / 5");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            OPERATION_ASSERTION(
+                INVALID_ASSERTION(),
+                "+",
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
+                    "*",
+                    INVALID_ASSERTION())),
+            "-",
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
+                "/",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
+}
