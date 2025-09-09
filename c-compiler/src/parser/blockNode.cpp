@@ -183,6 +183,20 @@ namespace ntt
                 parsedNodes,
                 newParsedNodes,
                 hasAnyModified,
+                std::set<String>{"==", "!=", "<", "<=", ">", ">="});
+            parsedNodes = newParsedNodes;
+        }
+
+        hasAnyModified = NTT_TRUE;
+
+        while (hasAnyModified)
+        {
+            hasAnyModified = NTT_FALSE;
+            Vector<Ref<Node>> newParsedNodes;
+            ParseOperations(
+                parsedNodes,
+                newParsedNodes,
+                hasAnyModified,
                 std::set<String>{"^"});
             parsedNodes = newParsedNodes;
         }

@@ -184,3 +184,17 @@ TEST(OperationTest, AssignOperation)
                 "+",
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
 }
+
+TEST(OperationTest, ComparingOperation)
+{
+    PARSE_DEFINE("a == 3 * 4");
+
+    PROGRAM_ASSERTION(
+        OPERATION_ASSERTION(
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                "==",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3))),
+            "*",
+            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+}
