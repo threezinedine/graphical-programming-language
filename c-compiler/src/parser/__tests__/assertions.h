@@ -154,6 +154,12 @@ private:
 #define EXPRESSION_ASSERTION_ERR(err, ...) \
     CreateRef<BlockAssertion>(NodeType::EXPRESSION, Vector<Ref<DelayAssertion>>{__VA_ARGS__}, err)
 
+#define STATEMENT_ASSERTION(...) \
+    CreateRef<BlockAssertion>(NodeType::STATEMENT, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
+
+#define STATEMENT_ASSERTION_ERR(err, ...) \
+    CreateRef<BlockAssertion>(NodeType::STATEMENT, Vector<Ref<DelayAssertion>>{__VA_ARGS__}, err)
+
 #define INDEX_ASSERTION(...) \
     CreateRef<BlockAssertion>(NodeType::INDEX, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
 

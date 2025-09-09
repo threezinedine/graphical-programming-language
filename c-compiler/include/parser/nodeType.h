@@ -10,6 +10,7 @@ namespace ntt
         INDEX,
         BLOCK,
 
+        STATEMENT,
         ATOMIC,
 
         UNARY_OPERATION,

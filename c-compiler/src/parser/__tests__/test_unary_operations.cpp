@@ -7,9 +7,10 @@ TEST(UnaryOperationsTest, SimpleUnaryPlus)
     PARSE_DEFINE("!true");
 
     PROGRAM_ASSERTION(
-        UNARY_ASSERTION(
-            "!",
-            ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE)));
+        STATEMENT_ASSERTION(
+            UNARY_ASSERTION(
+                "!",
+                ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE))));
 }
 
 TEST(UnaryOperationsTest, MissingOperand)
@@ -17,10 +18,11 @@ TEST(UnaryOperationsTest, MissingOperand)
     PARSE_DEFINE("! ");
 
     PROGRAM_ASSERTION(
-        UNARY_ASSERTION_ERR(
-            ErrorType::MISSING_RIGHT_OPERAND,
-            "!",
-            INVALID_ASSERTION()));
+        STATEMENT_ASSERTION(
+            UNARY_ASSERTION_ERR(
+                ErrorType::MISSING_RIGHT_OPERAND,
+                "!",
+                INVALID_ASSERTION())));
 }
 
 TEST(UnaryOperationsTest, NestedUnaryOperand)
@@ -28,11 +30,12 @@ TEST(UnaryOperationsTest, NestedUnaryOperand)
     PARSE_DEFINE("!!test");
 
     PROGRAM_ASSERTION(
-        UNARY_ASSERTION(
-            "!",
+        STATEMENT_ASSERTION(
             UNARY_ASSERTION(
                 "!",
-                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "test"))));
+                UNARY_ASSERTION(
+                    "!",
+                    ATOMIC_ASSERTION(TokenType::IDENTIFIER, "test")))));
 }
 
 TEST(UnaryOperationsTest, UnaryWithExpressionOperand)
@@ -40,10 +43,11 @@ TEST(UnaryOperationsTest, UnaryWithExpressionOperand)
     PARSE_DEFINE("!(true)");
 
     PROGRAM_ASSERTION(
-        UNARY_ASSERTION(
-            "!",
-            EXPRESSION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE))));
+        STATEMENT_ASSERTION(
+            UNARY_ASSERTION(
+                "!",
+                EXPRESSION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE)))));
 }
 
 TEST(UnaryOperationsTest, UnaryWithInvalidOperand)
@@ -51,9 +55,10 @@ TEST(UnaryOperationsTest, UnaryWithInvalidOperand)
     PARSE_DEFINE("!{ }");
 
     PROGRAM_ASSERTION(
-        UNARY_ASSERTION_ERR(
-            ErrorType::MISSING_RIGHT_OPERAND,
-            "!",
-            INVALID_ASSERTION()),
+        STATEMENT_ASSERTION(
+            UNARY_ASSERTION_ERR(
+                ErrorType::MISSING_RIGHT_OPERAND,
+                "!",
+                INVALID_ASSERTION())),
         BLOCK_ASSERTION());
 }

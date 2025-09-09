@@ -7,10 +7,11 @@ TEST(OperationTest, SimpleAddition)
     PARSE_DEFINE("3 + 4");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-            "+",
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+        STATEMENT_ASSERTION(
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "+",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
 }
 
 TEST(OperationTest, MultipleOperations)
@@ -18,13 +19,14 @@ TEST(OperationTest, MultipleOperations)
     PARSE_DEFINE("3 + 4 - 2");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-                "+",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
-            "-",
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                    "+",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
+                "-",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))));
 }
 
 TEST(OperationTest, MultipleAndDivider)
@@ -32,13 +34,14 @@ TEST(OperationTest, MultipleAndDivider)
     PARSE_DEFINE("3 * 4 / 2");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-                "*",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
-            "/",
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                    "*",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))),
+                "/",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))));
 }
 
 TEST(OperationTest, MixedOperations)
@@ -46,19 +49,20 @@ TEST(OperationTest, MixedOperations)
     PARSE_DEFINE("3 + 4 * 2 - 1 / 5");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-                "+",
                 OPERATION_ASSERTION(
-                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
-                    "*",
-                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))),
-            "-",
-            OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(1)),
-                "/",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                    "+",
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
+                        "*",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))),
+                "-",
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(1)),
+                    "/",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))));
 }
 
 TEST(OperationTest, PowerOperation)
@@ -66,13 +70,14 @@ TEST(OperationTest, PowerOperation)
     PARSE_DEFINE("3 * 4 ^ 2");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-            "*",
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
-                "^",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))));
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "*",
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
+                    "^",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))))));
 }
 
 TEST(OperationTest, OperaionWithBrackets)
@@ -80,14 +85,15 @@ TEST(OperationTest, OperaionWithBrackets)
     PARSE_DEFINE("(3 + 4) * 2");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
-            EXPRESSION_ASSERTION(
-                OPERATION_ASSERTION(
-                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-                    "+",
-                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))),
-            "*",
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2))));
+        STATEMENT_ASSERTION(
+            OPERATION_ASSERTION(
+                EXPRESSION_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                        "+",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))),
+                "*",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)))));
 }
 
 TEST(OperationTest, MissingRightOperand)
@@ -95,11 +101,12 @@ TEST(OperationTest, MissingRightOperand)
     PARSE_DEFINE("3 + ");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION_ERR(
-            ErrorType::MISSING_RIGHT_OPERAND,
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-            "+",
-            INVALID_ASSERTION()));
+        STATEMENT_ASSERTION(
+            OPERATION_ASSERTION_ERR(
+                ErrorType::MISSING_RIGHT_OPERAND,
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                "+",
+                INVALID_ASSERTION())));
 }
 
 TEST(OperationTest, MixedMissingRightOperand)
@@ -107,14 +114,15 @@ TEST(OperationTest, MixedMissingRightOperand)
     PARSE_DEFINE("3 * + 4");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
-            OPERATION_ASSERTION_ERR(
-                ErrorType::MISSING_RIGHT_OPERAND,
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-                "*",
-                INVALID_ASSERTION()),
-            "+",
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+        STATEMENT_ASSERTION(
+            OPERATION_ASSERTION(
+                OPERATION_ASSERTION_ERR(
+                    ErrorType::MISSING_RIGHT_OPERAND,
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                    "*",
+                    INVALID_ASSERTION()),
+                "+",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
 }
 
 TEST(OperationTest, MissingLeftOperand)
@@ -122,11 +130,12 @@ TEST(OperationTest, MissingLeftOperand)
     PARSE_DEFINE("+ 4");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION_ERR(
-            ErrorType::MISSING_LEFT_OPERAND,
-            INVALID_ASSERTION(),
-            "+",
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+        STATEMENT_ASSERTION(
+            OPERATION_ASSERTION_ERR(
+                ErrorType::MISSING_LEFT_OPERAND,
+                INVALID_ASSERTION(),
+                "+",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
 }
 
 TEST(OperationTest, FinalMixed)
@@ -134,19 +143,20 @@ TEST(OperationTest, FinalMixed)
     PARSE_DEFINE("+ 4 * - 2 / 5");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
-                INVALID_ASSERTION(),
-                "+",
                 OPERATION_ASSERTION(
-                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
-                    "*",
-                    INVALID_ASSERTION())),
-            "-",
-            OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
-                "/",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
+                    INVALID_ASSERTION(),
+                    "+",
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)),
+                        "*",
+                        INVALID_ASSERTION())),
+                "-",
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
+                    "/",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))));
 }
 
 TEST(OperationTest, NestedWithBrackets)
@@ -154,21 +164,22 @@ TEST(OperationTest, NestedWithBrackets)
     PARSE_DEFINE("(3 + 4) * (2 - 1) ^ 5");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
-            EXPRESSION_ASSERTION(
-                OPERATION_ASSERTION(
-                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-                    "+",
-                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))),
-            "*",
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
                 EXPRESSION_ASSERTION(
                     OPERATION_ASSERTION(
-                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
-                        "-",
-                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(1)))),
-                "^",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                        "+",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))),
+                "*",
+                OPERATION_ASSERTION(
+                    EXPRESSION_ASSERTION(
+                        OPERATION_ASSERTION(
+                            ATOMIC_ASSERTION(TokenType::INTEGER, u32(2)),
+                            "-",
+                            ATOMIC_ASSERTION(TokenType::INTEGER, u32(1)))),
+                    "^",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))));
 }
 
 TEST(OperationTest, AssignOperation)
@@ -176,13 +187,14 @@ TEST(OperationTest, AssignOperation)
     PARSE_DEFINE("a = 3 + 4");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
-            "=",
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
-                "+",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
+                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                "=",
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
+                    "+",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))))));
 }
 
 TEST(OperationTest, ComparingOperation)
@@ -190,11 +202,12 @@ TEST(OperationTest, ComparingOperation)
     PARSE_DEFINE("a == 3 * 4");
 
     PROGRAM_ASSERTION(
-        OPERATION_ASSERTION(
+        STATEMENT_ASSERTION(
             OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
-                "==",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3))),
-            "*",
-            ATOMIC_ASSERTION(TokenType::INTEGER, u32(4))));
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                    "==",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3))),
+                "*",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
 }

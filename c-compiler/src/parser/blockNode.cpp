@@ -143,13 +143,17 @@ namespace ntt
 
     static void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
                                      Vector<Ref<Node>> &outNodes,
-                                     b8 &foundUnary,
+                                     b8 &hasAnyChange,
                                      const std::set<String> &operators);
 
     static void ParseOperations(const Vector<Ref<Node>> &sourceNodes,
                                 Vector<Ref<Node>> &outNodes,
-                                b8 &foundUnary,
+                                b8 &hasAnyChange,
                                 const std::set<String> &operators);
+
+    static void ParseStatements(const Vector<Ref<Node>> &sourceNodes,
+                                Vector<Ref<Node>> &outNodes,
+                                b8 &hasAnyChange);
 
     void BlockNode::Parse()
     {
@@ -159,6 +163,24 @@ namespace ntt
         for (auto &node : m_children)
         {
             node->Parse();
+        }
+
+        if (GetType() == NodeType::BLOCK || GetType() == NodeType::PROGRAM)
+        {
+            Vector<Ref<Node>> newParsedNodes;
+            ParseStatements(
+                parsedNodes,
+                newParsedNodes,
+                hasAnyModified);
+
+            m_children = newParsedNodes;
+
+            for (auto &node : m_children)
+            {
+                node->Parse();
+            }
+
+            return;
         }
 
         while (hasAnyModified)
@@ -278,7 +300,7 @@ namespace ntt
 
     void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
                               Vector<Ref<Node>> &outNodes,
-                              b8 &foundUnary,
+                              b8 &hasAnyChange,
                               const std::set<String> &operators)
     {
         NTT_ASSERT(outNodes.empty());
@@ -355,14 +377,14 @@ namespace ntt
 
             Ref<Node> newUnaryNode = CreateRef<UnaryOperationNode>(currentNode, operandNode);
             outNodes.push_back(newUnaryNode);
-            foundUnary = NTT_TRUE;
+            hasAnyChange = NTT_TRUE;
             sourceNodeIndex += 2;
         }
     }
 
     void ParseOperations(const Vector<Ref<Node>> &sourceNodes,
                          Vector<Ref<Node>> &outNodes,
-                         b8 &foundUnary,
+                         b8 &hasAnyChange,
                          const std::set<String> &operators)
     {
         NTT_ASSERT(outNodes.empty());
@@ -428,8 +450,77 @@ namespace ntt
             }
 
             outNodes.push_back(newOperation);
-            foundUnary = NTT_TRUE;
+            hasAnyChange = NTT_TRUE;
             sourceNodeIndex += moveIndexSteps;
+        }
+    }
+
+    static void ParseStatements(const Vector<Ref<Node>> &sourceNodes,
+                                Vector<Ref<Node>> &outNodes,
+                                b8 &hasAnyChange)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        Vector<Ref<Node>> currentStatementNodes;
+
+        while (sourceNodeIndex < numberOfSourceNodes)
+        {
+            const Ref<Node> &currentNode = sourceNodes[sourceNodeIndex];
+
+            if (currentNode->GetType() != NodeType::ATOMIC &&
+                currentNode->GetType() != NodeType::OPERATION &&
+                currentNode->GetType() != NodeType::UNARY_OPERATION &&
+                currentNode->GetType() != NodeType::EXPRESSION)
+            {
+                if (currentStatementNodes.size() != 0)
+                {
+                    Ref<Node> newTemporaryBlock = CreateRef<BlockNode>(NodeType::STATEMENT, currentStatementNodes);
+                    outNodes.push_back(newTemporaryBlock);
+                    currentStatementNodes.clear();
+                }
+
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            if (currentNode->GetType() == NodeType::OPERATION ||
+                currentNode->GetType() == NodeType::UNARY_OPERATION ||
+                currentNode->GetType() == NodeType::EXPRESSION)
+            {
+                currentStatementNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
+            const Token &currentNodeToken = atomicNode->GetToken();
+
+            if (currentNodeToken.GetType() != TokenType::DELIMITER ||
+                currentNodeToken.GetValue<String>() != ";")
+            {
+                currentStatementNodes.push_back(currentNode);
+            }
+            else
+            {
+                if (currentStatementNodes.size() != 0)
+                {
+                    Ref<Node> newTemporaryBlock = CreateRef<BlockNode>(NodeType::STATEMENT, currentStatementNodes);
+                    outNodes.push_back(newTemporaryBlock);
+                    currentStatementNodes.clear();
+                }
+            }
+
+            sourceNodeIndex++;
+        }
+
+        if (currentStatementNodes.size() != 0)
+        {
+            Ref<Node> newTemporaryBlock = CreateRef<BlockNode>(NodeType::STATEMENT, currentStatementNodes);
+            outNodes.push_back(newTemporaryBlock);
+            currentStatementNodes.clear();
         }
     }
 

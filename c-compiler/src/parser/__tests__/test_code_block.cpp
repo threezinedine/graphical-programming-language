@@ -4,16 +4,15 @@
 
 using namespace ntt;
 
-TEST(CodeBlockTest, DISABLED_impleCodeBlock)
+TEST(CodeBlockTest, SimpleCodeBlock)
 {
-    PARSE_DEFINE("{ int a = 5; }");
+    PARSE_DEFINE("{ a = 5; }");
 
     PROGRAM_ASSERTION(
         BLOCK_ASSERTION(
-            ATOMIC_ASSERTION(TokenType::KEYWORD, "int"),
-            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
-            OPERATION_ASSERTION(
-                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
-                "=",
-                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
+            STATEMENT_ASSERTION(
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                    "=",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))));
 }
