@@ -61,3 +61,5 @@ Ref<T> CreateRef(Args &&...args)
         printf("%s\n", msg);     \
         __debugbreak();          \
     }
+
+#define STRINGIFY(x) #x

@@ -2,6 +2,7 @@
 #include "assertions.h"
 #include "parser/operationNode.h"
 #include "parser/if_statement.h"
+#include "parser/function_call.h"
 
 #define DEFINE_ERROR_BUFFER()                      \
     char errorBuffer[10000];                       \
@@ -129,4 +130,24 @@ void IfStatementAssertion::_Assert(Ref<Node> node)
     m_condition->Assert(ifNode->GetCondition());
     m_block->Assert(ifNode->GetBlock());
     m_elseBlock->Assert(ifNode->GetElseBlock());
+}
+
+void FunctionCallAssertion::_Assert(Ref<Node> node)
+{
+    DEFINE_ERROR_BUFFER();
+
+    EXPECT_THAT(node->GetType(), NodeType::FUNCTION_CALL) << errorBuffer;
+
+    FunctionCallNode *funcCallNode = dynamic_cast<FunctionCallNode *>(node.get());
+    EXPECT_THAT(funcCallNode != nullptr, true) << errorBuffer;
+
+    m_function->Assert(funcCallNode->GetFunction());
+
+    for (u32 i = 0; i < m_arguments.size(); i++)
+    {
+        if (i < funcCallNode->GetArguments().size())
+        {
+            m_arguments[i]->Assert(funcCallNode->GetArguments()[i]);
+        }
+    }
 }

@@ -152,6 +152,21 @@ private:
     Ref<DelayAssertion> m_elseBlock;
 };
 
+class FunctionCallAssertion : public DelayAssertion
+{
+public:
+    FunctionCallAssertion(Ref<DelayAssertion> function, Vector<Ref<DelayAssertion>> arguments, ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error), m_function(function), m_arguments(arguments) {}
+    ~FunctionCallAssertion() = default;
+
+protected:
+    void _Assert(Ref<Node> node) override;
+
+private:
+    Ref<DelayAssertion> m_function;
+    Vector<Ref<DelayAssertion>> m_arguments;
+};
+
 #define COMPRESS_ONLY_DEFINE(content)                \
     BlockNode blockNode(NodeType::PROGRAM, content); \
     blockNode.Compress();
@@ -221,3 +236,12 @@ private:
 
 #define OPERATION_ASSERTION_ERR(err, leftOperand, operator, rightOperand) \
     CreateRef<OperationAssertion>(ATOMIC_ASSERTION(TokenType::OPERATOR, operator), leftOperand, rightOperand, err)
+
+#define FUNCTION_CALL_ASSERTION(name, ...) \
+    CreateRef<FunctionCallAssertion>(name, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
+
+#define FUNCTION_CALL_ASSERTION_ERR(err, name, ...) \
+    CreateRef<FunctionCallAssertion>(name, Vector<Ref<DelayAssertion>>{__VA_ARGS__}, err)
+
+#define FUNCTION_CALL_NAME_ASSERTION(name) \
+    ATOMIC_ASSERTION(TokenType::IDENTIFIER, name)

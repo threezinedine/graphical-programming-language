@@ -9,6 +9,8 @@ namespace ntt
         EXPRESSION,
         INDEX,
         BLOCK,
+        FUNCTION_CALL,
+        CALL_ARGUMENTS,
 
         IF_STATEMENT,
         STATEMENT,
@@ -20,4 +22,6 @@ namespace ntt
         INVALID,
         COUNT,
     };
+
+    String NodeTypeToString(NodeType type);
 } // namespace ntt

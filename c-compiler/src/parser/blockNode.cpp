@@ -6,6 +6,7 @@
 #include "parser/invalid.h"
 #include "parser/operationNode.h"
 #include "parser/if_statement.h"
+#include "parser/function_call.h"
 
 namespace ntt
 {
@@ -27,7 +28,7 @@ namespace ntt
     JSON BlockNode::ToJSON()
     {
         JSON json;
-        json["type"] = "BlockNode";
+        json["type"] = NodeTypeToString(m_type);
         json["children"] = JSON::array();
         for (const auto &child : m_children)
         {
@@ -159,6 +160,10 @@ namespace ntt
                                   Vector<Ref<Node>> &outNodes,
                                   b8 &hasAnyChange);
 
+    static void ParseFunctionCall(const Vector<Ref<Node>> &sourceNodes,
+                                  Vector<Ref<Node>> &outNodes,
+                                  b8 &hasAnyChange);
+
     void BlockNode::Parse()
     {
         Vector<Ref<Node>> parsedNodes = m_children;
@@ -201,6 +206,22 @@ namespace ntt
 
             return;
         }
+
+        hasAnyModified = NTT_TRUE;
+
+        while (hasAnyModified)
+        {
+            hasAnyModified = NTT_FALSE;
+            Vector<Ref<Node>> newerParsedNodes;
+            ParseFunctionCall(
+                parsedNodes,
+                newerParsedNodes,
+                hasAnyModified);
+
+            parsedNodes = newerParsedNodes;
+        }
+
+        hasAnyModified = NTT_TRUE;
 
         while (hasAnyModified)
         {
@@ -646,6 +667,55 @@ namespace ntt
             }
             outNodes.push_back(newIfNode);
             sourceNodeIndex = tempIndex;
+            hasAnyChange = NTT_TRUE;
+        }
+    }
+
+    static void ParseFunctionCall(const Vector<Ref<Node>> &sourceNodes,
+                                  Vector<Ref<Node>> &outNodes,
+                                  b8 &hasAnyChange)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        while (sourceNodeIndex < numberOfSourceNodes)
+        {
+            u32 temporaryIndex = sourceNodeIndex;
+
+            Ref<Node> currentNode = sourceNodes[sourceNodeIndex];
+            if (currentNode->GetType() != NodeType::ATOMIC)
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
+            const Token &currentNodeToken = atomicNode->GetToken();
+
+            if (currentNodeToken.GetType() != TokenType::IDENTIFIER)
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Ref<Node> functionCallNode = CreateRef<FunctionCallNode>(currentNode, Vector<Ref<Node>>{});
+            temporaryIndex++;
+
+            if (temporaryIndex >= numberOfSourceNodes ||
+                sourceNodes[temporaryIndex]->GetType() != NodeType::EXPRESSION)
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            temporaryIndex++;
+
+            outNodes.push_back(functionCallNode);
+            sourceNodeIndex = temporaryIndex;
             hasAnyChange = NTT_TRUE;
         }
     }
