@@ -132,6 +132,26 @@ private:
     Ref<DelayAssertion> m_rightOperand;
 };
 
+class IfStatementAssertion : public DelayAssertion
+{
+public:
+    IfStatementAssertion(Ref<DelayAssertion> condition,
+                         Ref<DelayAssertion> block,
+                         Ref<DelayAssertion> elseBlock,
+                         ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error), m_condition(condition), m_block(block), m_elseBlock(elseBlock) {}
+
+    ~IfStatementAssertion() = default;
+
+protected:
+    void _Assert(Ref<Node> node) override;
+
+private:
+    Ref<DelayAssertion> m_condition;
+    Ref<DelayAssertion> m_block;
+    Ref<DelayAssertion> m_elseBlock;
+};
+
 #define COMPRESS_ONLY_DEFINE(content)                \
     BlockNode blockNode(NodeType::PROGRAM, content); \
     blockNode.Compress();
@@ -160,11 +180,11 @@ private:
 #define STATEMENT_ASSERTION_ERR(err, ...) \
     CreateRef<BlockAssertion>(NodeType::STATEMENT, Vector<Ref<DelayAssertion>>{__VA_ARGS__}, err)
 
-#define IF_STATEMENT_ASSERTION(condition, block) \
-    CreateRef<BlockAssertion>(NodeType::IF_STATEMENT, Vector<Ref<DelayAssertion>>{condition, block})
+#define IF_STATEMENT_ASSERTION(condition, block, elseBlock) \
+    CreateRef<IfStatementAssertion>(condition, block, elseBlock)
 
-#define IF_STATEMENT_ASSERTION_ERR(err, condition, block) \
-    CreateRef<BlockAssertion>(NodeType::IF_STATEMENT, Vector<Ref<DelayAssertion>>{condition, block}, err)
+#define IF_STATEMENT_ASSERTION_ERR(err, condition, block, elseBlock) \
+    CreateRef<IfStatementAssertion>(condition, block, elseBlock, err)
 
 #define INDEX_ASSERTION(...) \
     CreateRef<BlockAssertion>(NodeType::INDEX, Vector<Ref<DelayAssertion>>{__VA_ARGS__})

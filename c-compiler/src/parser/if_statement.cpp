@@ -2,8 +2,8 @@
 
 namespace ntt
 {
-    IfStatementNode::IfStatementNode(const Ref<Node> &conditionNode, const Ref<Node> &blockNode)
-        : m_conditionNode(conditionNode), m_blockNode(blockNode)
+    IfStatementNode::IfStatementNode(const Ref<Node> &conditionNode, const Ref<Node> &blockNode, const Ref<Node> &elseBlockNode)
+        : m_conditionNode(conditionNode), m_blockNode(blockNode), m_elseBlockNode(elseBlockNode)
     {
     }
 

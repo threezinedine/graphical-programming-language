@@ -17,5 +17,62 @@ TEST(IfStatementTest, SimpleIfStatement)
                     OPERATION_ASSERTION(
                         ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
                         "=",
-                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))))));
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))),
+            BLOCK_ASSERTION()));
+}
+
+TEST(IfStatementTest, NestedIfStatement)
+{
+    PARSE_DEFINE(R"(
+if (true) {
+    if (false) {
+        a = 5;
+    }   
+}
+)");
+
+    PROGRAM_ASSERTION(
+        IF_STATEMENT_ASSERTION(
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE)),
+            BLOCK_ASSERTION(
+                IF_STATEMENT_ASSERTION(
+                    EXPRESSION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_FALSE)),
+                    BLOCK_ASSERTION(
+                        STATEMENT_ASSERTION(
+                            OPERATION_ASSERTION(
+                                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                                "=",
+                                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))),
+                    BLOCK_ASSERTION())),
+            BLOCK_ASSERTION()));
+}
+
+TEST(IfStatementTest, ElseBlock)
+{
+    PARSE_DEFINE(R"(
+if (true) {
+    a = 5;
+} else {
+    a = 10;
+}
+)");
+
+    PROGRAM_ASSERTION(
+        IF_STATEMENT_ASSERTION(
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE)),
+            BLOCK_ASSERTION(
+                STATEMENT_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                        "=",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))),
+            BLOCK_ASSERTION(
+                STATEMENT_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                        "=",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(10)))))));
 }

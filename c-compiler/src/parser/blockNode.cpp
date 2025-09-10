@@ -5,6 +5,7 @@
 #include "parser/unaryOperationNode.h"
 #include "parser/invalid.h"
 #include "parser/operationNode.h"
+#include "parser/if_statement.h"
 
 namespace ntt
 {
@@ -563,33 +564,57 @@ namespace ntt
 
             Ref<Node> conditionNode = NTT_NULL;
             Ref<Node> blockNode = NTT_NULL;
-            u32 moveIndexSteps = 1;
+            Ref<Node> elseNode = NTT_NULL;
+            Ref<Node> elseBlockNode = CreateRef<BlockNode>(NodeType::BLOCK, Vector<Ref<Node>>{});
 
-            if (sourceNodeIndex + 1 < numberOfSourceNodes &&
-                sourceNodes[sourceNodeIndex + 1]->GetType() == NodeType::EXPRESSION)
+            u32 tempIndex = sourceNodeIndex + 1;
+
+            if (tempIndex < numberOfSourceNodes &&
+                sourceNodes[tempIndex]->GetType() == NodeType::EXPRESSION)
             {
-                conditionNode = sourceNodes[sourceNodeIndex + 1];
-                moveIndexSteps += 1;
+                conditionNode = sourceNodes[tempIndex];
+                tempIndex++;
             }
             else
             {
                 conditionNode = CreateRef<InvalidNode>();
             }
 
-            if (sourceNodeIndex + 2 < numberOfSourceNodes &&
-                sourceNodes[sourceNodeIndex + 2]->GetType() == NodeType::BLOCK)
+            if (tempIndex < numberOfSourceNodes &&
+                sourceNodes[tempIndex]->GetType() == NodeType::BLOCK)
             {
-                blockNode = sourceNodes[sourceNodeIndex + 2];
-                moveIndexSteps += 1;
+                blockNode = sourceNodes[tempIndex];
+                tempIndex++;
             }
             else
             {
                 blockNode = CreateRef<InvalidNode>();
             }
 
-            Ref<Node> newIfNode = CreateRef<BlockNode>(NodeType::IF_STATEMENT, Vector<Ref<Node>>{conditionNode, blockNode});
+            if (tempIndex < numberOfSourceNodes &&
+                sourceNodes[tempIndex]->GetType() == NodeType::ATOMIC)
+            {
+                Atomic *elseAtomicNode = dynamic_cast<Atomic *>(sourceNodes[tempIndex].get());
+                const Token &elseToken = elseAtomicNode->GetToken();
+
+                if (elseToken.GetType() == TokenType::KEYWORD &&
+                    elseToken.GetValue<String>() == "else")
+                {
+                    tempIndex++;
+                    elseNode = sourceNodes[tempIndex];
+
+                    if (tempIndex < numberOfSourceNodes &&
+                        sourceNodes[tempIndex]->GetType() == NodeType::BLOCK)
+                    {
+                        elseBlockNode = sourceNodes[tempIndex];
+                        tempIndex++;
+                    }
+                }
+            }
+
+            Ref<Node> newIfNode = CreateRef<IfStatementNode>(conditionNode, blockNode, elseBlockNode);
             outNodes.push_back(newIfNode);
-            sourceNodeIndex += moveIndexSteps;
+            sourceNodeIndex = tempIndex;
         }
     }
 

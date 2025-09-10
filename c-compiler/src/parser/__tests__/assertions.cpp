@@ -1,6 +1,7 @@
 #include "test_common.h"
 #include "assertions.h"
 #include "parser/operationNode.h"
+#include "parser/if_statement.h"
 
 #define DEFINE_ERROR_BUFFER()                      \
     char errorBuffer[10000];                       \
@@ -114,4 +115,18 @@ void OperationAssertion::_Assert(Ref<Node> node)
     m_leftOperand->Assert(expressionNode->GetLeftOperand());
     m_operatorNode->Assert(expressionNode->GetOperator());
     m_rightOperand->Assert(expressionNode->GetRightOperand());
+}
+
+void IfStatementAssertion::_Assert(Ref<Node> node)
+{
+    DEFINE_ERROR_BUFFER();
+
+    EXPECT_THAT(node->GetType(), NodeType::IF_STATEMENT) << errorBuffer;
+
+    IfStatementNode *ifNode = dynamic_cast<IfStatementNode *>(node.get());
+    EXPECT_THAT(ifNode != nullptr, true) << errorBuffer;
+
+    m_condition->Assert(ifNode->GetCondition());
+    m_block->Assert(ifNode->GetBlock());
+    m_elseBlock->Assert(ifNode->GetElseBlock());
 }
