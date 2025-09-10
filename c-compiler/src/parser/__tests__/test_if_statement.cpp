@@ -76,3 +76,44 @@ if (true) {
                         "=",
                         ATOMIC_ASSERTION(TokenType::INTEGER, u32(10)))))));
 }
+
+TEST(IfStatementTest, FullyNestedIfElse)
+{
+    PARSE_DEFINE(R"(
+if (true) {
+    if (false) {
+        a = 5;
+    } else {
+        a = 10;
+    }
+} else {
+    a = 15;
+})");
+
+    PROGRAM_ASSERTION(
+        IF_STATEMENT_ASSERTION(
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_TRUE)),
+            BLOCK_ASSERTION(
+                IF_STATEMENT_ASSERTION(
+                    EXPRESSION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::BOOLEAN, NTT_FALSE)),
+                    BLOCK_ASSERTION(
+                        STATEMENT_ASSERTION(
+                            OPERATION_ASSERTION(
+                                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                                "=",
+                                ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))),
+                    BLOCK_ASSERTION(
+                        STATEMENT_ASSERTION(
+                            OPERATION_ASSERTION(
+                                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                                "=",
+                                ATOMIC_ASSERTION(TokenType::INTEGER, u32(10))))))),
+            BLOCK_ASSERTION(
+                STATEMENT_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                        "=",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(15)))))));
+}
