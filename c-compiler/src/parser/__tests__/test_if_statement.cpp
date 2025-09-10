@@ -181,7 +181,7 @@ TEST(IfStatementTest, MissingCondition)
 
 TEST(IfStatement, MissingBlock)
 {
-    PARSE_DEFINE_P(R"(
+    PARSE_DEFINE(R"(
 if (testing)
 )");
 
@@ -192,4 +192,25 @@ if (testing)
                 ATOMIC_ASSERTION(TokenType::IDENTIFIER, "testing")),
             BLOCK_ASSERTION(),
             BLOCK_ASSERTION()));
+}
+
+TEST(IfStatement, MATCHER)
+{
+    PARSE_DEFINE(R"(
+if
+a = b;
+
+)");
+
+    PROGRAM_ASSERTION(
+        IF_STATEMENT_ASSERTION_ERR(
+            ErrorType::MISSING_CONDITION,
+            INVALID_ASSERTION(),
+            BLOCK_ASSERTION(),
+            BLOCK_ASSERTION()),
+        STATEMENT_ASSERTION(
+            OPERATION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                "=",
+                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "b"))));
 }
