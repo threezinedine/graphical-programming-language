@@ -6,6 +6,7 @@ namespace ntt
     enum class ErrorType
     {
         MISSING_CONDITION,
+        MISSING_BLOCK,
 
         MISSING_SEMICOLON,
 

@@ -164,7 +164,7 @@ if (a == 3) {
 
 TEST(IfStatementTest, MissingCondition)
 {
-    PARSE_DEFINE_P("if { a = 5; }");
+    PARSE_DEFINE("if { a = 5; }");
 
     PROGRAM_ASSERTION(
         IF_STATEMENT_ASSERTION_ERR(
@@ -176,5 +176,20 @@ TEST(IfStatementTest, MissingCondition)
                         ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
                         "=",
                         ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))),
+            BLOCK_ASSERTION()));
+}
+
+TEST(IfStatement, MissingBlock)
+{
+    PARSE_DEFINE_P(R"(
+if (testing)
+)");
+
+    PROGRAM_ASSERTION(
+        IF_STATEMENT_ASSERTION_ERR(
+            ErrorType::MISSING_BLOCK,
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "testing")),
+            BLOCK_ASSERTION(),
             BLOCK_ASSERTION()));
 }

@@ -17,6 +17,7 @@ namespace ntt
         json["type"] = "IfStatementNode";
         json["condition"] = m_conditionNode->ToJSON();
         json["block"] = m_blockNode->ToJSON();
+        json["elseBlock"] = m_elseBlockNode->ToJSON();
 
         return json;
     }

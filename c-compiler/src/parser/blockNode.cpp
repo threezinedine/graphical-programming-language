@@ -573,7 +573,7 @@ namespace ntt
             }
 
             Ref<Node> conditionNode = NTT_NULL;
-            Ref<Node> blockNode = NTT_NULL;
+            Ref<Node> blockNode = CreateRef<BlockNode>(NodeType::BLOCK, Vector<Ref<Node>>{});
             Ref<Node> elseNode = NTT_NULL;
             Ref<Node> elseBlockNode = CreateRef<BlockNode>(NodeType::BLOCK, Vector<Ref<Node>>{});
             Vector<ErrorType> errors;
@@ -600,7 +600,7 @@ namespace ntt
             }
             else
             {
-                blockNode = CreateRef<InvalidNode>();
+                errors.push_back(ErrorType::MISSING_BLOCK);
             }
 
             if (tempIndex < numberOfSourceNodes &&
