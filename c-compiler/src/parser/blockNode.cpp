@@ -152,8 +152,10 @@ namespace ntt
                                 const std::set<String> &operators);
 
     static void ParseStatements(const Vector<Ref<Node>> &sourceNodes,
-                                Vector<Ref<Node>> &outNodes,
-                                b8 &hasAnyChange);
+                                Vector<Ref<Node>> &outNodes);
+
+    static void ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
+                                  Vector<Ref<Node>> &outNodes);
 
     void BlockNode::Parse()
     {
@@ -168,10 +170,16 @@ namespace ntt
         if (GetType() == NodeType::BLOCK || GetType() == NodeType::PROGRAM)
         {
             Vector<Ref<Node>> newParsedNodes;
+            ParseIfStatements(
+                parsedNodes,
+                newParsedNodes);
+
+            parsedNodes = newParsedNodes;
+            newParsedNodes.clear();
+
             ParseStatements(
                 parsedNodes,
-                newParsedNodes,
-                hasAnyModified);
+                newParsedNodes);
 
             m_children = newParsedNodes;
 
@@ -456,8 +464,7 @@ namespace ntt
     }
 
     static void ParseStatements(const Vector<Ref<Node>> &sourceNodes,
-                                Vector<Ref<Node>> &outNodes,
-                                b8 &hasAnyChange)
+                                Vector<Ref<Node>> &outNodes)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -522,6 +529,67 @@ namespace ntt
             newTemporaryBlock->AddError(ErrorType::MISSING_SEMICOLON);
             outNodes.push_back(newTemporaryBlock);
             currentStatementNodes.clear();
+        }
+    }
+
+    static void ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
+                                  Vector<Ref<Node>> &outNodes)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        while (sourceNodeIndex < numberOfSourceNodes)
+        {
+            Ref<Node> currentNode = sourceNodes[sourceNodeIndex];
+
+            if (currentNode->GetType() != NodeType::ATOMIC)
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
+            const Token &currentNodeToken = atomicNode->GetToken();
+
+            if (currentNodeToken.GetType() != TokenType::KEYWORD ||
+                currentNodeToken.GetValue<String>() != "if")
+            {
+                outNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Ref<Node> conditionNode = NTT_NULL;
+            Ref<Node> blockNode = NTT_NULL;
+            u32 moveIndexSteps = 1;
+
+            if (sourceNodeIndex + 1 < numberOfSourceNodes &&
+                sourceNodes[sourceNodeIndex + 1]->GetType() == NodeType::EXPRESSION)
+            {
+                conditionNode = sourceNodes[sourceNodeIndex + 1];
+                moveIndexSteps += 1;
+            }
+            else
+            {
+                conditionNode = CreateRef<InvalidNode>();
+            }
+
+            if (sourceNodeIndex + 2 < numberOfSourceNodes &&
+                sourceNodes[sourceNodeIndex + 2]->GetType() == NodeType::BLOCK)
+            {
+                blockNode = sourceNodes[sourceNodeIndex + 2];
+                moveIndexSteps += 1;
+            }
+            else
+            {
+                blockNode = CreateRef<InvalidNode>();
+            }
+
+            Ref<Node> newIfNode = CreateRef<BlockNode>(NodeType::IF_STATEMENT, Vector<Ref<Node>>{conditionNode, blockNode});
+            outNodes.push_back(newIfNode);
+            sourceNodeIndex += moveIndexSteps;
         }
     }
 

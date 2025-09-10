@@ -160,6 +160,12 @@ private:
 #define STATEMENT_ASSERTION_ERR(err, ...) \
     CreateRef<BlockAssertion>(NodeType::STATEMENT, Vector<Ref<DelayAssertion>>{__VA_ARGS__}, err)
 
+#define IF_STATEMENT_ASSERTION(condition, block) \
+    CreateRef<BlockAssertion>(NodeType::IF_STATEMENT, Vector<Ref<DelayAssertion>>{condition, block})
+
+#define IF_STATEMENT_ASSERTION_ERR(err, condition, block) \
+    CreateRef<BlockAssertion>(NodeType::IF_STATEMENT, Vector<Ref<DelayAssertion>>{condition, block}, err)
+
 #define INDEX_ASSERTION(...) \
     CreateRef<BlockAssertion>(NodeType::INDEX, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
 
