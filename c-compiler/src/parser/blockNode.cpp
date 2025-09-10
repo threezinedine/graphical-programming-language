@@ -156,7 +156,8 @@ namespace ntt
                                 Vector<Ref<Node>> &outNodes);
 
     static void ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
-                                  Vector<Ref<Node>> &outNodes);
+                                  Vector<Ref<Node>> &outNodes,
+                                  b8 &hasAnyChange);
 
     void BlockNode::Parse()
     {
@@ -171,12 +172,21 @@ namespace ntt
         if (GetType() == NodeType::BLOCK || GetType() == NodeType::PROGRAM)
         {
             Vector<Ref<Node>> newParsedNodes;
-            ParseIfStatements(
-                parsedNodes,
-                newParsedNodes);
 
-            parsedNodes = newParsedNodes;
-            newParsedNodes.clear();
+            while (hasAnyModified)
+            {
+                Vector<Ref<Node>> newParsedNodes;
+                hasAnyModified = NTT_FALSE;
+
+                ParseIfStatements(
+                    parsedNodes,
+                    newParsedNodes,
+                    hasAnyModified);
+
+                parsedNodes = newParsedNodes;
+            }
+
+            hasAnyModified = NTT_TRUE;
 
             ParseStatements(
                 parsedNodes,
@@ -534,7 +544,7 @@ namespace ntt
     }
 
     static void ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
-                                  Vector<Ref<Node>> &outNodes)
+                                  Vector<Ref<Node>> &outNodes, b8 &hasAnyChange)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -603,11 +613,26 @@ namespace ntt
                     tempIndex++;
                     elseNode = sourceNodes[tempIndex];
 
-                    if (tempIndex < numberOfSourceNodes &&
-                        sourceNodes[tempIndex]->GetType() == NodeType::BLOCK)
+                    if (tempIndex < numberOfSourceNodes)
                     {
-                        elseBlockNode = sourceNodes[tempIndex];
-                        tempIndex++;
+                        if (sourceNodes[tempIndex]->GetType() == NodeType::BLOCK ||
+                            sourceNodes[tempIndex]->GetType() == NodeType::IF_STATEMENT)
+                        {
+                            elseBlockNode = sourceNodes[tempIndex];
+                            tempIndex++;
+                        }
+                        else if (sourceNodes[tempIndex]->GetType() == NodeType::ATOMIC &&
+                                 dynamic_cast<Atomic *>(sourceNodes[tempIndex].get())->GetToken().GetType() == TokenType::KEYWORD &&
+                                 dynamic_cast<Atomic *>(sourceNodes[tempIndex].get())->GetToken().GetValue<String>() == "if")
+                        {
+                            for (u32 i = sourceNodeIndex; i < tempIndex; i++)
+                            {
+                                outNodes.push_back(sourceNodes[i]);
+                            }
+
+                            sourceNodeIndex = tempIndex;
+                            continue;
+                        }
                     }
                 }
             }
@@ -615,6 +640,7 @@ namespace ntt
             Ref<Node> newIfNode = CreateRef<IfStatementNode>(conditionNode, blockNode, elseBlockNode);
             outNodes.push_back(newIfNode);
             sourceNodeIndex = tempIndex;
+            hasAnyChange = NTT_TRUE;
         }
     }
 

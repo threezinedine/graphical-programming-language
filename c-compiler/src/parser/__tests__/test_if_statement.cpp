@@ -117,3 +117,47 @@ if (true) {
                         "=",
                         ATOMIC_ASSERTION(TokenType::INTEGER, u32(15)))))));
 }
+
+TEST(IfStatementTest, TestElseIf)
+{
+    PARSE_DEFINE_P(R"(
+if (a == 3) {
+    a = 5;
+} else if (a == 4) {
+    a = 10;
+} else {
+    a = 15;
+})");
+
+    PROGRAM_ASSERTION(
+        IF_STATEMENT_ASSERTION(
+            EXPRESSION_ASSERTION(
+                OPERATION_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                    "==",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)))),
+            BLOCK_ASSERTION(
+                STATEMENT_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                        "=",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))),
+            IF_STATEMENT_ASSERTION(
+                EXPRESSION_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                        "==",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))),
+                BLOCK_ASSERTION(
+                    STATEMENT_ASSERTION(
+                        OPERATION_ASSERTION(
+                            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                            "=",
+                            ATOMIC_ASSERTION(TokenType::INTEGER, u32(10))))),
+                BLOCK_ASSERTION(
+                    STATEMENT_ASSERTION(
+                        OPERATION_ASSERTION(
+                            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                            "=",
+                            ATOMIC_ASSERTION(TokenType::INTEGER, u32(15))))))));
+}

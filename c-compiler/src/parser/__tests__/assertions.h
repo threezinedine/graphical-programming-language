@@ -156,6 +156,12 @@ private:
     BlockNode blockNode(NodeType::PROGRAM, content); \
     blockNode.Compress();
 
+#define PARSE_DEFINE_P(content)                  \
+    COMPRESS_ONLY_DEFINE(content)                \
+    blockNode.Parse();                           \
+    printf("########### PROGRAM ###########\n"); \
+    printf("%s\n", blockNode.ToJSON().dump(4).c_str());
+
 #define PARSE_DEFINE(content)     \
     COMPRESS_ONLY_DEFINE(content) \
     blockNode.Parse();
