@@ -6,7 +6,7 @@
 #define DEFINE_ERROR_BUFFER()                      \
     char errorBuffer[10000];                       \
     memset(errorBuffer, 0, sizeof((errorBuffer))); \
-    sprintf_s(errorBuffer, "\nNode: %s\n", node->ToJSON().dump(4).c_str());
+    sprintf_s(errorBuffer, "\nNode (): %s\n", node->ToJSON().dump(4).c_str());
 
 void DelayAssertion::Assert(Ref<Node> node)
 {

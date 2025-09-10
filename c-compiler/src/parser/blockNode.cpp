@@ -576,6 +576,7 @@ namespace ntt
             Ref<Node> blockNode = NTT_NULL;
             Ref<Node> elseNode = NTT_NULL;
             Ref<Node> elseBlockNode = CreateRef<BlockNode>(NodeType::BLOCK, Vector<Ref<Node>>{});
+            Vector<ErrorType> errors;
 
             u32 tempIndex = sourceNodeIndex + 1;
 
@@ -588,6 +589,7 @@ namespace ntt
             else
             {
                 conditionNode = CreateRef<InvalidNode>();
+                errors.push_back(ErrorType::MISSING_CONDITION);
             }
 
             if (tempIndex < numberOfSourceNodes &&
@@ -638,6 +640,10 @@ namespace ntt
             }
 
             Ref<Node> newIfNode = CreateRef<IfStatementNode>(conditionNode, blockNode, elseBlockNode);
+            for (const auto &error : errors)
+            {
+                newIfNode->AddError(error);
+            }
             outNodes.push_back(newIfNode);
             sourceNodeIndex = tempIndex;
             hasAnyChange = NTT_TRUE;

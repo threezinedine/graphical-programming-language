@@ -120,7 +120,7 @@ if (true) {
 
 TEST(IfStatementTest, TestElseIf)
 {
-    PARSE_DEFINE_P(R"(
+    PARSE_DEFINE(R"(
 if (a == 3) {
     a = 5;
 } else if (a == 4) {
@@ -160,4 +160,21 @@ if (a == 3) {
                             ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
                             "=",
                             ATOMIC_ASSERTION(TokenType::INTEGER, u32(15))))))));
+}
+
+TEST(IfStatementTest, MissingCondition)
+{
+    PARSE_DEFINE_P("if { a = 5; }");
+
+    PROGRAM_ASSERTION(
+        IF_STATEMENT_ASSERTION_ERR(
+            ErrorType::MISSING_CONDITION,
+            INVALID_ASSERTION(),
+            BLOCK_ASSERTION(
+                STATEMENT_ASSERTION(
+                    OPERATION_ASSERTION(
+                        ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                        "=",
+                        ATOMIC_ASSERTION(TokenType::INTEGER, u32(5))))),
+            BLOCK_ASSERTION()));
 }
