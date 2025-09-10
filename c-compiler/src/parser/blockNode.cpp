@@ -519,6 +519,7 @@ namespace ntt
         if (currentStatementNodes.size() != 0)
         {
             Ref<Node> newTemporaryBlock = CreateRef<BlockNode>(NodeType::STATEMENT, currentStatementNodes);
+            newTemporaryBlock->AddError(ErrorType::MISSING_SEMICOLON);
             outNodes.push_back(newTemporaryBlock);
             currentStatementNodes.clear();
         }
