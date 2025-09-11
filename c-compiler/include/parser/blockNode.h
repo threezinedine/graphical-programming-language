@@ -31,6 +31,30 @@ namespace ntt
                                                const String &bracketOpen,
                                                const String &bracketClose);
 
+        void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
+                                  Vector<Ref<Node>> &outNodes,
+                                  b8 &hasAnyChange,
+                                  const std::set<String> &operators);
+
+        void ParseOperations(const Vector<Ref<Node>> &sourceNodes,
+                             Vector<Ref<Node>> &outNodes,
+                             b8 &hasAnyChange,
+                             const std::set<String> &operators);
+
+        void ParseStatements(const Vector<Ref<Node>> &sourceNodes,
+                             Vector<Ref<Node>> &outNodes);
+
+        void ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
+                               Vector<Ref<Node>> &outNodes,
+                               b8 &hasAnyChange);
+
+        void ParseFunctionCall(const Vector<Ref<Node>> &sourceNodes,
+                               Vector<Ref<Node>> &outNodes,
+                               b8 &hasAnyChange);
+
+        void ParseExpressions(const Vector<Ref<Node>> &sourceNodes,
+                              Vector<Ref<Node>> &outNodes, b8 &containsComma);
+
     private:
         NodeType m_type = NodeType::INVALID;
         String m_content;

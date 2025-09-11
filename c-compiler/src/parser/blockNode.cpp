@@ -1,7 +1,6 @@
 #include "parser/blockNode.h"
 #include "tokenizer/tokenizer.h"
 #include "parser/atomic.h"
-#include <set>
 #include "parser/unaryOperationNode.h"
 #include "parser/invalid.h"
 #include "parser/operationNode.h"
@@ -34,6 +33,7 @@ namespace ntt
         {
             json["children"].push_back(child->ToJSON());
         }
+        json["errors"] = ToErrorJSON();
 
         return json;
     }
@@ -142,30 +142,6 @@ namespace ntt
 
         return compressedNodes;
     }
-
-    static void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
-                                     Vector<Ref<Node>> &outNodes,
-                                     b8 &hasAnyChange,
-                                     const std::set<String> &operators);
-
-    static void ParseOperations(const Vector<Ref<Node>> &sourceNodes,
-                                Vector<Ref<Node>> &outNodes,
-                                b8 &hasAnyChange,
-                                const std::set<String> &operators);
-
-    static void ParseStatements(const Vector<Ref<Node>> &sourceNodes,
-                                Vector<Ref<Node>> &outNodes);
-
-    static void ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
-                                  Vector<Ref<Node>> &outNodes,
-                                  b8 &hasAnyChange);
-
-    static void ParseFunctionCall(const Vector<Ref<Node>> &sourceNodes,
-                                  Vector<Ref<Node>> &outNodes,
-                                  b8 &hasAnyChange);
-
-    static void ParseExpressions(const Vector<Ref<Node>> &sourceNodes,
-                                 Vector<Ref<Node>> &outNodes, b8 &containsComma);
 
     void BlockNode::Parse()
     {
@@ -355,10 +331,10 @@ namespace ntt
         return NTT_TRUE;
     }
 
-    void ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
-                              Vector<Ref<Node>> &outNodes,
-                              b8 &hasAnyChange,
-                              const std::set<String> &operators)
+    void BlockNode::ParseUnaryOperations(const Vector<Ref<Node>> &sourceNodes,
+                                         Vector<Ref<Node>> &outNodes,
+                                         b8 &hasAnyChange,
+                                         const std::set<String> &operators)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -439,10 +415,10 @@ namespace ntt
         }
     }
 
-    void ParseOperations(const Vector<Ref<Node>> &sourceNodes,
-                         Vector<Ref<Node>> &outNodes,
-                         b8 &hasAnyChange,
-                         const std::set<String> &operators)
+    void BlockNode::ParseOperations(const Vector<Ref<Node>> &sourceNodes,
+                                    Vector<Ref<Node>> &outNodes,
+                                    b8 &hasAnyChange,
+                                    const std::set<String> &operators)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -512,8 +488,8 @@ namespace ntt
         }
     }
 
-    static void ParseStatements(const Vector<Ref<Node>> &sourceNodes,
-                                Vector<Ref<Node>> &outNodes)
+    void BlockNode::ParseStatements(const Vector<Ref<Node>> &sourceNodes,
+                                    Vector<Ref<Node>> &outNodes)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -581,8 +557,8 @@ namespace ntt
         }
     }
 
-    static void ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
-                                  Vector<Ref<Node>> &outNodes, b8 &hasAnyChange)
+    void BlockNode::ParseIfStatements(const Vector<Ref<Node>> &sourceNodes,
+                                      Vector<Ref<Node>> &outNodes, b8 &hasAnyChange)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -688,9 +664,9 @@ namespace ntt
         }
     }
 
-    static void ParseFunctionCall(const Vector<Ref<Node>> &sourceNodes,
-                                  Vector<Ref<Node>> &outNodes,
-                                  b8 &hasAnyChange)
+    void BlockNode::ParseFunctionCall(const Vector<Ref<Node>> &sourceNodes,
+                                      Vector<Ref<Node>> &outNodes,
+                                      b8 &hasAnyChange)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -738,6 +714,13 @@ namespace ntt
             Ref<BlockNode> argumentsBlockNode = std::dynamic_pointer_cast<BlockNode>(argumentsNode);
 
             Ref<Node> functionCallNode = CreateRef<FunctionCallNode>(currentNode, argumentsBlockNode->GetChildren());
+            if (argumentsBlockNode->HasErrors())
+            {
+                for (const auto &error : argumentsBlockNode->GetErrors())
+                {
+                    functionCallNode->AddError(error);
+                }
+            }
 
             temporaryIndex++;
 
@@ -747,8 +730,8 @@ namespace ntt
         }
     }
 
-    static void ParseExpressions(const Vector<Ref<Node>> &sourceNodes,
-                                 Vector<Ref<Node>> &outNodes, b8 &containsComma)
+    void BlockNode::ParseExpressions(const Vector<Ref<Node>> &sourceNodes,
+                                     Vector<Ref<Node>> &outNodes, b8 &containsComma)
     {
         NTT_ASSERT(outNodes.empty());
         u32 numberOfSourceNodes = u32(sourceNodes.size());
@@ -775,6 +758,7 @@ namespace ntt
 
             Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
             const Token &currentNodeToken = atomicNode->GetToken();
+            Vector<ErrorType> errors;
 
             if (currentNodeToken.GetType() != TokenType::DELIMITER ||
                 currentNodeToken.GetValue<String>() != ",")
@@ -786,7 +770,14 @@ namespace ntt
 
             containsComma = NTT_TRUE;
 
-            if (temporaryNodes.size() == 1)
+            if (temporaryNodes.size() == 0)
+            {
+                sourceNodeIndex++;
+                this->AddError(ErrorType::REDUNDANT_DELIMITER);
+                temporaryNodes.clear();
+                continue;
+            }
+            else if (temporaryNodes.size() == 1)
             {
                 outNodes.push_back(temporaryNodes[0]);
                 temporaryNodes.clear();
@@ -795,6 +786,10 @@ namespace ntt
             }
 
             Ref<Node> newExpressionNode = CreateRef<BlockNode>(NodeType::EXPRESSION, temporaryNodes);
+            for (const auto &error : errors)
+            {
+                this->AddError(error);
+            }
             outNodes.push_back(newExpressionNode);
             temporaryNodes.clear();
             sourceNodeIndex++;

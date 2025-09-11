@@ -25,6 +25,7 @@ namespace ntt
         json["type"] = "FunctionCall";
         json["function"] = m_function->ToJSON();
         json["arguments"] = JSON::array();
+        json["errors"] = ToErrorJSON();
         for (const Ref<Node> &arg : m_arguments)
         {
             json["arguments"].push_back(arg->ToJSON());

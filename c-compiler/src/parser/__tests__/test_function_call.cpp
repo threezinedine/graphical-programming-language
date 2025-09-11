@@ -14,7 +14,7 @@ TEST(FunctionCallTest, SimpleFunctionCall)
 
 TEST(FunctionCallTest, FunctionCallWithArguments)
 {
-    PARSE_DEFINE_P("foo(3, 4);");
+    PARSE_DEFINE("foo(3, 4);");
 
     PROGRAM_ASSERTION(
         STATEMENT_ASSERTION(
@@ -26,7 +26,7 @@ TEST(FunctionCallTest, FunctionCallWithArguments)
 
 TEST(FunctionCallTest, NestedFunctionCall)
 {
-    PARSE_DEFINE_P("foo(bar(3), 4);");
+    PARSE_DEFINE("foo(bar(3), 4);");
 
     PROGRAM_ASSERTION(
         STATEMENT_ASSERTION(
@@ -35,5 +35,18 @@ TEST(FunctionCallTest, NestedFunctionCall)
                 FUNCTION_CALL_ASSERTION(
                     "bar",
                     ATOMIC_ASSERTION(TokenType::INTEGER, u32(3))),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
+}
+
+TEST(FunctionCallTest, RedundantDelimeter)
+{
+    PARSE_DEFINE_P("foo(3,, 4);");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            FUNCTION_CALL_ASSERTION_ERR(
+                ErrorType::REDUNDANT_DELIMITER,
+                "foo",
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
 }

@@ -5,6 +5,8 @@ namespace ntt
 {
     enum class ErrorType
     {
+        REDUNDANT_DELIMITER,
+
         MISSING_CONDITION,
         MISSING_BLOCK,
 
