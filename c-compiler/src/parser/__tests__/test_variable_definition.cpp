@@ -10,8 +10,8 @@ TEST(VariableDefinitionTest, SimpleVariableDefinition)
 
     PROGRAM_ASSERTION(
         STATEMENT_ASSERTION(
-            LET_VARIABLE_DEFINITION_ASSERTION(
-                "a", "integer")));
+            VARIABLE_DEFINITION_ASSERTION(
+                "let", "a", "integer", ATOMIC_ASSERTION(TokenType::INTEGER, u32(0)))));
 }
 
 TEST(VariableDefinitionTest, ConstVariableDefinition)
@@ -20,6 +20,16 @@ TEST(VariableDefinitionTest, ConstVariableDefinition)
 
     PROGRAM_ASSERTION(
         STATEMENT_ASSERTION(
-            CONST_VARIABLE_DEFINITION_ASSERTION(
-                "b", "string")));
+            VARIABLE_DEFINITION_ASSERTION(
+                "const", "b", "string", ATOMIC_ASSERTION(TokenType::STRING, ""))));
+}
+
+TEST(VariableDefinitionTest, DefineWithDefaultValue)
+{
+    PARSE_DEFINE("let c: number = 5;");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            VARIABLE_DEFINITION_ASSERTION(
+                "let", "c", "integer", ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
 }

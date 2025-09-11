@@ -187,6 +187,20 @@ namespace ntt
             return;
         }
 
+        {
+            b8 contain = NTT_FALSE;
+            Vector<Ref<Node>> newerParsedNodes;
+            ParseVariableDeifinition(
+                parsedNodes,
+                newerParsedNodes,
+                contain);
+
+            if (contain)
+            {
+                parsedNodes = newerParsedNodes;
+            }
+        }
+
         hasAnyModified = NTT_TRUE;
 
         while (hasAnyModified)
@@ -282,20 +296,6 @@ namespace ntt
                 hasAnyModified);
 
             parsedNodes = newerParsedNodes;
-        }
-
-        {
-            b8 contain = NTT_FALSE;
-            Vector<Ref<Node>> newerParsedNodes;
-            ParseVariableDeifinition(
-                parsedNodes,
-                newerParsedNodes,
-                contain);
-
-            if (contain)
-            {
-                parsedNodes = newerParsedNodes;
-            }
         }
 
         hasAnyModified = NTT_TRUE;
@@ -825,6 +825,8 @@ namespace ntt
         }
     }
 
+    static Ref<Node> CreateDefaultNodeForType(const String &type);
+
     void BlockNode::ParseVariableDeifinition(const Vector<Ref<Node>> &sourceNodes,
                                              Vector<Ref<Node>> &outNodes, b8 &contain)
     {
@@ -870,9 +872,48 @@ namespace ntt
         Ref<Node> typeHintNode = sourceNodes[sourceNodeIndex];
         sourceNodeIndex++;
         Ref<Node> typeNode = sourceNodes[sourceNodeIndex];
+        sourceNodeIndex++;
+        Ref<Node> defaultValueNode = NTT_NULL;
 
-        Ref<Node> variableDefinitionNode = CreateRef<VariableDefinitionNode>(defintTypeNode, variableNameNode, typeNode);
+        if (sourceNodeIndex < numberOfSourceNodes)
+        {
+            defaultValueNode = sourceNodes[sourceNodeIndex];
+            sourceNodeIndex++;
+        }
+        else
+        {
+            defaultValueNode = CreateDefaultNodeForType(dynamic_cast<Atomic *>(typeNode.get())->GetToken().GetValue<String>());
+        }
+
+        Ref<Node> variableDefinitionNode = CreateRef<VariableDefinitionNode>(defintTypeNode, variableNameNode, typeNode, defaultValueNode);
         outNodes.push_back(variableDefinitionNode);
+    }
+
+    static Ref<Node> CreateDefaultNodeForType(const String &type)
+    {
+        if (type == "number")
+        {
+            Token floatToken(TokenType::FLOAT, 0);
+            floatToken.SetValue<float>(0.0f);
+            return CreateRef<Atomic>(NodeType::ATOMIC, floatToken);
+        }
+        else if (type == "string")
+        {
+            Token stringToken(TokenType::STRING, 0);
+            stringToken.SetValue<String>("");
+            return CreateRef<Atomic>(NodeType::ATOMIC, stringToken);
+        }
+        else if (type == "boolean")
+        {
+            Token booleanToken(TokenType::BOOLEAN, NTT_FALSE);
+            booleanToken.SetValue<b8>(NTT_FALSE);
+            return CreateRef<Atomic>(NodeType::ATOMIC, booleanToken);
+        }
+        else
+        {
+            NTT_ASSERT_MSG(false, "No default node for type");
+            return NTT_NULL;
+        }
     }
 
     void BlockNode::TokenizeContent()

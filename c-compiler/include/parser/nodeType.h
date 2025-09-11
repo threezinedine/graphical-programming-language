@@ -3,6 +3,8 @@
 
 namespace ntt
 {
+    class Node;
+
     enum class NodeType
     {
         PROGRAM,

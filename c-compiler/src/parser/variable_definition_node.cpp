@@ -2,8 +2,8 @@
 
 namespace ntt
 {
-    VariableDefinitionNode::VariableDefinitionNode(Ref<Node> defineType, Ref<Node> name, Ref<Node> type)
-        : m_defineType(defineType), m_name(name), m_type(type)
+    VariableDefinitionNode::VariableDefinitionNode(Ref<Node> defineType, Ref<Node> name, Ref<Node> type, Ref<Node> defaultValue)
+        : m_defineType(defineType), m_name(name), m_type(type), m_defaultValue(defaultValue)
     {
     }
 
@@ -18,6 +18,10 @@ namespace ntt
         json["defineType"] = m_defineType->ToJSON();
         json["name"] = m_name->ToJSON();
         json["type"] = m_type->ToJSON();
+        if (m_defaultValue)
+        {
+            json["defaultValue"] = m_defaultValue->ToJSON();
+        }
         return json;
     }
 
@@ -37,6 +41,11 @@ namespace ntt
         {
             m_defineType->Compress();
         }
+
+        if (m_defaultValue)
+        {
+            m_defaultValue->Compress();
+        }
     }
 
     void VariableDefinitionNode::Parse()
@@ -54,6 +63,11 @@ namespace ntt
         if (m_defineType)
         {
             m_defineType->Parse();
+        }
+
+        if (m_defaultValue)
+        {
+            m_defaultValue->Parse();
         }
     }
 } // namespace ntt
