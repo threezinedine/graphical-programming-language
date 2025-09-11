@@ -164,6 +164,9 @@ namespace ntt
                                   Vector<Ref<Node>> &outNodes,
                                   b8 &hasAnyChange);
 
+    static void ParseExpressions(const Vector<Ref<Node>> &sourceNodes,
+                                 Vector<Ref<Node>> &outNodes, b8 &containsComma);
+
     void BlockNode::Parse()
     {
         Vector<Ref<Node>> parsedNodes = m_children;
@@ -205,20 +208,6 @@ namespace ntt
             }
 
             return;
-        }
-
-        hasAnyModified = NTT_TRUE;
-
-        while (hasAnyModified)
-        {
-            hasAnyModified = NTT_FALSE;
-            Vector<Ref<Node>> newerParsedNodes;
-            ParseFunctionCall(
-                parsedNodes,
-                newerParsedNodes,
-                hasAnyModified);
-
-            parsedNodes = newerParsedNodes;
         }
 
         hasAnyModified = NTT_TRUE;
@@ -303,6 +292,34 @@ namespace ntt
                 hasAnyModified,
                 std::set<String>{"="});
             parsedNodes = newParsedNodes;
+        }
+
+        hasAnyModified = NTT_TRUE;
+        while (hasAnyModified)
+        {
+            hasAnyModified = NTT_FALSE;
+            Vector<Ref<Node>> newerParsedNodes;
+            ParseFunctionCall(
+                parsedNodes,
+                newerParsedNodes,
+                hasAnyModified);
+
+            parsedNodes = newerParsedNodes;
+        }
+
+        if (GetType() == NodeType::EXPRESSION)
+        {
+            bool containsComma = NTT_FALSE;
+            Vector<Ref<Node>> newParsedNodes;
+            ParseExpressions(
+                parsedNodes,
+                newParsedNodes,
+                containsComma);
+
+            if (containsComma)
+            {
+                parsedNodes = newParsedNodes;
+            }
         }
 
         m_children = parsedNodes;
@@ -717,6 +734,72 @@ namespace ntt
             outNodes.push_back(functionCallNode);
             sourceNodeIndex = temporaryIndex;
             hasAnyChange = NTT_TRUE;
+        }
+    }
+
+    static void ParseExpressions(const Vector<Ref<Node>> &sourceNodes,
+                                 Vector<Ref<Node>> &outNodes, b8 &containsComma)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        if (numberOfSourceNodes < 2)
+        {
+            outNodes = sourceNodes;
+            return;
+        }
+
+        Vector<Ref<Node>> temporaryNodes;
+
+        while (sourceNodeIndex < numberOfSourceNodes)
+        {
+            Ref<Node> currentNode = sourceNodes[sourceNodeIndex];
+
+            if (currentNode->GetType() != NodeType::ATOMIC)
+            {
+                temporaryNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Atomic *atomicNode = dynamic_cast<Atomic *>(currentNode.get());
+            const Token &currentNodeToken = atomicNode->GetToken();
+
+            if (currentNodeToken.GetType() != TokenType::DELIMITER ||
+                currentNodeToken.GetValue<String>() != ",")
+            {
+                temporaryNodes.push_back(currentNode);
+                sourceNodeIndex++;
+                continue;
+            }
+
+            containsComma = NTT_TRUE;
+
+            if (temporaryNodes.size() == 1)
+            {
+                outNodes.push_back(temporaryNodes[0]);
+                temporaryNodes.clear();
+                sourceNodeIndex++;
+                continue;
+            }
+
+            Ref<Node> newExpressionNode = CreateRef<BlockNode>(NodeType::EXPRESSION, temporaryNodes);
+            outNodes.push_back(newExpressionNode);
+            temporaryNodes.clear();
+            sourceNodeIndex++;
+        }
+
+        if (temporaryNodes.size() == 1)
+        {
+            outNodes.push_back(temporaryNodes[0]);
+            temporaryNodes.clear();
+        }
+        else if (temporaryNodes.size() > 1)
+        {
+            Ref<Node> newExpressionNode = CreateRef<BlockNode>(NodeType::EXPRESSION, temporaryNodes);
+            outNodes.push_back(newExpressionNode);
+            temporaryNodes.clear();
         }
     }
 

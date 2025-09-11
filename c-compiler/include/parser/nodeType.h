@@ -12,6 +12,8 @@ namespace ntt
         FUNCTION_CALL,
         CALL_ARGUMENTS,
 
+        ATOMIC_EXPRESSION,
+
         IF_STATEMENT,
         STATEMENT,
         ATOMIC,

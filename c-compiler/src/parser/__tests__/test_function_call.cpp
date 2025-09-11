@@ -4,7 +4,7 @@
 
 TEST(FunctionCallTest, SimpleFunctionCall)
 {
-    PARSE_DEFINE_P("foo();");
+    PARSE_DEFINE("foo();");
 
     PROGRAM_ASSERTION(
         STATEMENT_ASSERTION(
