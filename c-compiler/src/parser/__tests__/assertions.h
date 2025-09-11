@@ -167,6 +167,22 @@ private:
     Vector<Ref<DelayAssertion>> m_arguments;
 };
 
+class VariableDefinitionAssertion : public DelayAssertion
+{
+public:
+    VariableDefinitionAssertion(Ref<DelayAssertion> defineType, Ref<DelayAssertion> name, Ref<DelayAssertion> type, ErrorType error = ErrorType::NO_ERROR)
+        : DelayAssertion(error), m_name(name), m_defineType(defineType), m_type(type) {}
+    ~VariableDefinitionAssertion() = default;
+
+protected:
+    void _Assert(Ref<Node> node) override;
+
+private:
+    Ref<DelayAssertion> m_type;
+    Ref<DelayAssertion> m_defineType;
+    Ref<DelayAssertion> m_name;
+};
+
 #define COMPRESS_ONLY_DEFINE(content)                \
     BlockNode blockNode(NodeType::PROGRAM, content); \
     blockNode.Compress();
@@ -245,3 +261,15 @@ private:
 
 #define FUNCTION_CALL_NAME_ASSERTION(name) \
     ATOMIC_ASSERTION(TokenType::IDENTIFIER, name)
+
+#define LET_VARIABLE_DEFINITION_ASSERTION(name, type) \
+    CreateRef<VariableDefinitionAssertion>(ATOMIC_ASSERTION(TokenType::KEYWORD, "let"), ATOMIC_ASSERTION(TokenType::IDENTIFIER, name), ATOMIC_ASSERTION(TokenType::KEYWORD, type))
+
+#define LET_VARIABLE_DEFINITION_ASSERTION_ERR(err, name, type) \
+    CreateRef<VariableDefinitionAssertion>(ATOMIC_ASSERTION(TokenType::KEYWORD, "let"), ATOMIC_ASSERTION(TokenType::IDENTIFIER, name), ATOMIC_ASSERTION(TokenType::KEYWORD, type), err)
+
+#define CONST_VARIABLE_DEFINITION_ASSERTION(name, type) \
+    CreateRef<VariableDefinitionAssertion>(ATOMIC_ASSERTION(TokenType::KEYWORD, "const"), ATOMIC_ASSERTION(TokenType::IDENTIFIER, name), ATOMIC_ASSERTION(TokenType::KEYWORD, type))
+
+#define CONST_VARIABLE_DEFINITION_ASSERTION_ERR(err, name, type) \
+    CreateRef<VariableDefinitionAssertion>(ATOMIC_ASSERTION(TokenType::KEYWORD, "const"), ATOMIC_ASSERTION(TokenType::IDENTIFIER, name), ATOMIC_ASSERTION(TokenType::KEYWORD, type), err)

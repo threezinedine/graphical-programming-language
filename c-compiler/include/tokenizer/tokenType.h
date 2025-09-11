@@ -14,6 +14,7 @@ namespace ntt
         BRACKET,
         DELIMITER,
         OPERATOR,
+        TYPE_HINT,
 
         INVALID,
         COUNT,

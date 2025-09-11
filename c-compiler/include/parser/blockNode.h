@@ -55,6 +55,9 @@ namespace ntt
         void ParseExpressions(const Vector<Ref<Node>> &sourceNodes,
                               Vector<Ref<Node>> &outNodes, b8 &containsComma);
 
+        void ParseVariableDeifinition(const Vector<Ref<Node>> &sourceNodes,
+                                      Vector<Ref<Node>> &outNodes, b8 &contain);
+
     private:
         NodeType m_type = NodeType::INVALID;
         String m_content;

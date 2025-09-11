@@ -24,6 +24,10 @@ namespace ntt
             return "OPERATOR";
         case TokenType::INVALID:
             return "INVALID";
+        case TokenType::BOOLEAN:
+            return "BOOLEAN";
+        case TokenType::TYPE_HINT:
+            return "TYPE_HINT";
         case TokenType::COUNT:
             return "COUNT";
         default:

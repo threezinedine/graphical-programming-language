@@ -6,6 +6,7 @@
 #include "parser/operationNode.h"
 #include "parser/if_statement.h"
 #include "parser/function_call.h"
+#include "parser/variable_definition_node.h"
 
 namespace ntt
 {
@@ -282,6 +283,22 @@ namespace ntt
 
             parsedNodes = newerParsedNodes;
         }
+
+        {
+            b8 contain = NTT_FALSE;
+            Vector<Ref<Node>> newerParsedNodes;
+            ParseVariableDeifinition(
+                parsedNodes,
+                newerParsedNodes,
+                contain);
+
+            if (contain)
+            {
+                parsedNodes = newerParsedNodes;
+            }
+        }
+
+        hasAnyModified = NTT_TRUE;
 
         if (GetType() == NodeType::EXPRESSION)
         {
@@ -806,6 +823,56 @@ namespace ntt
             outNodes.push_back(newExpressionNode);
             temporaryNodes.clear();
         }
+    }
+
+    void BlockNode::ParseVariableDeifinition(const Vector<Ref<Node>> &sourceNodes,
+                                             Vector<Ref<Node>> &outNodes, b8 &contain)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        if (GetType() != NodeType::STATEMENT)
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        Ref<Node> defintTypeNode = sourceNodes[sourceNodeIndex];
+
+        if (defintTypeNode->GetType() != NodeType::ATOMIC)
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        Atomic *atomicNode = dynamic_cast<Atomic *>(defintTypeNode.get());
+        const Token &currentNodeToken = atomicNode->GetToken();
+
+        if (currentNodeToken.GetType() != TokenType::KEYWORD)
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        if (currentNodeToken.GetValue<String>() != "let" &&
+            currentNodeToken.GetValue<String>() != "const")
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        contain = NTT_TRUE;
+
+        sourceNodeIndex++;
+        Ref<Node> variableNameNode = sourceNodes[sourceNodeIndex];
+        sourceNodeIndex++;
+        Ref<Node> typeHintNode = sourceNodes[sourceNodeIndex];
+        sourceNodeIndex++;
+        Ref<Node> typeNode = sourceNodes[sourceNodeIndex];
+
+        Ref<Node> variableDefinitionNode = CreateRef<VariableDefinitionNode>(defintTypeNode, variableNameNode, typeNode);
+        outNodes.push_back(variableDefinitionNode);
     }
 
     void BlockNode::TokenizeContent()

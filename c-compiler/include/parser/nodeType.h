@@ -15,6 +15,7 @@ namespace ntt
         ATOMIC_EXPRESSION,
 
         IF_STATEMENT,
+        VARIABLE_DEFINITION_STATEMENT,
         STATEMENT,
         ATOMIC,
 
