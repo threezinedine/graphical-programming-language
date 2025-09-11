@@ -19,11 +19,23 @@ TEST(ExpressionTest, SimpleExpression)
 
 TEST(ExpressionTest, WithDelimiter)
 {
-    PARSE_DEFINE_P("(a, 4)");
+    PARSE_DEFINE("(a, 4)");
 
     PROGRAM_ASSERTION(
         STATEMENT_ASSERTION(
             EXPRESSION_ASSERTION(
                 ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
+}
+
+TEST(ExpressionTest, NestedExpressionWithFunctionCall)
+{
+    PARSE_DEFINE("(a, foo())");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            EXPRESSION_ASSERTION(
+                ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
+                FUNCTION_CALL_ASSERTION(
+                    ATOMIC_ASSERTION(TokenType::IDENTIFIER, "foo")))));
 }
