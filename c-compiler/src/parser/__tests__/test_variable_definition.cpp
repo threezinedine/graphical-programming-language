@@ -13,3 +13,13 @@ TEST(VariableDefinitionTest, SimpleVariableDefinition)
             LET_VARIABLE_DEFINITION_ASSERTION(
                 "a", "integer")));
 }
+
+TEST(VariableDefinitionTest, ConstVariableDefinition)
+{
+    PARSE_DEFINE("const b: string;");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            CONST_VARIABLE_DEFINITION_ASSERTION(
+                "b", "string")));
+}
