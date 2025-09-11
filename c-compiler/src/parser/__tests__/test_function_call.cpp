@@ -23,3 +23,17 @@ TEST(FunctionCallTest, FunctionCallWithArguments)
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(3)),
                 ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
 }
+
+TEST(FunctionCallTest, NestedFunctionCall)
+{
+    PARSE_DEFINE_P("foo(bar(3), 4);");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            FUNCTION_CALL_ASSERTION(
+                "foo",
+                FUNCTION_CALL_ASSERTION(
+                    "bar",
+                    ATOMIC_ASSERTION(TokenType::INTEGER, u32(3))),
+                ATOMIC_ASSERTION(TokenType::INTEGER, u32(4)))));
+}
