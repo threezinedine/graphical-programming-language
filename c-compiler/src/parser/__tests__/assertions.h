@@ -238,10 +238,10 @@ private:
     CreateRef<OperationAssertion>(ATOMIC_ASSERTION(TokenType::OPERATOR, operator), leftOperand, rightOperand, err)
 
 #define FUNCTION_CALL_ASSERTION(name, ...) \
-    CreateRef<FunctionCallAssertion>(name, Vector<Ref<DelayAssertion>>{__VA_ARGS__})
+    CreateRef<FunctionCallAssertion>(FUNCTION_CALL_NAME_ASSERTION(name), Vector<Ref<DelayAssertion>>{__VA_ARGS__})
 
 #define FUNCTION_CALL_ASSERTION_ERR(err, name, ...) \
-    CreateRef<FunctionCallAssertion>(name, Vector<Ref<DelayAssertion>>{__VA_ARGS__}, err)
+    CreateRef<FunctionCallAssertion>(FUNCTION_CALL_NAME_ASSERTION(name), Vector<Ref<DelayAssertion>>{__VA_ARGS__}, err)
 
 #define FUNCTION_CALL_NAME_ASSERTION(name) \
     ATOMIC_ASSERTION(TokenType::IDENTIFIER, name)

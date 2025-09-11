@@ -718,7 +718,6 @@ namespace ntt
                 continue;
             }
 
-            Ref<Node> functionCallNode = CreateRef<FunctionCallNode>(currentNode, Vector<Ref<Node>>{});
             temporaryIndex++;
 
             if (temporaryIndex >= numberOfSourceNodes ||
@@ -728,6 +727,17 @@ namespace ntt
                 sourceNodeIndex++;
                 continue;
             }
+            Ref<Node> argumentsNode = sourceNodes[temporaryIndex];
+
+            if (argumentsNode->GetType() != NodeType::EXPRESSION)
+            {
+                outNodes.push_back(currentNode);
+                continue;
+            }
+
+            Ref<BlockNode> argumentsBlockNode = std::dynamic_pointer_cast<BlockNode>(argumentsNode);
+
+            Ref<Node> functionCallNode = CreateRef<FunctionCallNode>(currentNode, argumentsBlockNode->GetChildren());
 
             temporaryIndex++;
 

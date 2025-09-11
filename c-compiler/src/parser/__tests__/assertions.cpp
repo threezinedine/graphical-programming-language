@@ -143,6 +143,8 @@ void FunctionCallAssertion::_Assert(Ref<Node> node)
 
     m_function->Assert(funcCallNode->GetFunction());
 
+    EXPECT_THAT(funcCallNode->GetArguments().size(), m_arguments.size()) << errorBuffer;
+
     for (u32 i = 0; i < m_arguments.size(); i++)
     {
         if (i < funcCallNode->GetArguments().size())

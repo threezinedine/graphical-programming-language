@@ -36,6 +36,5 @@ TEST(ExpressionTest, NestedExpressionWithFunctionCall)
         STATEMENT_ASSERTION(
             EXPRESSION_ASSERTION(
                 ATOMIC_ASSERTION(TokenType::IDENTIFIER, "a"),
-                FUNCTION_CALL_ASSERTION(
-                    ATOMIC_ASSERTION(TokenType::IDENTIFIER, "foo")))));
+                FUNCTION_CALL_ASSERTION("foo"))));
 }
