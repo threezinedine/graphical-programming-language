@@ -6,6 +6,8 @@ namespace ntt
     {
         switch (type)
         {
+        case TokenType::NONE:
+            return "NONE";
         case TokenType::FLOAT:
             return "FLOAT";
         case TokenType::INTEGER:
@@ -24,6 +26,10 @@ namespace ntt
             return "OPERATOR";
         case TokenType::INVALID:
             return "INVALID";
+        case TokenType::BOOLEAN:
+            return "BOOLEAN";
+        case TokenType::TYPE_HINT:
+            return "TYPE_HINT";
         case TokenType::COUNT:
             return "COUNT";
         default:

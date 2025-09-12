@@ -13,6 +13,7 @@ namespace ntt
             "string",
             "boolean",
             "null",
+            "any",
 
             // control flow
             "if",
@@ -98,6 +99,12 @@ namespace ntt
                     "^\\)",
                     "^\\}",
                     "^\\]",
+                },
+            },
+            {
+                TokenType::TYPE_HINT,
+                {
+                    "^\\:",
                 },
             },
             {
@@ -258,6 +265,7 @@ namespace ntt
                         case TokenType::BRACKET:
                         case TokenType::INVALID:
                         case TokenType::OPERATOR:
+                        case TokenType::TYPE_HINT:
                         {
                             token.SetValue<std::string>(matchedStr);
                             break;

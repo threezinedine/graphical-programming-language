@@ -6,6 +6,7 @@
 #include "parser/operationNode.h"
 #include "parser/if_statement.h"
 #include "parser/function_call.h"
+#include "parser/variable_definition_node.h"
 
 namespace ntt
 {
@@ -186,6 +187,20 @@ namespace ntt
             return;
         }
 
+        {
+            b8 contain = NTT_FALSE;
+            Vector<Ref<Node>> newerParsedNodes;
+            ParseVariableDeifinition(
+                parsedNodes,
+                newerParsedNodes,
+                contain);
+
+            if (contain)
+            {
+                parsedNodes = newerParsedNodes;
+            }
+        }
+
         hasAnyModified = NTT_TRUE;
 
         while (hasAnyModified)
@@ -282,6 +297,8 @@ namespace ntt
 
             parsedNodes = newerParsedNodes;
         }
+
+        hasAnyModified = NTT_TRUE;
 
         if (GetType() == NodeType::EXPRESSION)
         {
@@ -805,6 +822,122 @@ namespace ntt
             Ref<Node> newExpressionNode = CreateRef<BlockNode>(NodeType::EXPRESSION, temporaryNodes);
             outNodes.push_back(newExpressionNode);
             temporaryNodes.clear();
+        }
+    }
+
+    static Ref<Node> CreateDefaultNodeForType(const String &type);
+
+    void BlockNode::ParseVariableDeifinition(const Vector<Ref<Node>> &sourceNodes,
+                                             Vector<Ref<Node>> &outNodes, b8 &contain)
+    {
+        NTT_ASSERT(outNodes.empty());
+        u32 numberOfSourceNodes = u32(sourceNodes.size());
+        u32 sourceNodeIndex = 0;
+
+        if (GetType() != NodeType::STATEMENT)
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        Ref<Node> defintTypeNode = sourceNodes[sourceNodeIndex];
+
+        if (defintTypeNode->GetType() != NodeType::ATOMIC)
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        Atomic *atomicNode = dynamic_cast<Atomic *>(defintTypeNode.get());
+        const Token &currentNodeToken = atomicNode->GetToken();
+
+        if (currentNodeToken.GetType() != TokenType::KEYWORD)
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        if (currentNodeToken.GetValue<String>() != "let" &&
+            currentNodeToken.GetValue<String>() != "const")
+        {
+            contain = NTT_FALSE;
+            return;
+        }
+
+        contain = NTT_TRUE;
+
+        sourceNodeIndex++;
+        Ref<Node> variableNameNode = sourceNodes[sourceNodeIndex];
+        sourceNodeIndex++;
+
+        Ref<Node> typeHintNode = NTT_NULL;
+
+        if (sourceNodeIndex < numberOfSourceNodes)
+        {
+            typeHintNode = sourceNodes[sourceNodeIndex];
+            sourceNodeIndex++;
+        }
+
+        Ref<Node> typeNode = NTT_NULL;
+
+        if (sourceNodeIndex < numberOfSourceNodes)
+        {
+            typeNode = sourceNodes[sourceNodeIndex];
+            sourceNodeIndex++;
+        }
+        else
+        {
+            Token token(TokenType::NONE, 0);
+            token.SetValue<String>("any");
+            typeNode = CreateRef<Atomic>(NodeType::ATOMIC, token);
+        }
+
+        Ref<Node> defaultValueNode = NTT_NULL;
+
+        if (sourceNodeIndex < numberOfSourceNodes)
+        {
+            defaultValueNode = sourceNodes[sourceNodeIndex];
+            sourceNodeIndex++;
+        }
+        else
+        {
+            defaultValueNode = CreateDefaultNodeForType(dynamic_cast<Atomic *>(typeNode.get())->GetToken().GetValue<String>());
+        }
+
+        Ref<Node> variableDefinitionNode = CreateRef<VariableDefinitionNode>(defintTypeNode, variableNameNode, typeNode, defaultValueNode);
+        outNodes.push_back(variableDefinitionNode);
+    }
+
+    static Ref<Node> CreateDefaultNodeForType(const String &type)
+    {
+        if (type == "number")
+        {
+            Token floatToken(TokenType::FLOAT, 0);
+            floatToken.SetValue<float>(0.0f);
+            return CreateRef<Atomic>(NodeType::ATOMIC, floatToken);
+        }
+        else if (type == "string")
+        {
+            Token stringToken(TokenType::STRING, 0);
+            stringToken.SetValue<String>("");
+            return CreateRef<Atomic>(NodeType::ATOMIC, stringToken);
+        }
+        else if (type == "boolean")
+        {
+            Token booleanToken(TokenType::BOOLEAN, NTT_FALSE);
+            booleanToken.SetValue<b8>(NTT_FALSE);
+            return CreateRef<Atomic>(NodeType::ATOMIC, booleanToken);
+        }
+        else if (type == "any")
+        {
+            Token noneToken(TokenType::NONE, 0);
+            noneToken.SetValue<String>("any");
+            return CreateRef<Atomic>(NodeType::ATOMIC, noneToken);
+        }
+        else
+        {
+            NTT_ASSERT_MSG(false, "No default node for type");
+            return NTT_NULL;
         }
     }
 

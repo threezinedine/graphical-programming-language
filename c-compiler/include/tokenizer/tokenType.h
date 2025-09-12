@@ -5,6 +5,7 @@ namespace ntt
 {
     enum class TokenType
     {
+        NONE,
         FLOAT,
         INTEGER,
         BOOLEAN,
@@ -14,6 +15,7 @@ namespace ntt
         BRACKET,
         DELIMITER,
         OPERATOR,
+        TYPE_HINT,
 
         INVALID,
         COUNT,

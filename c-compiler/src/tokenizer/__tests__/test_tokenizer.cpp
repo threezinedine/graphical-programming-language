@@ -37,6 +37,7 @@ FUNC_ASSERT_TOKEN_IMPL(IDENTIFIER, std::string, StrEq, .c_str());
 FUNC_ASSERT_TOKEN_IMPL(BRACKET, std::string, StrEq, .c_str());
 FUNC_ASSERT_TOKEN_IMPL(DELIMITER, std::string, StrEq, .c_str());
 FUNC_ASSERT_TOKEN_IMPL(OPERATOR, std::string, StrEq, .c_str());
+FUNC_ASSERT_TOKEN_IMPL(TYPE_HINT, std::string, StrEq, .c_str());
 
 #define TOKEN_TESTING(tokenType, input, value, startIndex, length) \
     _TOKEN_TESTING(tokenType, input, value, startIndex, length, __LINE__)
@@ -226,6 +227,11 @@ TEST(TokenizerTest, TokenizeOperators)
 
     TOKEN_TESTING(OPERATOR, "&&", "&&", 0, 2);
     TOKEN_TESTING(OPERATOR, "||", "||", 0, 2);
+}
+
+TEST(TokenizerTest, TypeHint)
+{
+    TOKEN_TESTING(TYPE_HINT, ":", ":", 0, 1);
 }
 
 TEST(TokenizerTest, FinalMix)

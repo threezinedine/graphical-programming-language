@@ -55,7 +55,9 @@ namespace ntt
                        TokenType::BRACKET,
                        TokenType::DELIMITER,
                        TokenType::IDENTIFIER,
-                       TokenType::OPERATOR);
+                       TokenType::OPERATOR,
+                       TokenType::TYPE_HINT,
+                       TokenType::NONE);
 
     JSON Token::ToJSON() const
     {
@@ -80,6 +82,7 @@ namespace ntt
         case TokenType::BRACKET:
         case TokenType::DELIMITER:
         case TokenType::IDENTIFIER:
+        case TokenType::TYPE_HINT:
         case TokenType::OPERATOR:
             json["value"] = m_value.stringValue;
             break;

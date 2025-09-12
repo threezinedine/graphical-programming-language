@@ -3,6 +3,8 @@
 
 namespace ntt
 {
+    class Node;
+
     enum class NodeType
     {
         PROGRAM,
@@ -15,6 +17,7 @@ namespace ntt
         ATOMIC_EXPRESSION,
 
         IF_STATEMENT,
+        VARIABLE_DEFINITION_STATEMENT,
         STATEMENT,
         ATOMIC,
 
