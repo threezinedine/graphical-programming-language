@@ -869,10 +869,28 @@ namespace ntt
         sourceNodeIndex++;
         Ref<Node> variableNameNode = sourceNodes[sourceNodeIndex];
         sourceNodeIndex++;
-        Ref<Node> typeHintNode = sourceNodes[sourceNodeIndex];
-        sourceNodeIndex++;
-        Ref<Node> typeNode = sourceNodes[sourceNodeIndex];
-        sourceNodeIndex++;
+
+        Ref<Node> typeHintNode = NTT_NULL;
+        if (sourceNodeIndex < numberOfSourceNodes)
+        {
+            typeHintNode = sourceNodes[sourceNodeIndex];
+            sourceNodeIndex++;
+        }
+
+        Ref<Node> typeNode = NTT_NULL;
+
+        if (sourceNodeIndex < numberOfSourceNodes)
+        {
+            typeNode = sourceNodes[sourceNodeIndex];
+            sourceNodeIndex++;
+        }
+        else
+        {
+            Token token(TokenType::NONE, 0);
+            token.SetValue<String>("any");
+            typeNode = CreateRef<Atomic>(NodeType::ATOMIC, token);
+        }
+
         Ref<Node> defaultValueNode = NTT_NULL;
 
         if (sourceNodeIndex < numberOfSourceNodes)
@@ -908,6 +926,12 @@ namespace ntt
             Token booleanToken(TokenType::BOOLEAN, NTT_FALSE);
             booleanToken.SetValue<b8>(NTT_FALSE);
             return CreateRef<Atomic>(NodeType::ATOMIC, booleanToken);
+        }
+        else if (type == "any")
+        {
+            Token noneToken(TokenType::NONE, 0);
+            noneToken.SetValue<String>("any");
+            return CreateRef<Atomic>(NodeType::ATOMIC, noneToken);
         }
         else
         {

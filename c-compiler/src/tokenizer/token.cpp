@@ -56,7 +56,8 @@ namespace ntt
                        TokenType::DELIMITER,
                        TokenType::IDENTIFIER,
                        TokenType::OPERATOR,
-                       TokenType::TYPE_HINT);
+                       TokenType::TYPE_HINT,
+                       TokenType::NONE);
 
     JSON Token::ToJSON() const
     {

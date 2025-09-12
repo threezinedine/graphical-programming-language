@@ -6,6 +6,8 @@ namespace ntt
     {
         switch (type)
         {
+        case TokenType::NONE:
+            return "NONE";
         case TokenType::FLOAT:
             return "FLOAT";
         case TokenType::INTEGER:

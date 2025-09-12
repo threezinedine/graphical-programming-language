@@ -13,6 +13,7 @@ namespace ntt
             "string",
             "boolean",
             "null",
+            "any",
 
             // control flow
             "if",

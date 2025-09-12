@@ -5,6 +5,7 @@ namespace ntt
 {
     enum class TokenType
     {
+        NONE,
         FLOAT,
         INTEGER,
         BOOLEAN,

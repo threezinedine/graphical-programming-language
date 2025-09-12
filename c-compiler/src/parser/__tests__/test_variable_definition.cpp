@@ -43,3 +43,13 @@ TEST(VariableDefinitionTest, DefineWithStringDefaultValue)
             VARIABLE_DEFINITION_ASSERTION(
                 "let", "d", "string", ATOMIC_ASSERTION(TokenType::STRING, "hello"))));
 }
+
+TEST(VariableDefinitionTest, NoneTypeDefine)
+{
+    PARSE_DEFINE("let e;");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            VARIABLE_DEFINITION_ASSERTION(
+                "let", "e", "any", ATOMIC_ASSERTION(TokenType::NONE, "null"))));
+}
