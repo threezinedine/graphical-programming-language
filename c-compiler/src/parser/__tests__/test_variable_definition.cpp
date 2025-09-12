@@ -53,3 +53,16 @@ TEST(VariableDefinitionTest, NoneTypeDefine)
             VARIABLE_DEFINITION_ASSERTION(
                 "let", "e", "any", ATOMIC_ASSERTION(TokenType::NONE, "null"))));
 }
+
+TEST(VariableDefinitionTest, DISABLED_MissingVariableName)
+{
+    PARSE_DEFINE("let : number;");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            VARIABLE_DEFINITION_ASSERTION_ERR(
+                ErrorType::MISSING_VARIABLE_NAME,
+                "let", "", "any", ATOMIC_ASSERTION(TokenType::NONE, "null")),
+            ATOMIC_ASSERTION(TokenType::TYPE_HINT, ":"),
+            ATOMIC_ASSERTION(TokenType::IDENTIFIER, "number")));
+}

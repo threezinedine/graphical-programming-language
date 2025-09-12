@@ -871,6 +871,7 @@ namespace ntt
         sourceNodeIndex++;
 
         Ref<Node> typeHintNode = NTT_NULL;
+
         if (sourceNodeIndex < numberOfSourceNodes)
         {
             typeHintNode = sourceNodes[sourceNodeIndex];

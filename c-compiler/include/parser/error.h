@@ -7,6 +7,8 @@ namespace ntt
     {
         REDUNDANT_DELIMITER,
 
+        MISSING_VARIABLE_NAME,
+
         MISSING_CONDITION,
         MISSING_BLOCK,
 

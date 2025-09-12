@@ -17,6 +17,9 @@ namespace ntt
         case ErrorType::MISSING_BLOCK:
             return "Missing block";
 
+        case ErrorType::MISSING_VARIABLE_NAME:
+            return "Missing variable name";
+
         case ErrorType::MISSING_CONDITION:
             return "Missing condition";
 
