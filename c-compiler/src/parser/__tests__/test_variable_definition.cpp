@@ -33,3 +33,13 @@ TEST(VariableDefinitionTest, DefineWithDefaultValue)
             VARIABLE_DEFINITION_ASSERTION(
                 "let", "c", "integer", ATOMIC_ASSERTION(TokenType::INTEGER, u32(5)))));
 }
+
+TEST(VariableDefinitionTest, DefineWithStringDefaultValue)
+{
+    PARSE_DEFINE("let d: string = \"hello\";");
+
+    PROGRAM_ASSERTION(
+        STATEMENT_ASSERTION(
+            VARIABLE_DEFINITION_ASSERTION(
+                "let", "d", "string", ATOMIC_ASSERTION(TokenType::STRING, "hello"))));
+}
