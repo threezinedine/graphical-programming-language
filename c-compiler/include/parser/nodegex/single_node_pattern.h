@@ -21,7 +21,7 @@ namespace ntt
          *      the node type is not a token, this value is not used. If the attribute is an empty
          *      list so that the pattern can match any content of the node.
          */
-        Vector<TokenValue> values;
+        Vector<Token> values;
     };
 
     /**
