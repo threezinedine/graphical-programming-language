@@ -31,6 +31,7 @@ namespace ntt
     {
     public:
         SingleNodePattern(const NodePatternPair &pair);
+        SingleNodePattern(const SingleNodePattern &other) = default;
         ~SingleNodePattern() override;
 
         u32 GetPatternLength() override;
@@ -39,4 +40,32 @@ namespace ntt
     private:
         NodePatternPair m_pair;
     };
+
+    /**
+     * Used for creating the SingleNodePattern objects.
+     */
+    class SingleNodePatternBuilder
+    {
+    public:
+        SingleNodePatternBuilder(NodeType type);
+        SingleNodePatternBuilder(const SingleNodePatternBuilder &other) = default;
+        ~SingleNodePatternBuilder();
+
+        template <typename T>
+        SingleNodePatternBuilder AddValue(TokenType tokenType, T value)
+        {
+            NTT_ASSERT(m_pair.type == NodeType::ATOMIC);
+
+            Token token(tokenType, 0);
+            token.SetValue(value);
+            m_pair.values.push_back(token);
+            return *this;
+        }
+
+        inline SingleNodePattern Build() { return SingleNodePattern(m_pair); }
+
+    private:
+        NodePatternPair m_pair;
+    };
+
 } // namespace ntt

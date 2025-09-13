@@ -77,4 +77,13 @@ namespace ntt
 
         return isMatched;
     }
+
+    SingleNodePatternBuilder::SingleNodePatternBuilder(NodeType type)
+    {
+        m_pair.type = type;
+    }
+
+    SingleNodePatternBuilder::~SingleNodePatternBuilder()
+    {
+    }
 } // namespace ntt

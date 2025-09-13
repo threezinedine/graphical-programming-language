@@ -3,15 +3,14 @@
 
 TEST(SingleNodePatternTest, GetPatternLength)
 {
-    DEFINE_SINGLE_PATTERN(pattern, NodeType::ATOMIC);
-
+    SingleNodePattern pattern = SingleNodePatternBuilder(NodeType::ATOMIC).Build();
     EXPECT_EQ(pattern.GetPatternLength(), 1);
 }
 
 TEST(SingleNodePatternTest, MatchAtomicNode)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    DEFINE_SINGLE_PATTERN(pattern, NodeType::ATOMIC);
+    SingleNodePattern pattern = SingleNodePatternBuilder(NodeType::ATOMIC).Build();
 
     EXPECT_TRUE(pattern.Match(Vector<Ref<Node>>{atomicNode}, 0));
 }
@@ -19,7 +18,7 @@ TEST(SingleNodePatternTest, MatchAtomicNode)
 TEST(SingleNodePatternTest, NotMatchAtomicNode)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    DEFINE_SINGLE_PATTERN(pattern, NodeType::EXPRESSION);
+    SingleNodePattern pattern = SingleNodePatternBuilder(NodeType::EXPRESSION).Build();
 
     EXPECT_FALSE(pattern.Match(Vector<Ref<Node>>{atomicNode}, 0));
 }
@@ -27,7 +26,9 @@ TEST(SingleNodePatternTest, NotMatchAtomicNode)
 TEST(SingleNodePatternTest, DoNotMatchValue)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    DEFINE_SINGLE_PATTERN_1(pattern, NodeType::ATOMIC, "bar");
+    SingleNodePattern pattern = SingleNodePatternBuilder(NodeType::ATOMIC)
+                                    .AddValue(TokenType::IDENTIFIER, String("bar"))
+                                    .Build();
 
     EXPECT_FALSE(pattern.Match(Vector<Ref<Node>>{atomicNode}, 0));
 }
@@ -35,7 +36,10 @@ TEST(SingleNodePatternTest, DoNotMatchValue)
 TEST(SingleNodePatternTest, MatchValueInMultipleOptions)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    DEFINE_SINGLE_PATTERN_2(pattern, NodeType::ATOMIC, "foo", "bar");
+    SingleNodePattern pattern = SingleNodePatternBuilder(NodeType::ATOMIC)
+                                    .AddValue(TokenType::IDENTIFIER, String("bar"))
+                                    .AddValue(TokenType::IDENTIFIER, String("foo"))
+                                    .Build();
 
     EXPECT_TRUE(pattern.Match(Vector<Ref<Node>>{atomicNode}, 0));
 }
@@ -43,7 +47,10 @@ TEST(SingleNodePatternTest, MatchValueInMultipleOptions)
 TEST(SingleNodePatternTest, NotMatchInMultipleOptions)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    DEFINE_SINGLE_PATTERN_2(pattern, NodeType::ATOMIC, "bar", "baz");
+    SingleNodePattern pattern = SingleNodePatternBuilder(NodeType::ATOMIC)
+                                    .AddValue(TokenType::IDENTIFIER, String("bar"))
+                                    .AddValue(TokenType::IDENTIFIER, String("baz"))
+                                    .Build();
 
     EXPECT_FALSE(pattern.Match(Vector<Ref<Node>>{atomicNode}, 0));
 }
@@ -51,7 +58,7 @@ TEST(SingleNodePatternTest, NotMatchInMultipleOptions)
 TEST(SingleNodePatternTest, CheckMatchIfIndexOutOfBounds)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    DEFINE_SINGLE_PATTERN(pattern, NodeType::ATOMIC);
+    SingleNodePattern pattern = SingleNodePatternBuilder(NodeType::ATOMIC).Build();
 
     EXPECT_FALSE(pattern.Match(Vector<Ref<Node>>{atomicNode}, 1));
 }
