@@ -35,7 +35,32 @@
 			"regex": "cpp",
 			"system_error": "cpp",
 			"xlocmon": "cpp",
-			"xlocale": "cpp"
+			"xlocale": "cpp",
+			"atomic": "cpp",
+			"bit": "cpp",
+			"charconv": "cpp",
+			"cmath": "cpp",
+			"condition_variable": "cpp",
+			"cstddef": "cpp",
+			"deque": "cpp",
+			"format": "cpp",
+			"forward_list": "cpp",
+			"iomanip": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"list": "cpp",
+			"map": "cpp",
+			"mutex": "cpp",
+			"numeric": "cpp",
+			"random": "cpp",
+			"set": "cpp",
+			"thread": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"valarray": "cpp",
+			"xhash": "cpp",
+			"xlocnum": "cpp",
+			"xtree": "cpp"
 		}
 	}
 }

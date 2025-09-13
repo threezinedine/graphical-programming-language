@@ -9,6 +9,7 @@ file(
     SOURCE_FILES 
     "src/*.cpp"
     "src/**/*.cpp"
+    "src/**/**/*.cpp"
 )
 
 file(

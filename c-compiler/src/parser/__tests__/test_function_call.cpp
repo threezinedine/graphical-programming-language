@@ -40,7 +40,7 @@ TEST(FunctionCallTest, NestedFunctionCall)
 
 TEST(FunctionCallTest, RedundantDelimeter)
 {
-    PARSE_DEFINE_P("foo(3,, 4);");
+    PARSE_DEFINE("foo(3,, 4);");
 
     PROGRAM_ASSERTION(
         STATEMENT_ASSERTION(
