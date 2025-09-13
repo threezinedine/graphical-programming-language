@@ -24,9 +24,9 @@ TEST(SingleNodePatternTest, NotMatchAtomicNode)
 TEST(SingleNodePatternTest, DoNotMatchValue)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC)
-                                   .AddValue(TokenType::IDENTIFIER, String("bar"))
-                                   .Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::ATOMIC)
+                                   ->AddValue(TokenType::IDENTIFIER, String("bar"))
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
@@ -35,10 +35,10 @@ TEST(SingleNodePatternTest, DoNotMatchValue)
 TEST(SingleNodePatternTest, MatchValueInMultipleOptions)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC)
-                                   .AddValue(TokenType::IDENTIFIER, String("bar"))
-                                   .AddValue(TokenType::IDENTIFIER, String("foo"))
-                                   .Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::ATOMIC)
+                                   ->AddValue(TokenType::IDENTIFIER, String("bar"))
+                                   ->AddValue(TokenType::IDENTIFIER, String("foo"))
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
@@ -48,10 +48,10 @@ TEST(SingleNodePatternTest, MatchValueInMultipleOptions)
 TEST(SingleNodePatternTest, NotMatchInMultipleOptions)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC)
-                                   .AddValue(TokenType::IDENTIFIER, String("bar"))
-                                   .AddValue(TokenType::IDENTIFIER, String("baz"))
-                                   .Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::ATOMIC)
+                                   ->AddValue(TokenType::IDENTIFIER, String("bar"))
+                                   ->AddValue(TokenType::IDENTIFIER, String("baz"))
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
@@ -61,7 +61,7 @@ TEST(SingleNodePatternTest, NotMatchInMultipleOptions)
 TEST(SingleNodePatternTest, CheckMatchIfIndexOutOfBounds)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC).Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::ATOMIC)->Build();
 
     u32 startIndex = 1;
     EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
@@ -73,7 +73,8 @@ TEST(SingleNodePatternTest, MatchZeroOrOneQuantifier)
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
     CREATE_ATOMIC_NODE(atomicNode1, TokenType::IDENTIFIER, String("test"));
 
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC, NodegexQuantifier::ZERO_OR_MORE).Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::ATOMIC, NodegexQuantifier::ZERO_OR_MORE)
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode, atomicNode1}, startIndex));
@@ -85,7 +86,8 @@ TEST(SingleNodePatternTest, MatchOneOrMoreQuantifier)
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
     CREATE_ATOMIC_NODE(atomicNode1, TokenType::IDENTIFIER, String("test"));
 
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC, NodegexQuantifier::ONE_OR_MORE).Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::ATOMIC, NodegexQuantifier::ONE_OR_MORE)
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode, atomicNode1}, startIndex));
@@ -97,7 +99,8 @@ TEST(SingleNodePatternTest, NotMatchOneOrMoreQuantifier)
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
     CREATE_ATOMIC_NODE(atomicNode1, TokenType::IDENTIFIER, String("test"));
 
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::EXPRESSION, NodegexQuantifier::ONE_OR_MORE).Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::EXPRESSION, NodegexQuantifier::ONE_OR_MORE)
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode, atomicNode1}, startIndex));
@@ -109,7 +112,8 @@ TEST(SingleNodePatternTest, MatchZeroOrMoreQuantifier)
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
     CREATE_ATOMIC_NODE(atomicNode1, TokenType::IDENTIFIER, String("test"));
 
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::EXPRESSION, NodegexQuantifier::ZERO_OR_MORE).Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::EXPRESSION, NodegexQuantifier::ZERO_OR_MORE)
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode, atomicNode1}, startIndex));
@@ -122,10 +126,10 @@ TEST(SingleNodePatternTest, MatchOnceInZeroOrMoreQuantifier)
     CREATE_ATOMIC_NODE(atomicNode1, TokenType::BOOLEAN, false);
     CREATE_ATOMIC_NODE(atomicNode2, TokenType::IDENTIFIER, String("test"));
 
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC, NodegexQuantifier::ZERO_OR_MORE)
-                                   .AddValue(TokenType::IDENTIFIER, String("foo"))
-                                   .AddValue(TokenType::IDENTIFIER, String("test"))
-                                   .Build();
+    Ref<NodePattern> pattern = CreateRef<SingleNodePatternBuilder>(NodeType::ATOMIC, NodegexQuantifier::ZERO_OR_MORE)
+                                   ->AddValue(TokenType::IDENTIFIER, String("foo"))
+                                   ->AddValue(TokenType::IDENTIFIER, String("test"))
+                                   ->Build();
 
     u32 startIndex = 0;
     EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode, atomicNode1, atomicNode2}, startIndex));

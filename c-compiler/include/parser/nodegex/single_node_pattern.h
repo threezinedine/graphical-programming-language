@@ -52,14 +52,14 @@ namespace ntt
         ~SingleNodePatternBuilder();
 
         template <typename T>
-        SingleNodePatternBuilder AddValue(TokenType tokenType, T value)
+        Ref<SingleNodePatternBuilder> AddValue(TokenType tokenType, T value)
         {
             NTT_ASSERT(m_pair.type == NodeType::ATOMIC);
 
             Token token(tokenType, 0);
             token.SetValue(value);
             m_pair.values.push_back(token);
-            return *this;
+            return CreateRef<SingleNodePatternBuilder>(*this);
         }
 
         inline Ref<NodePattern> Build() { return CreateRef<SingleNodePattern>(m_pair, GetQuantifier()); }
