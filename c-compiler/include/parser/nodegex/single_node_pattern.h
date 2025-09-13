@@ -30,11 +30,12 @@ namespace ntt
     class SingleNodePattern : public NodePattern
     {
     public:
-        SingleNodePattern(const NodePatternPair &pair);
+        SingleNodePattern(const NodePatternPair &pair, NodegexQuantifier quantifier = NodegexQuantifier::ONCE);
         SingleNodePattern(const SingleNodePattern &other) = default;
         ~SingleNodePattern() override;
 
-        b8 Match(const Vector<Ref<Node>> &inNodes, u32 &startIndex) override;
+    protected:
+        b8 MatchImpl(const Vector<Ref<Node>> &inNodes, u32 &startIndex) override;
 
     private:
         NodePatternPair m_pair;
@@ -46,7 +47,7 @@ namespace ntt
     class SingleNodePatternBuilder : public NodePatternBuilder
     {
     public:
-        SingleNodePatternBuilder(NodeType type);
+        SingleNodePatternBuilder(NodeType type, NodegexQuantifier quantifier = NodegexQuantifier::ONCE);
         SingleNodePatternBuilder(const SingleNodePatternBuilder &other) = default;
         ~SingleNodePatternBuilder();
 
@@ -61,7 +62,7 @@ namespace ntt
             return *this;
         }
 
-        inline Ref<NodePattern> Build() { return CreateRef<SingleNodePattern>(m_pair); }
+        inline Ref<NodePattern> Build() { return CreateRef<SingleNodePattern>(m_pair, GetQuantifier()); }
 
     private:
         NodePatternPair m_pair;

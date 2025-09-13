@@ -3,8 +3,8 @@
 
 namespace ntt
 {
-    SingleNodePattern::SingleNodePattern(const NodePatternPair &pair)
-        : m_pair(pair)
+    SingleNodePattern::SingleNodePattern(const NodePatternPair &pair, NodegexQuantifier quantifier)
+        : NodePattern(quantifier), m_pair(pair)
     {
     }
 
@@ -12,7 +12,7 @@ namespace ntt
     {
     }
 
-    b8 SingleNodePattern::Match(const Vector<Ref<Node>> &inNodes, u32 &startIndex)
+    b8 SingleNodePattern::MatchImpl(const Vector<Ref<Node>> &inNodes, u32 &startIndex)
     {
         if (startIndex >= inNodes.size())
         {
@@ -79,7 +79,8 @@ namespace ntt
         return isMatched;
     }
 
-    SingleNodePatternBuilder::SingleNodePatternBuilder(NodeType type)
+    SingleNodePatternBuilder::SingleNodePatternBuilder(NodeType type, NodegexQuantifier quantifier)
+        : NodePatternBuilder(quantifier)
     {
         m_pair.type = type;
     }
