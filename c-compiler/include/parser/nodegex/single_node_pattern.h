@@ -34,8 +34,7 @@ namespace ntt
         SingleNodePattern(const SingleNodePattern &other) = default;
         ~SingleNodePattern() override;
 
-        u32 GetPatternLength() override;
-        b8 Match(const Vector<Ref<Node>> &inNodes, u32 startIndex) override;
+        b8 Match(const Vector<Ref<Node>> &inNodes, u32 &startIndex) override;
 
     private:
         NodePatternPair m_pair;

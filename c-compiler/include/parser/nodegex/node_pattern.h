@@ -13,23 +13,17 @@ namespace ntt
         virtual ~NodePattern() = default;
 
         /**
-         * Used for specifying how many nodes should be used for checking the matching.
-         *
-         * @return The number of nodes that this pattern expects to match.
-         */
-        virtual u32 GetPatternLength() = 0;
-
-        /**
          * Checks if the nodes starting from the given index match the pattern.
          *
          * @param inNodes The vector of nodes to match against (this is original nodes).
          *      The nodes are not copied, so the pattern should not modify them.
          * @param startIndex The index in the inNodes from which the matching should start.
          *      With the GetPatternLength() method, the pattern can determine how many nodes
-         *      it expects to match and the final index it should check.
+         *      it expects to match and the final index it should check. This value will be
+         *      modifed to the next index after the matched nodes if the match is successful.
          * @return Whether the nodes match the pattern starting from the given index.
          */
-        virtual b8 Match(const Vector<Ref<Node>> &inNodes, u32 startIndex) = 0;
+        virtual b8 Match(const Vector<Ref<Node>> &inNodes, u32 &startIndex) = 0;
     };
 
     class NodePatternBuilder

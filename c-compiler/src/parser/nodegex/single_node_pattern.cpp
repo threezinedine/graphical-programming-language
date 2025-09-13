@@ -12,12 +12,7 @@ namespace ntt
     {
     }
 
-    u32 SingleNodePattern::GetPatternLength()
-    {
-        return 1;
-    }
-
-    b8 SingleNodePattern::Match(const Vector<Ref<Node>> &inNodes, u32 startIndex)
+    b8 SingleNodePattern::Match(const Vector<Ref<Node>> &inNodes, u32 &startIndex)
     {
         if (startIndex >= inNodes.size())
         {
@@ -32,6 +27,7 @@ namespace ntt
 
         if (currentNode->GetType() != NodeType::ATOMIC)
         {
+            startIndex++;
             return NTT_TRUE;
         }
 
@@ -73,6 +69,11 @@ namespace ntt
                     isMatched = NTT_TRUE;
                 }
             }
+        }
+
+        if (isMatched)
+        {
+            startIndex++;
         }
 
         return isMatched;

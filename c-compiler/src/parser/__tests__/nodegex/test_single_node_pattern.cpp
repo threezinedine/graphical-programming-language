@@ -1,18 +1,14 @@
 #include "test_common.h"
 #include "nodegex_common.h"
 
-TEST(SingleNodePatternTest, GetPatternLength)
-{
-    Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC).Build();
-    EXPECT_EQ(pattern->GetPatternLength(), 1);
-}
-
 TEST(SingleNodePatternTest, MatchAtomicNode)
 {
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
     Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC).Build();
 
-    EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode}, 0));
+    u32 startIndex = 0;
+    EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
+    EXPECT_EQ(startIndex, 1);
 }
 
 TEST(SingleNodePatternTest, NotMatchAtomicNode)
@@ -20,7 +16,9 @@ TEST(SingleNodePatternTest, NotMatchAtomicNode)
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
     Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::EXPRESSION).Build();
 
-    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, 0));
+    u32 startIndex = 0;
+    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
+    EXPECT_EQ(startIndex, 0);
 }
 
 TEST(SingleNodePatternTest, DoNotMatchValue)
@@ -30,7 +28,8 @@ TEST(SingleNodePatternTest, DoNotMatchValue)
                                    .AddValue(TokenType::IDENTIFIER, String("bar"))
                                    .Build();
 
-    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, 0));
+    u32 startIndex = 0;
+    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
 }
 
 TEST(SingleNodePatternTest, MatchValueInMultipleOptions)
@@ -41,7 +40,9 @@ TEST(SingleNodePatternTest, MatchValueInMultipleOptions)
                                    .AddValue(TokenType::IDENTIFIER, String("foo"))
                                    .Build();
 
-    EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode}, 0));
+    u32 startIndex = 0;
+    EXPECT_TRUE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
+    EXPECT_EQ(startIndex, 1);
 }
 
 TEST(SingleNodePatternTest, NotMatchInMultipleOptions)
@@ -52,7 +53,9 @@ TEST(SingleNodePatternTest, NotMatchInMultipleOptions)
                                    .AddValue(TokenType::IDENTIFIER, String("baz"))
                                    .Build();
 
-    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, 0));
+    u32 startIndex = 0;
+    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
+    EXPECT_EQ(startIndex, 0);
 }
 
 TEST(SingleNodePatternTest, CheckMatchIfIndexOutOfBounds)
@@ -60,5 +63,7 @@ TEST(SingleNodePatternTest, CheckMatchIfIndexOutOfBounds)
     CREATE_ATOMIC_NODE(atomicNode, TokenType::IDENTIFIER, String("foo"));
     Ref<NodePattern> pattern = SingleNodePatternBuilder(NodeType::ATOMIC).Build();
 
-    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, 1));
+    u32 startIndex = 1;
+    EXPECT_FALSE(pattern->Match(Vector<Ref<Node>>{atomicNode}, startIndex));
+    EXPECT_EQ(startIndex, 1);
 }
