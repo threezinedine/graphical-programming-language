@@ -44,7 +44,7 @@ namespace ntt
     /**
      * Used for creating the SingleNodePattern objects.
      */
-    class SingleNodePatternBuilder
+    class SingleNodePatternBuilder : public NodePatternBuilder
     {
     public:
         SingleNodePatternBuilder(NodeType type);
@@ -62,7 +62,7 @@ namespace ntt
             return *this;
         }
 
-        inline SingleNodePattern Build() { return SingleNodePattern(m_pair); }
+        inline Ref<NodePattern> Build() { return CreateRef<SingleNodePattern>(m_pair); }
 
     private:
         NodePatternPair m_pair;

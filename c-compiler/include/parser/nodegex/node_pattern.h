@@ -31,4 +31,10 @@ namespace ntt
          */
         virtual b8 Match(const Vector<Ref<Node>> &inNodes, u32 startIndex) = 0;
     };
+
+    class NodePatternBuilder
+    {
+    public:
+        virtual Ref<NodePattern> Build() = 0;
+    };
 } // namespace ntt
